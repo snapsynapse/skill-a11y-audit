@@ -13,14 +13,16 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 1
-  version_date: 2026-03-02
-  previous_version: null
+  version: 2
+  version_date: 2026-03-03
+  previous_version: 1
   change_summary: >
-    v1 initial build. Six-phase pipeline: environment discovery, automated
-    scanning, compliance mapping, manual check guidance, report generation,
-    issue creation. Generic for any web project; project-specific standards
-    configured via PAICE_CONTEXT.md.
+    v2 token efficiency, portability, and usefulness pass. Removed static
+    WCAG criteria enumeration (model knows these). Condensed report and
+    issue templates to structural specs. Removed redundant axe coverage
+    list. Renamed context file to PROJECT_CONTEXT.md. Added Playwright
+    alternative and multi-tracker support. Added delta/comparison for
+    repeat audits. Made Phase 4 checklists dynamic based on scan results.
 ---
 
 # Accessibility Audit
@@ -31,7 +33,7 @@ This skill operates as a single layer. It reads the project environment,
 runs automated accessibility tools, maps findings to compliance standards,
 and produces a structured report. No external skill dependency is required.
 
-When a `PAICE_CONTEXT.md` file exists in the skill directory, the skill
+When a `PROJECT_CONTEXT.md` file exists in the skill directory, the skill
 uses it for project-specific configuration: additional compliance standards,
 GitHub label schemes, route lists, color palettes, and cross-references to
 existing documentation. When absent, the skill uses WCAG 2.1 AA as the
@@ -78,7 +80,7 @@ Read the project to determine:
    Look for `.claude/launch.json` or a `dev` script in `package.json`.
    Use `preview_start` if the Claude Preview MCP tools are available.
 
-5. **Project context**: Look for `PAICE_CONTEXT.md` in the skill
+5. **Project context**: Look for `PROJECT_CONTEXT.md` in the skill
    directory. If found, load project-specific standards, routes, labels,
    and color palette.
 
@@ -153,6 +155,13 @@ adjust the import path or run from that directory.
 and the `__dirname` workaround shown above. If absent, `require()` is
 fine.
 
+**Playwright alternative:** If the project uses Playwright instead of
+Puppeteer, adapt the script: replace `puppeteer.launch()` with
+`chromium.launch()`, use `page.goto()` the same way, and inject
+axe-core via `page.evaluate()`. The axe-core injection pattern is
+identical. Use whichever browser automation library the project already
+has installed.
+
 #### Lighthouse Scanning
 
 Run Lighthouse CLI against each target URL:
@@ -218,92 +227,25 @@ rule. Tags follow the format `wcag2a`, `wcag2aa`, `wcag111` (for SC
 
 #### WCAG Criteria Reference
 
-The 50 Level A and AA success criteria, grouped by principle:
-
-**Perceivable (Principle 1)**
-- 1.1.1 Non-text Content (A)
-- 1.2.1 Audio-only and Video-only (A)
-- 1.2.2 Captions (A)
-- 1.2.3 Audio Description or Media Alternative (A)
-- 1.2.4 Captions (Live) (AA)
-- 1.2.5 Audio Description (AA)
-- 1.3.1 Info and Relationships (A)
-- 1.3.2 Meaningful Sequence (A)
-- 1.3.3 Sensory Characteristics (A)
-- 1.3.4 Orientation (AA)
-- 1.3.5 Identify Input Purpose (AA)
-- 1.4.1 Use of Color (A)
-- 1.4.2 Audio Control (A)
-- 1.4.3 Contrast (Minimum) (AA)
-- 1.4.4 Resize Text (AA)
-- 1.4.5 Images of Text (AA)
-- 1.4.10 Reflow (AA)
-- 1.4.11 Non-text Contrast (AA)
-- 1.4.12 Text Spacing (AA)
-- 1.4.13 Content on Hover or Focus (AA)
-
-**Operable (Principle 2)**
-- 2.1.1 Keyboard (A)
-- 2.1.2 No Keyboard Trap (A)
-- 2.1.4 Character Key Shortcuts (A)
-- 2.2.1 Timing Adjustable (A)
-- 2.2.2 Pause, Stop, Hide (A)
-- 2.3.1 Three Flashes or Below Threshold (A)
-- 2.4.1 Bypass Blocks (A)
-- 2.4.2 Page Titled (A)
-- 2.4.3 Focus Order (A)
-- 2.4.4 Link Purpose (In Context) (A)
-- 2.4.5 Multiple Ways (AA)
-- 2.4.6 Headings and Labels (AA)
-- 2.4.7 Focus Visible (AA)
-- 2.5.1 Pointer Gestures (A)
-- 2.5.2 Pointer Cancellation (A)
-- 2.5.3 Label in Name (A)
-- 2.5.4 Motion Actuation (A)
-
-**Understandable (Principle 3)**
-- 3.1.1 Language of Page (A)
-- 3.1.2 Language of Parts (AA)
-- 3.2.1 On Focus (A)
-- 3.2.2 On Input (A)
-- 3.2.3 Consistent Navigation (AA)
-- 3.2.4 Consistent Identification (AA)
-- 3.3.1 Error Identification (A)
-- 3.3.2 Labels or Instructions (A)
-- 3.3.3 Error Suggestion (AA)
-- 3.3.4 Error Prevention (Legal, Financial, Data) (AA)
-
-**Robust (Principle 4)**
-- 4.1.1 Parsing (A) -- deprecated in WCAG 2.2 but still in 2.1
-- 4.1.2 Name, Role, Value (A)
-- 4.1.3 Status Messages (AA)
+The compliance matrix covers all 50 WCAG 2.1 Level A and AA success
+criteria (Principles 1-4: Perceivable, Operable, Understandable,
+Robust). Do not enumerate them in the skill; use your knowledge of WCAG
+2.1 to build the matrix at generation time.
 
 #### axe Rule to WCAG Mapping
 
-axe-core includes WCAG tags on each rule. When processing results, group
-violations by their WCAG tags. A single axe rule may map to multiple
-criteria (e.g., `color-contrast` maps to 1.4.3). A single criterion may
-be covered by multiple axe rules.
+axe-core maps violations to WCAG criteria via the `tags` array on each
+rule. Tags follow the format `wcag2a`, `wcag2aa`, `wcag111` (for SC
+1.1.1), etc. Group violations by these tags to populate the matrix.
 
-Criteria with no axe rule coverage (require manual review):
-- 1.2.1-1.2.5 (media alternatives -- axe checks for presence of tracks
-  but cannot verify content quality)
-- 1.3.2 (meaningful sequence -- partially automated)
-- 1.3.3 (sensory characteristics -- not automatable)
-- 1.4.1 (use of color -- not fully automatable)
-- 1.4.2 (audio control -- not automatable)
-- 2.1.4 (character key shortcuts -- not automatable)
-- 2.2.1, 2.2.2 (timing -- not automatable)
-- 2.4.3 (focus order -- partially automated)
-- 2.4.5 (multiple ways -- not automatable)
-- 2.5.1-2.5.4 (pointer/motion -- not automatable)
-- 3.1.2 (language of parts -- partially automated)
-- 3.2.1-3.2.4 (predictability -- not automatable)
-- 3.3.3, 3.3.4 (error handling -- partially automated)
+For criteria where axe found no violations AND has rules that cover
+the criterion, mark as Pass. For criteria with no axe rule coverage,
+mark as Manual. Determine coverage at runtime from the axe results
+`passes` and `inapplicable` arrays rather than a hardcoded list.
 
 #### Project-Specific Standards
 
-If `PAICE_CONTEXT.md` specifies additional standards (e.g., CAN-ASC-6.2),
+If `PROJECT_CONTEXT.md` specifies additional standards (e.g., CAN-ASC-6.2),
 build a secondary mapping. Cross-reference automated findings where the
 standard maps to WCAG criteria. For requirements that go beyond WCAG
 (equity, organizational processes, transparency), note them as manual
@@ -311,193 +253,76 @@ review items referencing the project's existing conformance documentation.
 
 ### Phase 4 -- Manual Check Guidance
 
-**Purpose:** Generate checklists for what automation cannot verify.
+**Purpose:** Generate targeted checklists for what automation cannot
+verify, prioritized by the automated findings.
 
-For each WCAG criterion marked "Cannot be determined" in Phase 3,
-generate a manual testing item. Organize by testing method:
+For each WCAG criterion marked "Manual" in the Phase 3 matrix, generate
+a testing item. Organize by testing method: Keyboard Navigation, Screen
+Reader, Visual Inspection, Cognitive, and Timing/Motion.
 
-#### Keyboard Navigation
-- Tab through all interactive elements; verify logical order (SC 2.4.3)
-- Confirm no keyboard traps: every element reachable and escapable (SC 2.1.2)
-- Verify skip links present and functional (SC 2.4.1)
-- Test all custom widgets (dropdowns, modals, tabs) with keyboard only
-  (SC 2.1.1)
-- Verify focus indicator visible with minimum 2px outline, 3:1 contrast
-  (SC 2.4.7)
+**Dynamic prioritization:** Do not produce a static checklist. Use the
+Phase 2 results to focus manual effort:
 
-#### Screen Reader
-- Verify heading hierarchy (h1-h6 in logical order) (SC 1.3.1)
-- Confirm all images have meaningful alt text (SC 1.1.1)
-- Test form labels announced correctly (SC 3.3.2)
-- Verify ARIA live regions announce dynamic content (SC 4.1.3)
-- Check landmark regions present and labeled (SC 1.3.1)
-- Test error messages announced on form validation (SC 3.3.1)
+- If axe found color-contrast violations, prioritize visual inspection
+  items (SC 1.4.1, 1.4.11, 1.4.10, 1.4.12, 1.4.13)
+- If axe found ARIA or landmark violations, prioritize screen reader
+  items (SC 1.3.1, 4.1.3, 3.3.1, 3.3.2)
+- If axe found heading or structure violations, prioritize keyboard
+  navigation items (SC 2.4.3, 2.4.7, 2.1.1)
+- If no form-related violations were found, deprioritize form testing
+  (SC 3.3.3, 3.3.4) with a note that automated checks passed
+- Always include timing items (SC 2.2.1, 2.2.2, 2.3.1) since these
+  cannot be automated at all
 
-#### Visual Inspection
-- Verify no information conveyed by color alone (SC 1.4.1)
-- Test at 200% browser zoom: no horizontal scroll, no overlap (SC 1.4.4)
-- Check text spacing override (letter-spacing 0.12em, word-spacing 0.16em,
-  line-height 1.5, paragraph spacing 2em): no content loss (SC 1.4.12)
-- Verify content reflows to single column at 320px width (SC 1.4.10)
-- Test hover/focus popups: dismissible, hoverable, persistent (SC 1.4.13)
+Each checklist item specifies: the WCAG criterion, what to test, how
+to test it, and which pages to focus on (pages where automated issues
+were found get priority).
 
-#### Cognitive
-- Confirm consistent navigation across pages (SC 3.2.3)
-- Verify consistent identification of UI components (SC 3.2.4)
-- Test error suggestions provided for invalid input (SC 3.3.3)
-- Check error prevention for legal/financial actions: reversible,
-  checked, or confirmed (SC 3.3.4)
-
-#### Timing and Motion
-- Verify users can extend or disable time limits (SC 2.2.1)
-- Check auto-updating content can be paused/stopped/hidden (SC 2.2.2)
-- Confirm no content flashes more than 3 times per second (SC 2.3.1)
-- Test `prefers-reduced-motion` media query respected (SC 2.3.1)
-
-Each checklist item should specify which pages or components to test,
-based on Phase 1 route discovery and Phase 2 scan results (focus manual
-testing on pages where automated issues were found).
-
-If `PAICE_CONTEXT.md` references an existing testing guide, cross-link
-to it rather than duplicating all procedures.
+If `PROJECT_CONTEXT.md` references an existing testing guide, cross-link
+to it rather than duplicating procedures.
 
 ### Phase 5 -- Report Generation
 
 **Purpose:** Produce a structured markdown report.
 
 Write the report to the output path. Default location:
-`docs/accessibility/audits/audit-YYYY-MM-DD.md`. If `PAICE_CONTEXT.md`
+`docs/accessibility/audits/audit-YYYY-MM-DD.md`. If `PROJECT_CONTEXT.md`
 specifies a different path, use that.
 
-#### Report Template
+#### Report Structure
 
-```markdown
-# Accessibility Audit Report
+The report is a markdown file with these sections in order:
 
-**Project:** [name from package.json or user input]
-**Date:** [YYYY-MM-DD]
-**Standard:** WCAG 2.1 Level AA [+ project-specific standards]
-**Tool:** a11y-audit skill v1
+1. **Header**: project name, date, standard(s), tool version
+2. **Executive Summary**: table of key metrics (Lighthouse score, axe
+   violation counts by severity, WCAG criteria evaluated/passing/failing/
+   manual, pages scanned) plus 1-2 sentence posture summary
+3. **Automated Scan Results**: axe findings by severity (table), axe
+   findings by WCAG criterion (table), Lighthouse score by page (table,
+   omit if Lighthouse was skipped)
+4. **WCAG 2.1 AA Compliance Matrix**: all 50 criteria, status
+   (Pass/Fail/Manual/N-A), evidence column citing axe rule or manual note
+5. **Delta from Previous Audit**: if a prior audit report exists at the
+   output path, diff the results. Show new violations, resolved
+   violations, and score changes. Omit this section on first audit.
+6. **Project-Specific Standard**: only if PROJECT_CONTEXT.md specifies
+   additional standards
+7. **Manual Testing Recommendations**: from Phase 4
+8. **Remediation Priority**: table with priority (P0-P3), issue, WCAG SC,
+   pages, effort estimate (Low/Med/High). P0 = blocks core functionality.
+   P1 = significantly impairs experience. P2 = barriers with workarounds.
+   P3 = beyond AA requirements.
+9. **Issues Created**: table of created issues (or note that creation was
+   not requested)
+10. **Methodology**: tool versions, browser, viewport, pages scanned, date
 
----
+#### Report Rules
 
-## Executive Summary
-
-| Metric | Value |
-|--------|-------|
-| Lighthouse Accessibility Score | [X]/100 (average across pages) |
-| axe-core Violations | [N] total ([C] critical, [S] serious, [M] moderate, [m] minor) |
-| WCAG 2.1 AA Criteria Evaluated | [X]/50 |
-| Criteria Passing | [N] |
-| Criteria Failing | [N] |
-| Criteria Requiring Manual Review | [N] |
-| Pages Scanned | [N] |
-
-[1-2 sentence summary of overall posture and top priority items]
-
----
-
-## Automated Scan Results
-
-### axe-core Findings by Severity
-
-| Severity | Count | Top Issues |
-|----------|-------|------------|
-| Critical | [N] | [brief descriptions] |
-| Serious | [N] | [brief descriptions] |
-| Moderate | [N] | [brief descriptions] |
-| Minor | [N] | [brief descriptions] |
-
-### axe-core Findings by WCAG Criterion
-
-| WCAG SC | Description | Impact | Violations | Pages Affected |
-|---------|-------------|--------|------------|----------------|
-| [1.4.3] | [Contrast] | [serious] | [N] | [list] |
-| ... | ... | ... | ... | ... |
-
-### Lighthouse Accessibility Score by Page
-
-| Page | Score | Failed Audits |
-|------|-------|---------------|
-| [/] | [95] | [list or "none"] |
-| ... | ... | ... |
-
----
-
-## WCAG 2.1 AA Compliance Matrix
-
-| SC | Description | Level | Status | Evidence |
-|----|-------------|-------|--------|----------|
-| 1.1.1 | Non-text Content | A | [Pass/Fail/Manual/N-A] | [axe rule or manual note] |
-| ... | ... | ... | ... | ... |
-
-Status key: Pass = automated tests confirm compliance. Fail = violations
-found. Manual = requires manual verification. N/A = not applicable.
-
----
-
-## [Project-Specific Standard] Compliance
-
-[Only included if PAICE_CONTEXT.md specifies additional standards.
-Format depends on the standard.]
-
----
-
-## Manual Testing Recommendations
-
-[Checklists from Phase 4, organized by testing method]
-
----
-
-## Remediation Priority
-
-| Priority | Issue | WCAG SC | Pages | Effort |
-|----------|-------|---------|-------|--------|
-| P0 | [description] | [SC] | [pages] | [Low/Med/High] |
-| P1 | [description] | [SC] | [pages] | [Low/Med/High] |
-| ... | ... | ... | ... | ... |
-
-Priority definitions:
-- **P0 (Critical):** Prevents core functionality for users with disabilities
-- **P1 (High):** Significantly impairs user experience
-- **P2 (Medium):** Barriers exist but workarounds available
-- **P3 (Low):** Enhancements beyond AA requirements
-
----
-
-## GitHub Issues Created
-
-| Issue # | Title | Priority | WCAG SC | Link |
-|---------|-------|----------|---------|------|
-| [N] | [title] | [P0-P3] | [SC] | [URL] |
-
-[Only populated if Phase 6 was executed. Otherwise: "Issue creation was
-not requested for this audit."]
-
----
-
-## Methodology
-
-- **axe-core version:** [from node_modules/axe-core/package.json]
-- **Lighthouse version:** [from npx lighthouse --version]
-- **Browser:** Chromium (headless) via Puppeteer
-- **Viewport:** 1280x800
-- **Pages scanned:** [list]
-- **Date:** [YYYY-MM-DD]
-- **Skill version:** a11y-audit v1
-```
-
-#### Report Writing Rules
-
-- Tables must be valid GitHub-flavored markdown (pipe-delimited, header
-  separator row)
-- All WCAG criterion references use the format `SC X.X.X` or just the
-  number `X.X.X`
-- Links to axe-core documentation use the `helpUrl` from axe results
-- The report is a working document, not a polished deliverable. Write
-  in plain technical prose. No marketing language.
-- If Lighthouse was skipped, omit the Lighthouse sections entirely
-  rather than showing empty tables
+- Valid GitHub-flavored markdown tables throughout
+- WCAG references as `SC X.X.X` or just `X.X.X`
+- axe-core `helpUrl` for documentation links
+- Plain technical prose; no marketing language
+- Omit empty sections rather than showing empty tables
 
 ### Phase 6 -- Issue Creation (Opt-In)
 
@@ -523,59 +348,31 @@ Parse the returned bodies for the deduplication key:
 If a match is found, skip that issue and note it in the report as
 "existing issue #N".
 
-#### Issue Template
+#### Issue Structure
 
-```markdown
-## Accessibility Issue
+Each issue body contains these fields: WCAG criterion, axe-core rule ID,
+severity, affected page(s), description (from axe), impact, affected
+elements (CSS selectors from axe `nodes[].target`), suggested fix (from
+axe `help` text), references (axe `helpUrl` + WCAG Understanding doc),
+and audit metadata (date, tool version, environment).
 
-**WCAG Criterion:** [e.g., 1.4.3 Contrast (Minimum)]
-**axe-core Rule:** [e.g., color-contrast]
-**Severity:** [Critical/Serious/Moderate/Minor]
-**Page(s):** [e.g., /results, /individual]
+**Title format:** `[A11y] [Severity] [Page]: [Brief description]`
 
-### Description
-[axe-core violation description]
-
-### Impact
-[Who is affected and how]
-
-### Elements Affected
-[CSS selector(s) from axe-core results]
-
-### Suggested Fix
-[axe-core help text and remediation guidance]
-
-### References
-- [axe-core rule documentation](helpUrl)
-- [WCAG Understanding document](https://www.w3.org/WAI/WCAG21/Understanding/[sc-slug])
-
-### Audit Metadata
-- Audit date: [YYYY-MM-DD]
-- Tool: axe-core [version] via a11y-audit skill v1
-- Environment: Chromium headless, 1280x800
-
-<!-- a11y-audit-key: [rule-id]::[page-path] -->
-```
+**Deduplication key:** Append as an HTML comment at the end of every
+issue body: `<!-- a11y-audit-key: [rule-id]::[page-path] -->`
 
 #### Issue Creation
 
-For each finding at the configured severity threshold (default: P0 and
-P1):
-
-```bash
-gh issue create \
-  --title "[A11y] [Severity] [Page]: [Brief description]" \
-  --label "[priority-label],[status-label],[wcag-principle-label]" \
-  --body "[body from template]"
-```
+Create issues using `gh issue create` (or the project's tracker CLI;
+see Portability below). Default severity threshold: P0 and P1.
 
 #### Label Mapping
 
-**Generic defaults** (when no PAICE_CONTEXT.md):
+**Generic defaults** (when no PROJECT_CONTEXT.md):
 - Priority: `a11y-critical`, `a11y-high`, `a11y-medium`, `a11y-low`
 - Status: `a11y-new`
 
-**Project-specific** (from PAICE_CONTEXT.md):
+**Project-specific** (from PROJECT_CONTEXT.md):
 - Override label names and add component/AT labels as configured
 
 #### axe Impact to Priority Mapping
@@ -586,6 +383,19 @@ gh issue create \
 | serious | P1 | `a11y-high` |
 | moderate | P2 | `a11y-medium` |
 | minor | P3 | `a11y-low` |
+
+#### Portability
+
+Phase 6 uses `gh issue create` by default (GitHub). Adapt to the
+project's tracker:
+- **GitLab:** `glab issue create` with equivalent flags
+- **Linear:** `linear issue create` or Linear API via curl
+- **Jira:** `jira issue create` via go-jira CLI or Jira REST API
+
+The deduplication key pattern (`<!-- a11y-audit-key: ... -->`) works
+in any tracker that preserves HTML comments in issue bodies. For
+trackers that strip HTML comments, store the key as a custom field or
+label instead.
 
 ---
 

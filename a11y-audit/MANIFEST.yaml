@@ -1,52 +1,68 @@
 bundle: a11y-audit
-bundle_version: 1
-bundle_date: 2026-03-02
+bundle_version: 2
+bundle_date: 2026-03-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
-  scanning (axe-core via Puppeteer, Lighthouse) with WCAG 2.1 AA compliance
-  mapping, manual check guidance, markdown report generation, and optional
-  GitHub Issue creation. Generic for any web project; project-specific
-  standards configured via PAICE_CONTEXT.md.
+  scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
+  AA compliance mapping, manual check guidance, markdown report generation,
+  and optional issue creation (GitHub, GitLab, Linear, Jira). Generic for
+  any web project; project-specific standards configured via
+  PROJECT_CONTEXT.md.
 
 compatibility:
   designed_for:
     platform: Anthropic Claude
     model: Claude Opus 4.6
     surface: Code
-  tested_on: []
+  tested_on:
+    - platform: Anthropic Claude
+      model: Claude Opus 4.6
+      surface: Code
+      status: pass
+      date: 2026-03-03
+      skill_version: 1
+      notes: >
+        Eval-1 against PAICE2 (3 pages). Lighthouse 93, axe-core 76
+        violations (0 critical, 26 serious, 50 moderate), 5 unique rules.
+        Full report generated with all sections.
   spec_version: agentskills.io/1.0
   frontmatter_mode: claude
 
 dependencies:
   - name: npm:axe-core
     note: >
-      Injected into Puppeteer pages for WCAG violation detection via
-      axe.run(). Install via: npm install axe-core
-  - name: npm:puppeteer
+      Injected into Puppeteer/Playwright pages for WCAG violation
+      detection via axe.run(). Install via: npm install axe-core
+  - name: npm:puppeteer OR npm:playwright
     note: >
       Browser automation for loading pages and injecting axe-core.
-      May already be installed. Install via: npm install puppeteer
+      Use whichever the project already has. Install via:
+      npm install puppeteer OR npm install playwright
   - name: lighthouse
     note: >
       CLI for accessibility scoring per page. Optional but recommended.
       Run via: npx lighthouse. Install globally: npm install -g lighthouse
-  - name: gh
+  - name: gh (or equivalent tracker CLI)
     note: >
-      GitHub CLI for Issue creation and deduplication search (Phase 6
-      only). Usually pre-installed. Install via: brew install gh
+      Issue tracker CLI for Phase 6 issue creation. GitHub: gh.
+      GitLab: glab. Linear: linear. Jira: go-jira. Only needed if
+      Phase 6 is requested.
 
 files:
   - path: SKILL.md
     role: skill
-    version: 1
-    hash: sha256:b3dbe757215ffe84cb8193c7c5a5da79f9516913083eae3bd7acd9072bca87cc
-    note: v1 -- six-phase accessibility audit pipeline
+    version: 2
+    hash: sha256:4045684a74ffc1eb9f923641b4ca2fc82b84d73a2e068463f6948c2299e95a05
+    note: >
+      v2 -- token efficiency pass (632 to 441 lines), PROJECT_CONTEXT.md
+      rename, Playwright alternative, multi-tracker support, delta
+      reporting, dynamic Phase 4 checklists
 
   - path: evals/evals.json
     role: evals
     version: 1
     hash: sha256:85df6f508faccb5387a9180fee602c1a5b1ab0bb3ee6f726a30491fa2134bb16
-    note: 3 eval cases -- pending first run
+    note: 3 eval cases -- eval-1 passing, eval-2 and eval-3 pending
 
   - path: HANDOFF.md
     role: handoff
@@ -56,12 +72,12 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 1
-    hash: sha256:9d788e33065f82433d877b2f3a7f8b08687c7039138c8b64698fba311fa0e369
-    note: Append-only change history
+    version: 2
+    hash: sha256:12204a0439f49da401ad45a308dd311ec35ed4cb384e1f1630a3bcdd2b104373
+    note: Append-only change history -- v2 entry added
 
   - path: MANIFEST.yaml
     role: reference
-    version: 1
+    version: 2
     hash: null
     note: This file -- self-referential hash omitted
