@@ -1,12 +1,13 @@
 bundle: a11y-audit
-bundle_version: 2
+bundle_version: 3
 bundle_date: 2026-03-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
-  AA compliance mapping, manual check guidance, markdown report generation,
-  and optional issue creation (GitHub, GitLab, Linear, Jira). Generic for
-  any web project; project-specific standards configured via
+  AA compliance mapping, manual check guidance, and configurable output:
+  markdown report only, markdown plus JSON for CI, or markdown plus issue
+  tracker tickets (GitHub, GitLab, Linear, Jira). Generic for any web
+  project; project-specific standards and output preferences configured via
   PROJECT_CONTEXT.md.
 
 compatibility:
@@ -42,21 +43,20 @@ dependencies:
     note: >
       CLI for accessibility scoring per page. Optional but recommended.
       Run via: npx lighthouse. Install globally: npm install -g lighthouse
-  - name: gh (or equivalent tracker CLI)
+  - name: issue tracker CLI (conditional)
     note: >
-      Issue tracker CLI for Phase 6 issue creation. GitHub: gh.
-      GitLab: glab. Linear: linear. Jira: go-jira. Only needed if
-      Phase 6 is requested.
+      Only needed in markdown+issues output mode. GitHub: gh.
+      GitLab: glab. Linear: linear CLI or API. Jira: go-jira CLI.
 
 files:
   - path: SKILL.md
     role: skill
-    version: 2
-    hash: sha256:4045684a74ffc1eb9f923641b4ca2fc82b84d73a2e068463f6948c2299e95a05
+    version: 3
+    hash: sha256:ee9980a2143efe7679f60ed856fc7ce830d3295911f4bf4a18dff47035edf582
     note: >
-      v2 -- token efficiency pass (632 to 441 lines), PROJECT_CONTEXT.md
-      rename, Playwright alternative, multi-tracker support, delta
-      reporting, dynamic Phase 4 checklists
+      v3 -- configurable output modes (markdown, markdown+json,
+      markdown+issues), self-configuring preferences in PROJECT_CONTEXT.md,
+      tracker-agnostic issue creation
 
   - path: evals/evals.json
     role: evals
@@ -72,12 +72,12 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 2
-    hash: sha256:12204a0439f49da401ad45a308dd311ec35ed4cb384e1f1630a3bcdd2b104373
-    note: Append-only change history -- v2 entry added
+    version: 3
+    hash: sha256:50dc9f481f91c57b271e193bef03e787045ecc1c742aba3c7f2c9a25b558a3c1
+    note: Append-only change history -- v3 entry added
 
   - path: MANIFEST.yaml
     role: reference
-    version: 2
+    version: 3
     hash: null
     note: This file -- self-referential hash omitted

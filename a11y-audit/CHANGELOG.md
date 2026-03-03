@@ -1,15 +1,36 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 3
 version_date: 2026-03-03
-previous_version: 1
+previous_version: 2
 change_summary: >
-  Token efficiency, portability, and usefulness pass. SKILL.md reduced
-  from 632 to 441 lines. Context file renamed to PROJECT_CONTEXT.md.
+  Decoupled output from GitHub Issues. Configurable output modes
+  (markdown, markdown+json, markdown+issues) with preference persistence.
 ---
 
 # Changelog
+
+## v3 -- 2026-03-03
+
+- **Output modes:** Replaced hardcoded GitHub Issue creation with three
+  configurable output modes: `markdown` (report only), `markdown+json`
+  (report + machine-readable JSON), `markdown+issues` (report + issue
+  tracker tickets). Mode is stored in PROJECT_CONTEXT.md and persisted
+  across runs.
+- **Self-configuring:** On first run, if no output_mode is set, the skill
+  asks the user to choose and persists the preference. Subsequent runs
+  use the saved preference without asking.
+- **JSON schema:** Defined structured JSON output format for CI
+  integration, dashboards, and trend tracking.
+- **Tracker-agnostic:** Issue tracker configuration (GitHub, GitLab,
+  Linear, Jira) moved to PROJECT_CONTEXT.md alongside the output mode.
+  The skill no longer assumes any specific tracker.
+- **Phase rename:** Phase 5 renamed from "Report Generation" to "Output
+  Generation". Phase 6 renamed from "Issue Creation (Opt-In)" to "Issue
+  Creation (conditional)"; runs only in markdown+issues mode.
+- `gh` CLI removed as a top-level dependency; now conditional on
+  markdown+issues mode with GitHub tracker selection.
 
 ## v2 -- 2026-03-03
 

@@ -3,26 +3,25 @@ name: a11y-audit
 description: >
   Run accessibility audits on web projects combining automated scanning
   (axe-core, Lighthouse) with WCAG 2.1 AA compliance mapping, manual check
-  guidance, and structured reporting. Produces a markdown report and
-  optionally creates GitHub Issues for findings. Use this skill whenever the
-  user mentions "accessibility audit", "a11y audit", "WCAG audit",
-  "accessibility check", "compliance scan", or asks to check a web project
-  for accessibility issues. Also trigger when the user wants to verify WCAG
-  conformance, map findings to a specific standard (CAN-ASC-6.2, EN 301 549,
-  ADA/AODA), or generate accessibility issues for their tracker.
+  guidance, and structured reporting. Output is configurable: markdown
+  report only, markdown plus machine-readable JSON, or markdown plus issue
+  tracker integration. Use this skill whenever the user mentions
+  "accessibility audit", "a11y audit", "WCAG audit", "accessibility check",
+  "compliance scan", or asks to check a web project for accessibility
+  issues. Also trigger when the user wants to verify WCAG conformance or
+  map findings to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 2
+  version: 3
   version_date: 2026-03-03
-  previous_version: 1
+  previous_version: 2
   change_summary: >
-    v2 token efficiency, portability, and usefulness pass. Removed static
-    WCAG criteria enumeration (model knows these). Condensed report and
-    issue templates to structural specs. Removed redundant axe coverage
-    list. Renamed context file to PROJECT_CONTEXT.md. Added Playwright
-    alternative and multi-tracker support. Added delta/comparison for
-    repeat audits. Made Phase 4 checklists dynamic based on scan results.
+    v3 decouples output from GitHub Issues. Phase 6 replaced with
+    configurable output modes (markdown, markdown+json, markdown+issues).
+    Output preference stored in PROJECT_CONTEXT.md and persisted across
+    runs. Issue tracker is now one of several output options, not a
+    pipeline dependency. Verification section updated accordingly.
 ---
 
 # Accessibility Audit
@@ -31,30 +30,58 @@ metadata:
 
 This skill operates as a single layer. It reads the project environment,
 runs automated accessibility tools, maps findings to compliance standards,
-and produces a structured report. No external skill dependency is required.
+and produces output in a configurable format. No external skill dependency
+is required.
 
 When a `PROJECT_CONTEXT.md` file exists in the skill directory, the skill
-uses it for project-specific configuration: additional compliance standards,
-GitHub label schemes, route lists, color palettes, and cross-references to
-existing documentation. When absent, the skill uses WCAG 2.1 AA as the
-sole standard and generic defaults for everything else.
+uses it for project-specific configuration: output mode, additional
+compliance standards, issue tracker settings, route lists, color palettes,
+and cross-references to existing documentation. When absent, the skill
+uses WCAG 2.1 AA as the sole standard, `markdown` as the output mode,
+and generic defaults for everything else.
 
 **The skill does not modify source code.** It is an auditor, not a fixer.
 Findings are reported with remediation guidance; the user decides what to
 act on.
+
+### Output Modes
+
+The skill supports three output modes, configured via the `output_mode`
+field in `PROJECT_CONTEXT.md`:
+
+| Mode | Output | Use Case |
+|------|--------|----------|
+| `markdown` | Markdown report only | Human review, documentation |
+| `markdown+json` | Markdown report + JSON data file | CI integration, dashboards, trend tracking |
+| `markdown+issues` | Markdown report + issue tracker tickets | Active remediation workflow |
+
+On first run, if no `output_mode` is set in `PROJECT_CONTEXT.md`, ask
+the user which mode they prefer and persist their choice by appending an
+`## Output Configuration` section to `PROJECT_CONTEXT.md`. If no context
+file exists, create one with just the output configuration.
+
+The `markdown+json` mode writes a companion file alongside the report:
+`audit-YYYY-MM-DD.json` containing the raw axe-core results, Lighthouse
+scores, and the compliance matrix as structured data. This file is
+machine-readable and can be consumed by CI pipelines, dashboards, or
+trend-tracking tools.
+
+The `markdown+issues` mode requires additional configuration in the
+context file (see Phase 6).
 
 ---
 
 ## Pipeline
 
 An accessibility audit moves through six phases. Each phase produces data
-the next phase consumes. Phases 1-5 always run. Phase 6 (Issue Creation)
-is opt-in and requires explicit user confirmation before executing.
+the next phase consumes. Phases 1-4 always run. Phase 5 produces output
+based on the configured output mode. Phase 6 runs only in
+`markdown+issues` mode and requires explicit user confirmation.
 
 The user can request a partial run. Common patterns:
 - "Quick scan": Phases 1-2 only, results summarized in conversation
-- "Full audit": Phases 1-5, markdown report generated
-- "Audit with issues": Phases 1-6, report plus GitHub Issues
+- "Full audit": Phases 1-5, output per configured mode
+- "Audit with issues": Phases 1-6, report plus tracker tickets
 
 ### Phase 1 -- Environment Discovery
 
@@ -281,121 +308,134 @@ were found get priority).
 If `PROJECT_CONTEXT.md` references an existing testing guide, cross-link
 to it rather than duplicating procedures.
 
-### Phase 5 -- Report Generation
+### Phase 5 -- Output Generation
 
-**Purpose:** Produce a structured markdown report.
+**Purpose:** Produce output based on the configured output mode.
 
-Write the report to the output path. Default location:
-`docs/accessibility/audits/audit-YYYY-MM-DD.md`. If `PROJECT_CONTEXT.md`
-specifies a different path, use that.
+Write output to the configured path. Default:
+`docs/accessibility/audits/audit-YYYY-MM-DD.md` (and `.json` if
+applicable). `PROJECT_CONTEXT.md` can override the path.
 
-#### Report Structure
+#### Markdown Report (all modes)
 
 The report is a markdown file with these sections in order:
 
 1. **Header**: project name, date, standard(s), tool version
-2. **Executive Summary**: table of key metrics (Lighthouse score, axe
-   violation counts by severity, WCAG criteria evaluated/passing/failing/
-   manual, pages scanned) plus 1-2 sentence posture summary
-3. **Automated Scan Results**: axe findings by severity (table), axe
-   findings by WCAG criterion (table), Lighthouse score by page (table,
-   omit if Lighthouse was skipped)
-4. **WCAG 2.1 AA Compliance Matrix**: all 50 criteria, status
-   (Pass/Fail/Manual/N-A), evidence column citing axe rule or manual note
-5. **Delta from Previous Audit**: if a prior audit report exists at the
-   output path, diff the results. Show new violations, resolved
-   violations, and score changes. Omit this section on first audit.
-6. **Project-Specific Standard**: only if PROJECT_CONTEXT.md specifies
-   additional standards
+2. **Executive Summary**: key metrics table plus 1-2 sentence posture
+3. **Automated Scan Results**: axe findings by severity and by WCAG
+   criterion; Lighthouse score by page (omit if skipped)
+4. **WCAG 2.1 AA Compliance Matrix**: all 50 criteria with status
+   (Pass/Fail/Manual/N-A) and evidence
+5. **Delta from Previous Audit**: if a prior report exists, show new
+   violations, resolved violations, and score changes. Omit on first run.
+6. **Project-Specific Standard**: only if configured
 7. **Manual Testing Recommendations**: from Phase 4
-8. **Remediation Priority**: table with priority (P0-P3), issue, WCAG SC,
-   pages, effort estimate (Low/Med/High). P0 = blocks core functionality.
-   P1 = significantly impairs experience. P2 = barriers with workarounds.
-   P3 = beyond AA requirements.
-9. **Issues Created**: table of created issues (or note that creation was
-   not requested)
-10. **Methodology**: tool versions, browser, viewport, pages scanned, date
+8. **Remediation Priority**: P0-P3 table with WCAG SC, pages, effort
+9. **Issues Created**: populated by Phase 6, or note that it was skipped
+10. **Methodology**: tool versions, browser, viewport, pages, date
 
-#### Report Rules
+Rules: valid GFM tables, WCAG references as `SC X.X.X`, axe `helpUrl`
+for links, plain technical prose, omit empty sections.
 
-- Valid GitHub-flavored markdown tables throughout
-- WCAG references as `SC X.X.X` or just `X.X.X`
-- axe-core `helpUrl` for documentation links
-- Plain technical prose; no marketing language
-- Omit empty sections rather than showing empty tables
+#### JSON Data File (`markdown+json` and `markdown+issues` modes)
 
-### Phase 6 -- Issue Creation (Opt-In)
+Write `audit-YYYY-MM-DD.json` alongside the markdown report containing:
 
-**Purpose:** Create GitHub Issues for findings.
+```json
+{
+  "date": "YYYY-MM-DD",
+  "tool": "a11y-audit v3",
+  "pages": ["url1", "url2"],
+  "lighthouse": { "url1": 93, "url2": 88 },
+  "summary": {
+    "critical": 0, "serious": 5, "moderate": 12, "minor": 3
+  },
+  "violations": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "wcag": ["1.4.3"],
+      "pages": ["/", "/about"],
+      "instances": 8
+    }
+  ],
+  "matrix": {
+    "1.1.1": "pass",
+    "1.4.3": "fail"
+  }
+}
+```
+
+This file enables CI integration, dashboards, and trend tracking across
+audit runs without parsing markdown.
+
+### Phase 6 -- Issue Creation (conditional)
+
+**Purpose:** Create issue tracker tickets for findings. Runs only when
+the output mode is `markdown+issues`.
 
 **This phase requires explicit user confirmation.** Before creating any
-issues, show the user how many issues will be created, at what priority
-levels, and ask for approval.
+tickets, show the user how many will be created, at what priority levels,
+and ask for approval.
 
-#### Deduplication
+#### Issue Tracker Configuration
 
-Before creating issues, search for existing ones:
+The tracker is configured in `PROJECT_CONTEXT.md` under
+`## Output Configuration`:
 
-```bash
-gh issue list --label accessibility --state open --json title,body,number --limit 200
+```markdown
+## Output Configuration
+
+- output_mode: markdown+issues
+- issue_tracker: github
+- issue_severity_threshold: P1
+- issue_labels_priority: accessibility-p0-critical, accessibility-p1-high, ...
+- issue_labels_status: accessibility-new
+- issue_labels_wcag: wcag-perceivable, wcag-operable, ...
 ```
 
-Parse the returned bodies for the deduplication key:
-```
-<!-- a11y-audit-key: [axe-rule-id]::[page-path] -->
-```
+Supported trackers and their CLI commands:
 
-If a match is found, skip that issue and note it in the report as
-"existing issue #N".
+| Tracker | CLI | Create Command |
+|---------|-----|----------------|
+| GitHub | `gh` | `gh issue create --title "..." --label "..." --body "..."` |
+| GitLab | `glab` | `glab issue create --title "..." --label "..." --description "..."` |
+| Linear | `linear` | Linear API via curl |
+| Jira | `jira` | `jira issue create --project "..." --type Bug --summary "..."` |
+
+If no tracker is configured, ask the user on first run and persist their
+choice to `PROJECT_CONTEXT.md`.
 
 #### Issue Structure
 
-Each issue body contains these fields: WCAG criterion, axe-core rule ID,
-severity, affected page(s), description (from axe), impact, affected
-elements (CSS selectors from axe `nodes[].target`), suggested fix (from
-axe `help` text), references (axe `helpUrl` + WCAG Understanding doc),
-and audit metadata (date, tool version, environment).
+Each ticket contains: WCAG criterion, axe-core rule ID, severity,
+affected pages, description, impact, affected elements (CSS selectors),
+suggested fix, references (axe `helpUrl` + WCAG Understanding doc), and
+audit metadata.
 
 **Title format:** `[A11y] [Severity] [Page]: [Brief description]`
 
-**Deduplication key:** Append as an HTML comment at the end of every
-issue body: `<!-- a11y-audit-key: [rule-id]::[page-path] -->`
+#### Deduplication
 
-#### Issue Creation
+Before creating tickets, search for existing ones using the tracker CLI.
+Each ticket body includes a deduplication key as an HTML comment:
+`<!-- a11y-audit-key: [rule-id]::[page-path] -->`
 
-Create issues using `gh issue create` (or the project's tracker CLI;
-see Portability below). Default severity threshold: P0 and P1.
-
-#### Label Mapping
-
-**Generic defaults** (when no PROJECT_CONTEXT.md):
-- Priority: `a11y-critical`, `a11y-high`, `a11y-medium`, `a11y-low`
-- Status: `a11y-new`
-
-**Project-specific** (from PROJECT_CONTEXT.md):
-- Override label names and add component/AT labels as configured
+Search existing open tickets for this key. If matched, skip and note
+in the report as "existing #N". For trackers that strip HTML comments,
+use a custom field or label for the key instead.
 
 #### axe Impact to Priority Mapping
 
-| axe Impact | Default Priority | Label |
-|------------|-----------------|-------|
-| critical | P0 | `a11y-critical` |
-| serious | P1 | `a11y-high` |
-| moderate | P2 | `a11y-medium` |
-| minor | P3 | `a11y-low` |
+| axe Impact | Priority |
+|------------|----------|
+| critical | P0 |
+| serious | P1 |
+| moderate | P2 |
+| minor | P3 |
 
-#### Portability
-
-Phase 6 uses `gh issue create` by default (GitHub). Adapt to the
-project's tracker:
-- **GitLab:** `glab issue create` with equivalent flags
-- **Linear:** `linear issue create` or Linear API via curl
-- **Jira:** `jira issue create` via go-jira CLI or Jira REST API
-
-The deduplication key pattern (`<!-- a11y-audit-key: ... -->`) works
-in any tracker that preserves HTML comments in issue bodies. For
-trackers that strip HTML comments, store the key as a custom field or
-label instead.
+Default severity threshold for ticket creation is P1 (creates tickets
+for P0 and P1 only). Configurable in `PROJECT_CONTEXT.md`.
 
 ---
 
@@ -416,10 +456,14 @@ After completing an audit, verify these quality checks:
 4. **Report structure**: All required sections present. Tables render
    correctly in a markdown viewer.
 
-5. **Issue deduplication**: If Phase 6 ran, run the skill again. The
-   second run should create zero duplicate issues.
+5. **JSON validity** (`markdown+json` mode): JSON file parses without
+   error. Violation counts match the markdown report.
 
-6. **Issue labels**: Verify created issues have the correct labels.
+6. **Issue deduplication** (`markdown+issues` mode): Run the skill
+   twice. The second run should create zero duplicate tickets.
+
+7. **Output mode persistence**: After first run, verify the output mode
+   is saved to `PROJECT_CONTEXT.md` and used automatically on next run.
 
 ---
 
@@ -436,6 +480,7 @@ After completing an audit, verify these quality checks:
 - **VPAT generation**: does not produce Voluntary Product Accessibility
   Templates (specific legal format).
 - **Continuous monitoring**: runs on demand, not as a CI pipeline.
-  A separate GitHub Actions workflow would be needed for CI integration.
+  The `markdown+json` output mode provides structured data for building
+  CI integrations, but the skill itself does not run in CI.
 - **Third-party auditing**: only audits the project's own frontend,
   not embedded third-party services.
