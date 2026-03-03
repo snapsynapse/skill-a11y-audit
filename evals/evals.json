@@ -1,0 +1,63 @@
+[
+  {
+    "id": "eval-1",
+    "prompt": "Run an accessibility audit on this project. The dev server is running at http://localhost:5173. Scan the homepage, about page, and contact page. Use axe-core and Lighthouse. Generate a markdown report. Do not create GitHub Issues.",
+    "expectations": {
+      "structural": [
+        "Markdown report generated with all required sections",
+        "Executive summary includes Lighthouse score and axe violation counts",
+        "WCAG 2.1 AA compliance matrix present with status per criterion",
+        "Manual testing checklist generated with items organized by testing method",
+        "Remediation priority table present with P0-P3 classifications",
+        "Methodology section records tool versions and pages scanned"
+      ],
+      "behavioral": [
+        "Environment discovery ran first and identified tech stack",
+        "All three specified pages scanned (not more, not fewer)",
+        "axe-core violations grouped by WCAG criterion in results",
+        "No GitHub Issues created (as instructed)",
+        "User was not asked about Issue creation"
+      ]
+    },
+    "results": null
+  },
+  {
+    "id": "eval-2",
+    "prompt": "Run an accessibility audit against http://localhost:5173. Scan all priority-1 routes from PAICE_CONTEXT.md. Map findings to both WCAG 2.1 AA and CAN-ASC-6.2. Create GitHub Issues for all P0 and P1 findings. Use the labels defined in PAICE_CONTEXT.md.",
+    "expectations": {
+      "structural": [
+        "Report includes both WCAG 2.1 AA and CAN-ASC-6.2 compliance sections",
+        "GitHub Issues created with correct PAICE label scheme",
+        "Issues include deduplication keys in body as HTML comments",
+        "Remediation table maps findings to both standards"
+      ],
+      "behavioral": [
+        "PAICE_CONTEXT.md read and used for label scheme, routes, and standards",
+        "CAN-ASC-6.2 mapping references existing conformance plan documentation",
+        "Deduplication check ran before issue creation",
+        "User was asked for confirmation before creating issues",
+        "Only priority-1 routes from context file were scanned"
+      ]
+    },
+    "results": null
+  },
+  {
+    "id": "eval-3",
+    "prompt": "Run a quick accessibility check on http://localhost:8080. This is a plain HTML site with no framework. Just run axe-core on the index page and give me a summary. No report file needed.",
+    "expectations": {
+      "structural": [
+        "No markdown report file generated",
+        "Summary provided in conversation with violation counts",
+        "axe-core results included with severity breakdown"
+      ],
+      "behavioral": [
+        "Environment discovery detected plain HTML (no framework)",
+        "Only one page scanned (index)",
+        "No GitHub Issues created",
+        "Skill adapted to minimal scope without running full six-phase pipeline",
+        "No Lighthouse run required for quick check"
+      ]
+    },
+    "results": null
+  }
+]
