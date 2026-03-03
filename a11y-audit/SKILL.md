@@ -10,18 +10,6 @@ description: >
   "compliance scan", or asks to check a web project for accessibility
   issues. Also trigger when the user wants to verify WCAG conformance or
   map findings to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
-metadata:
-  skill_bundle: a11y-audit
-  file_role: skill
-  version: 3
-  version_date: 2026-03-03
-  previous_version: 2
-  change_summary: >
-    v3 decouples output from GitHub Issues. Phase 6 replaced with
-    configurable output modes (markdown, markdown+json, markdown+issues).
-    Output preference stored in PROJECT_CONTEXT.md and persisted across
-    runs. Issue tracker is now one of several output options, not a
-    pipeline dependency. Verification section updated accordingly.
 ---
 
 # Accessibility Audit
@@ -33,12 +21,40 @@ runs automated accessibility tools, maps findings to compliance standards,
 and produces output in a configurable format. No external skill dependency
 is required.
 
-When a `PROJECT_CONTEXT.md` file exists in the skill directory, the skill
-uses it for project-specific configuration: output mode, additional
-compliance standards, issue tracker settings, route lists, color palettes,
-and cross-references to existing documentation. When absent, the skill
-uses WCAG 2.1 AA as the sole standard, `markdown` as the output mode,
-and generic defaults for everything else.
+Store project-specific audit state in the target workspace, not in the
+installed skill directory. Default path:
+`.a11y-audit/PROJECT_CONTEXT.md` at the workspace root. When that file
+exists, use it for project-specific configuration: output mode,
+additional compliance standards, issue tracker settings, route lists,
+color palettes, and cross-references to existing documentation. When
+absent, use WCAG 2.1 AA as the sole standard, `markdown` as the output
+mode, and generic defaults for everything else.
+
+Use `references/project-context-template.md` as the canonical schema for
+that file, including minimal and `markdown+issues` examples.
+
+Prefer bundled helpers over ad hoc generation when they fit:
+
+- `scripts/bootstrap-context.js` creates a workspace-local
+  `.a11y-audit/PROJECT_CONTEXT.md` from simple inputs.
+- `scripts/scan.js` runs reusable axe-based scans and records optional
+  Lighthouse execution intent.
+
+### Platform-Specific References
+
+- If running in Claude Code, read `references/claude-code.md` for
+  `.claude/launch.json` handling and Preview tool usage.
+- If running in Codex, read `references/codex.md` for workspace-local
+  state handling and execution assumptions.
+- Read `references/output-contract.md` when generating markdown or JSON.
+- Read `references/output-schema.json` when writing machine-readable
+  output.
+- Read `references/issue-trackers.md` only when `output_mode` is
+  `markdown+issues`.
+- If the user wants to operationalize recurring audits in CI, start from
+  `assets/ci/github-actions/accessibility-audit.yml`.
+- Prefer `scripts/plan-issues.js` before live ticket creation when you
+  need a safe review and deduplication pass.
 
 **The skill does not modify source code.** It is an auditor, not a fixer.
 Findings are reported with remediation guidance; the user decides what to
@@ -47,7 +63,7 @@ act on.
 ### Output Modes
 
 The skill supports three output modes, configured via the `output_mode`
-field in `PROJECT_CONTEXT.md`:
+field in `.a11y-audit/PROJECT_CONTEXT.md`:
 
 | Mode | Output | Use Case |
 |------|--------|----------|
@@ -55,10 +71,13 @@ field in `PROJECT_CONTEXT.md`:
 | `markdown+json` | Markdown report + JSON data file | CI integration, dashboards, trend tracking |
 | `markdown+issues` | Markdown report + issue tracker tickets | Active remediation workflow |
 
-On first run, if no `output_mode` is set in `PROJECT_CONTEXT.md`, ask
-the user which mode they prefer and persist their choice by appending an
-`## Output Configuration` section to `PROJECT_CONTEXT.md`. If no context
-file exists, create one with just the output configuration.
+On first run, if no `output_mode` is set in
+`.a11y-audit/PROJECT_CONTEXT.md`, ask the user which mode they prefer
+and persist their choice by appending an `## Output Configuration`
+section to that file. If no context file exists, create it at the
+default path following `references/project-context-template.md`. Prefer
+`scripts/bootstrap-context.js` for first-run context creation when a
+simple generated file is sufficient.
 
 The `markdown+json` mode writes a companion file alongside the report:
 `audit-YYYY-MM-DD.json` containing the raw axe-core results, Lighthouse
@@ -104,12 +123,18 @@ Read the project to determine:
    `.github/workflows/` for accessibility-related CI jobs.
 
 4. **Dev server**: Check if a dev server is running or can be started.
-   Look for `.claude/launch.json` or a `dev` script in `package.json`.
-   Use `preview_start` if the Claude Preview MCP tools are available.
+   Check package scripts, repo docs, and any platform-specific reference
+   file for launch hints. Do not assume Claude-only tools are available
+   unless the current agent matches that environment.
+   If the expected URL or port is unavailable but the app starts on a
+   different local URL, switch to the live URL, record the mismatch in
+   the report methodology, and update `.a11y-audit/PROJECT_CONTEXT.md`
+   to the working `base_url`.
 
-5. **Project context**: Look for `PROJECT_CONTEXT.md` in the skill
-   directory. If found, load project-specific standards, routes, labels,
-   and color palette.
+5. **Project context**: Look for `PROJECT_CONTEXT.md` at the workspace
+   path `.a11y-audit/PROJECT_CONTEXT.md`. If found, load
+   project-specific standards, routes, labels, and color palette using
+   `references/project-context-template.md` as the field contract.
 
 **Output:** A structured summary reported to the user before proceeding.
 The skill asks before installing any missing dependencies (axe-core,
@@ -124,7 +149,11 @@ the user).
 
 #### axe-core Scanning
 
-Write and execute a Node.js script that:
+Prefer the bundled `scripts/scan.js` before writing a throwaway scan
+script. Use an ad hoc script only when the workspace needs behavior that
+the bundled script does not yet support.
+
+The reusable scanner should:
 
 1. Imports `puppeteer` and `axe-core`
 2. Launches a headless browser
@@ -137,50 +166,26 @@ Write and execute a Node.js script that:
    d. Runs the audit: `page.evaluate(() => axe.run())`
    e. Collects the results JSON
 4. Closes the browser
-5. Writes raw results to a temporary JSON file
+5. Writes raw results to JSON
 
-The script template:
+Example invocation:
 
-```javascript
-import puppeteer from 'puppeteer';
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const axeSource = readFileSync(
-  resolve(__dirname, 'node_modules/axe-core/axe.min.js'),
-  'utf8'
-);
-
-const urls = process.argv.slice(2);
-const results = [];
-
-const browser = await puppeteer.launch({ headless: true });
-
-for (const url of urls) {
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 });
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
-  await page.evaluate(axeSource);
-  const axeResults = await page.evaluate(() => axe.run());
-  results.push({ url, ...axeResults });
-  await page.close();
-}
-
-await browser.close();
-console.log(JSON.stringify(results, null, 2));
+```bash
+node a11y-audit/scripts/scan.js \
+  --root . \
+  --urls http://127.0.0.1:3000/,http://127.0.0.1:3000/about \
+  --output /tmp/a11y-scan.json
 ```
 
-**Adapt the script to the project.** If `axe-core` is not in
-`node_modules`, check the frontend subdirectory (e.g.,
-`frontend/node_modules/axe-core`). If Puppeteer is in a subdirectory,
-adjust the import path or run from that directory.
+**Adapt to the project.** If dependencies live in a frontend
+subdirectory, point `--root` at the workspace root; the bundled script
+already checks common frontend paths. If that still fails, fall back to
+an ad hoc script or run from the frontend directory directly.
 
 **Common mistake:** Do not use `require()` in an ES module project. Check
 `package.json` for `"type": "module"`. If present, use `import` syntax
-and the `__dirname` workaround shown above. If absent, `require()` is
-fine.
+and the `__dirname` workaround in any ad hoc script. If absent,
+`require()` is fine.
 
 **Playwright alternative:** If the project uses Playwright instead of
 Puppeteer, adapt the script: replace `puppeteer.launch()` with
@@ -208,8 +213,10 @@ Parse the JSON output. Extract:
 - Each audit's `description` and `details.items`
 
 If Lighthouse is unavailable or fails (common in CI environments), skip
-it and note the gap in the report. axe-core results alone are sufficient
-for a valid audit.
+it and note the gap in the report. In the executive summary and
+methodology, explicitly say whether Lighthouse was skipped because the
+CLI was missing, Chrome launch failed, or another runtime error
+occurred. axe-core results alone are sufficient for a valid audit.
 
 #### Scope Control
 
@@ -272,11 +279,12 @@ mark as Manual. Determine coverage at runtime from the axe results
 
 #### Project-Specific Standards
 
-If `PROJECT_CONTEXT.md` specifies additional standards (e.g., CAN-ASC-6.2),
-build a secondary mapping. Cross-reference automated findings where the
-standard maps to WCAG criteria. For requirements that go beyond WCAG
-(equity, organizational processes, transparency), note them as manual
-review items referencing the project's existing conformance documentation.
+If `.a11y-audit/PROJECT_CONTEXT.md` specifies additional standards
+(e.g., CAN-ASC-6.2), build a secondary mapping. Cross-reference
+automated findings where the standard maps to WCAG criteria. For
+requirements that go beyond WCAG (equity, organizational processes,
+transparency), note them as manual review items referencing the
+project's existing conformance documentation.
 
 ### Phase 4 -- Manual Check Guidance
 
@@ -305,8 +313,8 @@ Each checklist item specifies: the WCAG criterion, what to test, how
 to test it, and which pages to focus on (pages where automated issues
 were found get priority).
 
-If `PROJECT_CONTEXT.md` references an existing testing guide, cross-link
-to it rather than duplicating procedures.
+If `.a11y-audit/PROJECT_CONTEXT.md` references an existing testing guide,
+cross-link to it rather than duplicating procedures.
 
 ### Phase 5 -- Output Generation
 
@@ -314,60 +322,16 @@ to it rather than duplicating procedures.
 
 Write output to the configured path. Default:
 `docs/accessibility/audits/audit-YYYY-MM-DD.md` (and `.json` if
-applicable). `PROJECT_CONTEXT.md` can override the path.
+applicable). `.a11y-audit/PROJECT_CONTEXT.md` can override the path.
 
-#### Markdown Report (all modes)
+Read `references/output-contract.md` for report section order, degraded
+mode rules, and JSON output requirements. Use
+`references/output-schema.json` as the stable machine-readable contract
+for `markdown+json` and `markdown+issues` modes.
 
-The report is a markdown file with these sections in order:
-
-1. **Header**: project name, date, standard(s), tool version
-2. **Executive Summary**: key metrics table plus 1-2 sentence posture
-3. **Automated Scan Results**: axe findings by severity and by WCAG
-   criterion; Lighthouse score by page (omit if skipped)
-4. **WCAG 2.1 AA Compliance Matrix**: all 50 criteria with status
-   (Pass/Fail/Manual/N-A) and evidence
-5. **Delta from Previous Audit**: if a prior report exists, show new
-   violations, resolved violations, and score changes. Omit on first run.
-6. **Project-Specific Standard**: only if configured
-7. **Manual Testing Recommendations**: from Phase 4
-8. **Remediation Priority**: P0-P3 table with WCAG SC, pages, effort
-9. **Issues Created**: populated by Phase 6, or note that it was skipped
-10. **Methodology**: tool versions, browser, viewport, pages, date
-
-Rules: valid GFM tables, WCAG references as `SC X.X.X`, axe `helpUrl`
-for links, plain technical prose, omit empty sections.
-
-#### JSON Data File (`markdown+json` and `markdown+issues` modes)
-
-Write `audit-YYYY-MM-DD.json` alongside the markdown report containing:
-
-```json
-{
-  "date": "YYYY-MM-DD",
-  "tool": "a11y-audit v3",
-  "pages": ["url1", "url2"],
-  "lighthouse": { "url1": 93, "url2": 88 },
-  "summary": {
-    "critical": 0, "serious": 5, "moderate": 12, "minor": 3
-  },
-  "violations": [
-    {
-      "rule": "color-contrast",
-      "impact": "serious",
-      "wcag": ["1.4.3"],
-      "pages": ["/", "/about"],
-      "instances": 8
-    }
-  ],
-  "matrix": {
-    "1.1.1": "pass",
-    "1.4.3": "fail"
-  }
-}
-```
-
-This file enables CI integration, dashboards, and trend tracking across
-audit runs without parsing markdown.
+If the user wants a recurring or on-demand CI job, adapt
+`assets/ci/github-actions/accessibility-audit.yml` to the target
+workspace instead of inventing a workflow from scratch.
 
 ### Phase 6 -- Issue Creation (conditional)
 
@@ -378,64 +342,9 @@ the output mode is `markdown+issues`.
 tickets, show the user how many will be created, at what priority levels,
 and ask for approval.
 
-#### Issue Tracker Configuration
-
-The tracker is configured in `PROJECT_CONTEXT.md` under
-`## Output Configuration`:
-
-```markdown
-## Output Configuration
-
-- output_mode: markdown+issues
-- issue_tracker: github
-- issue_severity_threshold: P1
-- issue_labels_priority: accessibility-p0-critical, accessibility-p1-high, ...
-- issue_labels_status: accessibility-new
-- issue_labels_wcag: wcag-perceivable, wcag-operable, ...
-```
-
-Supported trackers and their CLI commands:
-
-| Tracker | CLI | Create Command |
-|---------|-----|----------------|
-| GitHub | `gh` | `gh issue create --title "..." --label "..." --body "..."` |
-| GitLab | `glab` | `glab issue create --title "..." --label "..." --description "..."` |
-| Linear | `linear` | Linear API via curl |
-| Jira | `jira` | `jira issue create --project "..." --type Bug --summary "..."` |
-
-If no tracker is configured, ask the user on first run and persist their
-choice to `PROJECT_CONTEXT.md`.
-
-#### Issue Structure
-
-Each ticket contains: WCAG criterion, axe-core rule ID, severity,
-affected pages, description, impact, affected elements (CSS selectors),
-suggested fix, references (axe `helpUrl` + WCAG Understanding doc), and
-audit metadata.
-
-**Title format:** `[A11y] [Severity] [Page]: [Brief description]`
-
-#### Deduplication
-
-Before creating tickets, search for existing ones using the tracker CLI.
-Each ticket body includes a deduplication key as an HTML comment:
-`<!-- a11y-audit-key: [rule-id]::[page-path] -->`
-
-Search existing open tickets for this key. If matched, skip and note
-in the report as "existing #N". For trackers that strip HTML comments,
-use a custom field or label for the key instead.
-
-#### axe Impact to Priority Mapping
-
-| axe Impact | Priority |
-|------------|----------|
-| critical | P0 |
-| serious | P1 |
-| moderate | P2 |
-| minor | P3 |
-
-Default severity threshold for ticket creation is P1 (creates tickets
-for P0 and P1 only). Configurable in `PROJECT_CONTEXT.md`.
+Read `references/issue-trackers.md` for tracker configuration,
+deduplication, priority mapping, and ticket structure. Use the tracker
+settings from `.a11y-audit/PROJECT_CONTEXT.md`.
 
 ---
 
@@ -448,10 +357,15 @@ After completing an audit, verify these quality checks:
    match within tolerance (axe versions may differ slightly).
 
 2. **Lighthouse score consistent**: Compare against a manual Chrome
-   DevTools Lighthouse run. Should be within 5 points.
+   DevTools Lighthouse run when Lighthouse was actually executed. Should
+   be within 5 points.
 
 3. **WCAG matrix complete**: All 50 AA criteria appear in the compliance
    matrix. No criterion is missing.
+
+   Treat the matrix as evidence-oriented status reporting. Do not frame
+   it as proof of full conformance, because many WCAG criteria remain
+   manual even in a strong automated run.
 
 4. **Report structure**: All required sections present. Tables render
    correctly in a markdown viewer.
@@ -463,7 +377,12 @@ After completing an audit, verify these quality checks:
    twice. The second run should create zero duplicate tickets.
 
 7. **Output mode persistence**: After first run, verify the output mode
-   is saved to `PROJECT_CONTEXT.md` and used automatically on next run.
+   is saved to `.a11y-audit/PROJECT_CONTEXT.md` and used automatically
+   on next run.
+
+8. **Runtime URL reconciliation**: If the app started on a different
+   local URL than expected, verify the report records the mismatch and
+   the context file reflects the actual working `base_url`.
 
 ---
 

@@ -1,0 +1,42 @@
+name: Validate Skill Bundle
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check bundled scripts syntax
+        run: |
+          node --check a11y-audit/scripts/scan.js
+          node --check a11y-audit/scripts/bootstrap-context.js
+
+      - name: Validate JSON files
+        run: |
+          node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/evals/evals.json","utf8"))'
+          node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/references/output-schema.json","utf8"))'
+          node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/assets/sample-output/audit-sample.json","utf8"))'
+
+      - name: Validate YAML and frontmatter-bearing files
+        run: |
+          ruby -e 'require "yaml"; require "date"; files=%w[a11y-audit/SKILL.md a11y-audit/HANDOFF.md a11y-audit/CHANGELOG.md a11y-audit/MANIFEST.yaml a11y-audit/references/claude-code.md a11y-audit/references/codex.md a11y-audit/references/project-context-template.md a11y-audit/references/output-contract.md a11y-audit/references/issue-trackers.md a11y-audit/agents/openai.yaml a11y-audit/assets/ci/github-actions/accessibility-audit.yml]; files.each do |f|; text=File.read(f); payload=(f.end_with?(".md") && text.start_with?("---\n")) ? text.split(/^---\n/,3)[1] : text; YAML.safe_load(payload, permitted_classes:[Date]); end'
+
+      - name: Smoke test context bootstrap
+        run: |
+          node a11y-audit/scripts/bootstrap-context.js \
+            --workspace /tmp/a11y-audit-bootstrap-test \
+            --name Demo \
+            --base_url http://127.0.0.1:3001 \
+            --routes /,/about \
+            --priority_routes / \
+            --output_mode markdown

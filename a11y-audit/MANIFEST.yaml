@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 3
+bundle_version: 9
 bundle_date: 2026-03-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -8,12 +8,11 @@ description: >
   markdown report only, markdown plus JSON for CI, or markdown plus issue
   tracker tickets (GitHub, GitLab, Linear, Jira). Generic for any web
   project; project-specific standards and output preferences configured via
-  PROJECT_CONTEXT.md.
+  a workspace-local .a11y-audit/PROJECT_CONTEXT.md file.
 
 compatibility:
   designed_for:
-    platform: Anthropic Claude
-    model: Claude Opus 4.6
+    platform: Portable skill bundle (Claude Code, Codex)
     surface: Code
   tested_on:
     - platform: Anthropic Claude
@@ -26,8 +25,69 @@ compatibility:
         Eval-1 against PAICE2 (3 pages). Lighthouse 93, axe-core 76
         violations (0 critical, 26 serious, 50 moderate), 5 unique rules.
         Full report generated with all sections.
+    - platform: OpenAI Codex
+      model: GPT-5 Codex
+      surface: Code
+      status: partial
+      date: 2026-03-03
+      skill_version: 4
+      notes: >
+        Bundle refactored for Codex portability: minimal SKILL frontmatter,
+        platform-specific references, workspace-local mutable state, and
+        Codex UI metadata added. Runtime eval still pending.
+    - platform: Portable skill bundle (Claude Code, Codex)
+      surface: Code
+      status: partial
+      date: 2026-03-03
+      skill_version: 5
+      notes: >
+        Added a canonical workspace-local project-context template and
+        updated the core skill to reference that schema. Runtime eval
+        still pending.
+    - platform: OpenAI Codex
+      model: GPT-5 Codex
+      surface: Code
+      status: pass
+      date: 2026-03-03
+      skill_version: 6
+      notes: >
+        Eval-1 run against PAICE2 completed with axe-only output after
+        reconciling a local port mismatch and documenting missing
+        Lighthouse CLI. Report and workspace-local context were created.
+    - platform: Portable skill bundle (Claude Code, Codex)
+      surface: Code
+      status: pass
+      date: 2026-03-03
+      skill_version: 7
+      notes: >
+        Structural validation completed after the refactor: bundled
+        scripts added, detailed references split out, sample artifacts
+        added, expanded eval coverage defined, and manifest/file parsing
+        checks passed.
+    - platform: OpenAI Codex
+      model: GPT-5 Codex
+      surface: Code
+      status: pass
+      date: 2026-03-03
+      skill_version: 8
+      notes: >
+        Direct helper-based runs validated Lighthouse-unavailable and
+        runtime URL reconciliation behavior against PAICE2 using
+        scripts/scan.js. Workspace-local context update and report
+        methodology both behaved as intended.
+    - platform: OpenAI Codex
+      model: GPT-5 Codex
+      surface: Code
+      status: pass
+      date: 2026-03-03
+      skill_version: 9
+      notes: >
+        Direct /tmp validation now covers first-run context creation and
+        missing-browser-automation handling. Issue mode has a safe
+        planning/deduplication step, though live authenticated tracker
+        writes are still pending.
   spec_version: agentskills.io/1.0
-  frontmatter_mode: claude
+  frontmatter_mode: minimal
 
 dependencies:
   - name: npm:axe-core
@@ -51,33 +111,116 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 3
-    hash: sha256:ee9980a2143efe7679f60ed856fc7ce830d3295911f4bf4a18dff47035edf582
+    version: 9
+    hash: sha256:f31b014ab834c3b6e37cd75c5b96f3cb77bda7546cbb0711cfe05558f29936cd
     note: >
-      v3 -- configurable output modes (markdown, markdown+json,
-      markdown+issues), self-configuring preferences in PROJECT_CONTEXT.md,
-      tracker-agnostic issue creation
+      v9 -- issue planning helper added and remaining runtime guidance
+      narrowed to the live authenticated tracker path
 
   - path: evals/evals.json
     role: evals
-    version: 1
-    hash: sha256:85df6f508faccb5387a9180fee602c1a5b1ab0bb3ee6f726a30491fa2134bb16
-    note: 3 eval cases -- eval-1 passing, eval-2 and eval-3 pending
+    version: 5
+    hash: sha256:b9136068eb62fcc323dec7abbcb081c457f4979d390bb5111023929cadb76713
+    note: 8 eval cases -- eval-6 and eval-7 now pass; eval-8 has partial dry-run validation
 
   - path: HANDOFF.md
     role: handoff
-    version: 1
-    hash: sha256:22888d8a9fceff5f8a1a67605fdc502770b42d52a0cfc5b8c75f5ed0df8d2619
-    note: Bootstrap context and known constraints
+    version: 6
+    hash: sha256:5aa47650dca6f7070805530542487180f80c9dd21e704e717a098189a90205c7
+    note: Current state after direct validation of remaining non-destructive runtime gaps
 
   - path: CHANGELOG.md
     role: reference
-    version: 3
-    hash: sha256:50dc9f481f91c57b271e193bef03e787045ecc1c742aba3c7f2c9a25b558a3c1
-    note: Append-only change history -- v3 entry added
+    version: 9
+    hash: sha256:230204ba6f024b46f85fd9494a036ae7f73b0bec42e4e569f6a1960bd683131a
+    note: Append-only change history -- v9 final pre-publish mitigations recorded
+
+  - path: references/claude-code.md
+    role: reference
+    version: 1
+    hash: sha256:9a2f56eb21200a90653f753d1eeed4bef314f80eaf650b26363a4c3b243f7973
+    note: Claude Code-specific launch and Preview guidance
+
+  - path: references/codex.md
+    role: reference
+    version: 1
+    hash: sha256:70e5dd148b9d92a6d287b513eb76ae352869a22c0fdc3cc53c9e604f284f51e0
+    note: Codex-specific workspace and execution guidance
+
+  - path: references/project-context-template.md
+    role: reference
+    version: 1
+    hash: sha256:4624a92a3d0081ff49e9892eacecb963798456352caa3053fa1f6d057f03d40b
+    note: Canonical schema and examples for workspace-local audit context
+
+  - path: references/output-contract.md
+    role: reference
+    version: 1
+    hash: sha256:2b550f14cf59a788c8355d027dcee4f1d668f76cfbac6b4ad817513eb5a27d05
+    note: Markdown and JSON output requirements plus degraded-mode rules
+
+  - path: references/issue-trackers.md
+    role: reference
+    version: 1
+    hash: sha256:144a9b8a48b8bce83e122845ca3359aa48cfdec86c27d3704b1c4a53b4fc7b1f
+    note: Issue creation, deduplication, and priority mapping guidance
+
+  - path: references/output-schema.json
+    role: reference
+    version: 1
+    hash: sha256:facffb22ceb2221fda0ce354cac1dc83b67f0229ebe7616d2f1cb800be664710
+    note: Stable machine-readable schema for markdown+json output
+
+  - path: scripts/scan.js
+    role: script
+    version: 1
+    hash: sha256:5e402a9e582fd06c339d64a85f17b3633dbefc694d2bec1a1ccd73c63c842711
+    note: Reusable axe-based scanner with optional Lighthouse intent recording
+
+  - path: scripts/bootstrap-context.js
+    role: script
+    version: 1
+    hash: sha256:606c21c02a2c76e9be4e714563e58ee32bdb67f9bd22d82e7e6d8a3a7e2f2108
+    note: Helper for creating workspace-local PROJECT_CONTEXT.md
+
+  - path: scripts/plan-issues.js
+    role: script
+    version: 1
+    hash: sha256:68c1ba0847c086cfe56074b3a54b46507a73573690ccc5cd7f86da258b6ba746
+    note: Non-destructive issue planning helper for markdown+issues mode
+
+  - path: assets/sample-output/audit-sample.md
+    role: asset
+    version: 1
+    hash: sha256:6235e4ce670672f6f6e187dacea081632907419be6ba31c3b88cc84d5677196b
+    note: Sample markdown output artifact
+
+  - path: assets/sample-output/audit-sample.json
+    role: asset
+    version: 1
+    hash: sha256:14883940462cd5e849f199235fff351d834ffeb3fe862d3f4574db6389ba823a
+    note: Sample JSON output artifact
+
+  - path: assets/sample-output/issue-plan-sample.md
+    role: asset
+    version: 1
+    hash: sha256:377e6d156aa367f932fe7c0cf5340554c66b25269a65c86f17623912a1d57cef
+    note: Sample markdown issue-planning artifact
+
+  - path: assets/ci/github-actions/accessibility-audit.yml
+    role: asset
+    version: 1
+    hash: sha256:1d9b1f85fc3d89ec3fc5eacf129ce086bcff676b17d35e07dd51c7d3a8e5b2de
+    note: GitHub Actions starter for scheduled or on-demand audits
+
+  - path: agents/openai.yaml
+    role: agents
+    version: 1
+    hash: sha256:cd232a03228c4e26f28ea5fde5dcdddc011f7a90c29fcc4b9f8e1bfd4771b041
+    note: Codex UI metadata for skill lists and prompt insertion
 
   - path: MANIFEST.yaml
     role: reference
-    version: 3
+    version: 9
     hash: null
     note: This file -- self-referential hash omitted

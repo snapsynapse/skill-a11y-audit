@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+node_modules/
+.codex/
+.claude/
+.a11y-audit/
+dist/
+coverage/
+tmp/
