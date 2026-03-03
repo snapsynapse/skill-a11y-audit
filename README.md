@@ -59,8 +59,7 @@ This repo includes:
 
 ## Status
 
-The bundle has been structurally validated and exercised in Codex
-against PAICE2 for:
+The bundle has been structurally validated and exercised in Codex and Claude Code for:
 
 - core audit execution
 - runtime URL reconciliation
