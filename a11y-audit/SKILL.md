@@ -10,6 +10,15 @@ description: >
   "compliance scan", or asks to check a web project for accessibility
   issues. Also trigger when the user wants to verify WCAG conformance or
   map findings to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
+metadata:
+  skill_bundle: a11y-audit
+  file_role: skill
+  version: 9
+  version_date: 2026-03-03
+  previous_version: 8
+  change_summary: >
+    Validated first-run context creation and missing-browser-automation
+    paths. Added non-destructive issue-planning helper.
 ---
 
 # Accessibility Audit
