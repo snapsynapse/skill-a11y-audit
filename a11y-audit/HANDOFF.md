@@ -1,13 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 9
+version: 10
 version_date: 2026-03-26
-previous_version: 8
+previous_version: 9
 change_summary: >
-  Added discover.js for template-aware page sampling. Validated on
-  AI Regulation Reference: 746 pages → 22 scanned, found 12 violations
-  missed by the previous top-level-only scan.
+  Self-contained deps, Quick Fixes, delta comparison. Validated on
+  AI Regulation Reference + Virtual Meeting Reference.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -18,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: v11, template-aware sampling validated
+## Current State: v12, self-contained and portable
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes

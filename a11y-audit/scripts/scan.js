@@ -1,16 +1,23 @@
 #!/usr/bin/env node
-/* 
+/*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-03-03
-previous_version: null
-change_summary: Added a reusable axe-based scanner with optional Lighthouse probing.
+version: 2
+version_date: 2026-03-26
+previous_version: 1
+change_summary: >
+  Self-contained dependency resolution. Checks skill-local node_modules
+  first, then target project, then auto-installs to skill deps dir.
 */
 
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const { execSync } = require('child_process');
+
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
 
 function parseArgs(argv) {
   const args = {};
@@ -34,46 +41,115 @@ function splitCsv(value) {
   return value.split(',').map((entry) => entry.trim()).filter(Boolean);
 }
 
-function resolveFromRoots(roots, relativePath) {
-  for (const root of roots) {
-    const candidate = path.resolve(root, relativePath);
-    if (fs.existsSync(candidate)) return candidate;
-  }
+// ---------------------------------------------------------------------------
+// Dependency resolution
+// ---------------------------------------------------------------------------
+
+// The skill's own deps directory, sibling to scripts/
+const SKILL_DEPS_DIR = path.resolve(__dirname, '..', 'deps');
+
+function findPackageIn(dir, packageName) {
+  const pkgJson = path.join(dir, 'node_modules', packageName, 'package.json');
+  if (fs.existsSync(pkgJson)) return path.dirname(pkgJson);
   return null;
 }
 
-function findPackageRoot(rootDir, packageName) {
-  const roots = [
-    rootDir,
-    path.join(rootDir, 'frontend'),
-    path.join(rootDir, 'app'),
-    path.join(rootDir, 'web'),
-    path.join(rootDir, 'apps', 'web'),
+function findPackage(packageName, projectRoot) {
+  // 1. Skill-local deps directory (highest priority — self-contained)
+  const skillLocal = findPackageIn(SKILL_DEPS_DIR, packageName);
+  if (skillLocal) return { root: skillLocal, source: 'skill-deps' };
+
+  // 2. Target project workspace roots
+  const workspaceRoots = [
+    projectRoot,
+    path.join(projectRoot, 'frontend'),
+    path.join(projectRoot, 'app'),
+    path.join(projectRoot, 'web'),
+    path.join(projectRoot, 'apps', 'web'),
   ];
-  for (const root of roots) {
-    const pkgJson = path.join(root, 'node_modules', packageName, 'package.json');
-    if (fs.existsSync(pkgJson)) return path.dirname(pkgJson);
+  for (const root of workspaceRoots) {
+    const found = findPackageIn(root, packageName);
+    if (found) return { root: found, source: `project (${root})` };
   }
+
+  // 3. Global node_modules
+  try {
+    const globalDir = execSync('npm root -g', { encoding: 'utf8' }).trim();
+    const globalPkg = path.join(globalDir, packageName, 'package.json');
+    if (fs.existsSync(globalPkg)) return { root: path.dirname(globalPkg), source: 'global' };
+  } catch { /* no global npm */ }
+
   return null;
 }
+
+function ensureDependency(packageName, projectRoot) {
+  const found = findPackage(packageName, projectRoot);
+  if (found) return found;
+
+  // Auto-install to skill-local deps directory
+  console.error(`${packageName} not found — installing to ${SKILL_DEPS_DIR}...`);
+  fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
+
+  // Create a minimal package.json if it doesn't exist
+  const depsPackageJson = path.join(SKILL_DEPS_DIR, 'package.json');
+  if (!fs.existsSync(depsPackageJson)) {
+    fs.writeFileSync(depsPackageJson, JSON.stringify({
+      name: 'a11y-audit-deps',
+      version: '1.0.0',
+      private: true,
+      description: 'Auto-managed dependencies for a11y-audit skill scripts',
+    }, null, 2));
+  }
+
+  try {
+    execSync(`npm install --prefix "${SKILL_DEPS_DIR}" ${packageName}`, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 120000,
+    });
+  } catch (err) {
+    console.error(`Failed to install ${packageName}: ${err.stderr || err.message}`);
+    process.exit(1);
+  }
+
+  const installed = findPackageIn(SKILL_DEPS_DIR, packageName);
+  if (!installed) {
+    console.error(`${packageName} installed but not found at expected path`);
+    process.exit(1);
+  }
+  console.error(`${packageName} installed successfully`);
+  return { root: installed, source: 'skill-deps (auto-installed)' };
+}
+
+// ---------------------------------------------------------------------------
+// Puppeteer loader
+// ---------------------------------------------------------------------------
 
 async function loadPuppeteer(packageRoot) {
   const entry = path.join(packageRoot, 'lib', 'esm', 'puppeteer', 'puppeteer.js');
-  return import(pathToFileURL(entry).href);
+  if (fs.existsSync(entry)) {
+    return import(pathToFileURL(entry).href);
+  }
+  // Fallback: try CJS require
+  return require(packageRoot);
 }
+
+// ---------------------------------------------------------------------------
+// Lighthouse (optional)
+// ---------------------------------------------------------------------------
 
 function buildLighthouseCommand(url) {
   return [
-    'npx',
-    'lighthouse',
-    url,
-    '--output=json',
-    '--output-path=stdout',
+    'npx', 'lighthouse', url,
+    '--output=json', '--output-path=stdout',
     '--only-categories=accessibility',
     '--chrome-flags=--headless --no-sandbox',
     '--quiet',
   ].join(' ');
 }
+
+// ---------------------------------------------------------------------------
+// axe summary mode
+// ---------------------------------------------------------------------------
 
 function summarizeAxe(axe) {
   const tagsOnly = (arr) => (arr || []).map((r) => ({ id: r.id, tags: r.tags }));
@@ -91,6 +167,10 @@ function summarizeAxe(axe) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
 async function run() {
   const args = parseArgs(process.argv.slice(2));
   const rootDir = path.resolve(args.root || process.cwd());
@@ -101,28 +181,23 @@ async function run() {
   const summaryMode = args.summary === true || args.summary === 'true';
 
   if (urls.length === 0) {
-    console.error('Missing --urls url1,url2');
+    console.error('Usage: scan.js --urls url1,url2 [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true]');
     process.exit(1);
   }
 
-  const axeRoot = findPackageRoot(rootDir, 'axe-core');
-  if (!axeRoot) {
-    console.error('axe-core not found in workspace dependency roots');
-    process.exit(1);
-  }
+  // Resolve dependencies (skill-local → project → global → auto-install)
+  const axeDep = ensureDependency('axe-core', rootDir);
+  const browserDep = ensureDependency(browserLib, rootDir);
 
-  const browserRoot = findPackageRoot(rootDir, browserLib);
-  if (!browserRoot) {
-    console.error(`${browserLib} not found in workspace dependency roots`);
-    process.exit(1);
-  }
+  console.error(`axe-core: ${axeDep.source}`);
+  console.error(`${browserLib}: ${browserDep.source}`);
 
-  const axeSourcePath = resolveFromRoots([axeRoot], 'axe.min.js');
+  const axeSourcePath = path.join(axeDep.root, 'axe.min.js');
   const axeSource = fs.readFileSync(axeSourcePath, 'utf8');
 
   let browserModule;
   if (browserLib === 'puppeteer') {
-    browserModule = await loadPuppeteer(browserRoot);
+    browserModule = await loadPuppeteer(browserDep.root);
   } else {
     console.error('Only puppeteer is supported by this bundled script version');
     process.exit(1);
@@ -148,14 +223,8 @@ async function run() {
       url,
       axe: summaryMode ? summarizeAxe(axe) : axe,
       lighthouse: runLighthouse
-        ? {
-            status: 'not-run-by-script',
-            command: buildLighthouseCommand(url),
-          }
-        : {
-            status: 'skipped',
-            reason: 'Lighthouse disabled for this run',
-          },
+        ? { status: 'not-run-by-script', command: buildLighthouseCommand(url) }
+        : { status: 'skipped', reason: 'Lighthouse disabled for this run' },
     });
     await page.close();
   }
@@ -166,6 +235,10 @@ async function run() {
     root_dir: rootDir,
     browser: browserLib,
     axe_source: axeSourcePath,
+    dependency_sources: {
+      'axe-core': axeDep.source,
+      [browserLib]: browserDep.source,
+    },
     urls,
     results,
   }, null, 2));

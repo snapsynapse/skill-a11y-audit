@@ -1,14 +1,28 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 11
+version: 12
 version_date: 2026-03-26
-previous_version: 10
+previous_version: 11
 change_summary: >
-  Added discover.js for template-aware page sampling on large sites.
+  Self-contained deps, remediation hints, delta comparison, null-label fix.
 ---
 
 # Changelog
+
+## v12 -- 2026-03-26
+
+- **Self-contained dependencies:** scan.js now resolves axe-core and
+  puppeteer from skill-local `deps/` → project → global → auto-install.
+  The skill works against any project without requiring accessibility
+  tooling to be pre-installed.
+- **Quick Fixes:** report.js includes actionable one-liner remediation
+  hints for ~17 common axe rules, sorted by impact severity.
+- **Delta comparison:** `report.js --previous <prior-audit.json>` shows
+  fixed rules (strikethrough), new rules, changed instance counts with
+  direction arrows, and net totals.
+- **Null-label fix:** API enrichment labels no longer show "null" when
+  the API manifest lacks count data for an entity type.
 
 ## v11 -- 2026-03-26
 

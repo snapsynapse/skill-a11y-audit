@@ -286,11 +286,92 @@ function buildJson(opts) {
 }
 
 // ---------------------------------------------------------------------------
+// Delta comparison
+// ---------------------------------------------------------------------------
+
+function computeDelta(currentViolationMap, previousJson) {
+  if (!previousJson || !previousJson.violations) return null;
+
+  const prevMap = new Map();
+  for (const v of previousJson.violations) {
+    prevMap.set(v.rule, v);
+  }
+
+  const fixed = [];      // rules in previous but not current
+  const newRules = [];   // rules in current but not previous
+  const changed = [];    // rules in both but instance count changed
+  const unchanged = [];  // same rule, same count
+
+  for (const [rule, prev] of prevMap) {
+    if (!currentViolationMap.has(rule)) {
+      fixed.push({ rule, impact: prev.impact, previousInstances: prev.instances });
+    }
+  }
+
+  for (const [rule, curr] of currentViolationMap) {
+    const prev = prevMap.get(rule);
+    if (!prev) {
+      newRules.push({ rule, impact: curr.impact, instances: curr.instances });
+    } else if (curr.instances !== prev.instances) {
+      changed.push({
+        rule,
+        impact: curr.impact,
+        previousInstances: prev.instances,
+        currentInstances: curr.instances,
+        delta: curr.instances - prev.instances,
+      });
+    } else {
+      unchanged.push({ rule, impact: curr.impact, instances: curr.instances });
+    }
+  }
+
+  const prevTotal = previousJson.violations.reduce((sum, v) => sum + v.instances, 0);
+  const currTotal = [...currentViolationMap.values()].reduce((sum, v) => sum + v.instances, 0);
+
+  return {
+    previousDate: previousJson.date,
+    previousPages: previousJson.pages ? previousJson.pages.length : null,
+    fixed,
+    newRules,
+    changed,
+    unchanged,
+    previousTotal: prevTotal,
+    currentTotal: currTotal,
+    netDelta: currTotal - prevTotal,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Remediation hints for common axe rules
+// ---------------------------------------------------------------------------
+
+const REMEDIATION_HINTS = {
+  'landmark-one-main': 'Wrap the primary content area in a `<main>` element. This also resolves most `region` violations.',
+  'region': 'Ensure all page content is inside a landmark region (`<main>`, `<nav>`, `<header>`, `<footer>`, or `role="..."`).',
+  'color-contrast': 'Increase contrast ratio to ≥4.5:1 for normal text or ≥3:1 for large text. See Color Contrast Details below.',
+  'dlitem': '`<dt>` and `<dd>` elements must be direct children of a `<dl>`. Wrap definition list items in `<dl>` or remove stray items.',
+  'nested-interactive': 'Interactive elements (buttons, links) must not be nested inside other interactive elements. Flatten the hierarchy.',
+  'image-alt': 'Add descriptive `alt` attributes to `<img>` elements. Use `alt=""` for purely decorative images.',
+  'button-name': 'Buttons must have discernible text. Add visible text, `aria-label`, or `aria-labelledby`.',
+  'link-name': 'Links must have discernible text. Add visible text content or `aria-label`.',
+  'label': 'Form inputs must have associated labels via `<label for="...">`, `aria-label`, or `aria-labelledby`.',
+  'html-has-lang': 'Add a `lang` attribute to the `<html>` element (e.g., `<html lang="en">`).',
+  'document-title': 'Add a descriptive `<title>` element inside `<head>`.',
+  'list': 'Ensure `<li>` elements are direct children of `<ul>` or `<ol>`. Do not place non-list content directly inside list containers.',
+  'heading-order': 'Heading levels should increase by one (h1 → h2 → h3). Do not skip levels.',
+  'aria-allowed-attr': 'Remove ARIA attributes that are not valid for the element\'s role.',
+  'aria-required-attr': 'Add missing required ARIA attributes for the element\'s role.',
+  'duplicate-id': 'Ensure all `id` attribute values are unique within the page.',
+  'meta-viewport': 'Do not use `maximum-scale=1` or `user-scalable=no` in the viewport meta tag.',
+  'tabindex': 'Avoid `tabindex` values greater than 0. Use `tabindex="0"` or `tabindex="-1"` only.',
+};
+
+// ---------------------------------------------------------------------------
 // Markdown output (per output-contract.md section order)
 // ---------------------------------------------------------------------------
 
 function buildMarkdown(opts) {
-  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates } = opts;
+  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta } = opts;
   const lines = [];
   const ln = (s = '') => lines.push(s);
 
@@ -350,6 +431,22 @@ function buildMarkdown(opts) {
       ln(`| [${v.rule}](${v.helpUrl}) | ${v.impact} | ${v.instances} | ${pageCount} | ${wcagStr} |`);
     }
     ln();
+
+    // Remediation hints for detected rules
+    const hints = [...violationMap.values()]
+      .filter((v) => REMEDIATION_HINTS[v.rule])
+      .sort((a, b) => {
+        const order = { critical: 0, serious: 1, moderate: 2, minor: 3 };
+        return (order[a.impact] ?? 4) - (order[b.impact] ?? 4);
+      });
+    if (hints.length > 0) {
+      ln('### Quick Fixes');
+      ln();
+      for (const v of hints) {
+        ln(`- **${v.rule}** (${v.impact}, ${v.instances} instances): ${REMEDIATION_HINTS[v.rule]}`);
+      }
+      ln();
+    }
   }
 
   // Color-contrast detail
@@ -386,8 +483,51 @@ function buildMarkdown(opts) {
   }
   ln();
 
-  // 5. Delta from Previous Audit — placeholder (requires prior data)
-  // Omitted per output-contract.md: "Include only if a prior audit output exists"
+  // 5. Delta from Previous Audit
+  if (delta) {
+    ln('## Delta from Previous Audit');
+    ln();
+    ln(`Compared against audit from ${delta.previousDate}${delta.previousPages ? ` (${delta.previousPages} pages)` : ''}.`);
+    ln();
+    ln(`| Metric | Previous | Current | Change |`);
+    ln('|---|---|---|---|');
+    const sign = (n) => n > 0 ? `+${n}` : `${n}`;
+    ln(`| Total instances | ${delta.previousTotal} | ${delta.currentTotal} | ${sign(delta.netDelta)} |`);
+    ln();
+
+    if (delta.fixed.length > 0) {
+      ln('**Fixed** (no longer detected):');
+      ln();
+      for (const f of delta.fixed) {
+        ln(`- ~~${f.rule}~~ (${f.impact}, was ${f.previousInstances} instances)`);
+      }
+      ln();
+    }
+
+    if (delta.newRules.length > 0) {
+      ln('**New** (not in previous audit):');
+      ln();
+      for (const n of delta.newRules) {
+        ln(`- **${n.rule}** (${n.impact}, ${n.instances} instances)`);
+      }
+      ln();
+    }
+
+    if (delta.changed.length > 0) {
+      ln('**Changed**:');
+      ln();
+      for (const c of delta.changed) {
+        const direction = c.delta > 0 ? '↑' : '↓';
+        ln(`- ${c.rule}: ${c.previousInstances} → ${c.currentInstances} (${direction}${Math.abs(c.delta)})`);
+      }
+      ln();
+    }
+
+    if (delta.unchanged.length > 0) {
+      ln(`**Unchanged**: ${delta.unchanged.map((u) => u.rule).join(', ')}`);
+      ln();
+    }
+  }
 
   // 6. Project-Specific Standard — placeholder
   // Omitted per output-contract.md: "Omit sections that are truly empty"
@@ -452,7 +592,7 @@ function buildMarkdown(opts) {
     ln('| Template Group | Total Pages | Scanned | Selection |');
     ln('|---|---|---|---|');
     for (const g of discoverData.groups) {
-      const entityLabel = g.entity ? ` (${g.entity.count} ${g.entity.entityType})` : '';
+      const entityLabel = g.entity && g.entity.count ? ` (${g.entity.count} ${g.entity.entityType})` : '';
       ln(`| \`${g.pattern}\`${entityLabel} | ${g.count} | ${g.selected.length} | ${g.reason} |`);
     }
     ln();
@@ -486,7 +626,7 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const inputPath = args.input;
   if (!inputPath) {
-    console.error('Usage: report.js --input <scan.json> --output-dir <dir> [--project-name <name>] [--expected-url <url>] [--runtime-url <url>] [--discover <discover.json>]');
+    console.error('Usage: report.js --input <scan.json> --output-dir <dir> [--project-name <name>] [--expected-url <url>] [--runtime-url <url>] [--discover <discover.json>] [--previous <prior-audit.json>]');
     process.exit(1);
   }
 
@@ -497,6 +637,8 @@ function main() {
   const runtimeUrl = args['runtime-url'] || null;
   const discoverPath = args.discover || null;
   const discoverData = discoverPath ? JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8')) : null;
+  const previousPath = args.previous || null;
+  const previousJson = previousPath ? JSON.parse(fs.readFileSync(path.resolve(previousPath), 'utf8')) : null;
   const date = new Date().toISOString().slice(0, 10);
 
   // Aggregate
@@ -509,8 +651,11 @@ function main() {
   // Shared template detection
   const sharedTemplates = discoverData ? detectSharedTemplates(scanData, discoverData) : [];
 
+  // Delta comparison
+  const delta = previousJson ? computeDelta(violationMap, previousJson) : null;
+
   // Generate outputs
-  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates };
+  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta };
   const markdown = buildMarkdown(mdOpts);
   const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl });
   if (discoverData) {
@@ -532,6 +677,17 @@ function main() {
       rules: st.rules,
       pageCount: st.pages.length,
     }));
+  }
+  if (delta) {
+    json.delta = {
+      previousDate: delta.previousDate,
+      previousTotal: delta.previousTotal,
+      currentTotal: delta.currentTotal,
+      netDelta: delta.netDelta,
+      fixed: delta.fixed.map((f) => f.rule),
+      newRules: delta.newRules.map((n) => n.rule),
+      changed: delta.changed.map((c) => ({ rule: c.rule, delta: c.delta })),
+    };
   }
 
   // Write files

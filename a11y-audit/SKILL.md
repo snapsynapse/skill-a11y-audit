@@ -13,13 +13,12 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 11
+  version: 12
   version_date: 2026-03-26
-  previous_version: 10
+  previous_version: 11
   change_summary: >
-    Added discover.js for template-aware page sampling on large sites.
-    Sitemap-first discovery, URL pattern classification, representative
-    selection. Integrated with report.js methodology output.
+    Self-contained deps (auto-install axe-core + puppeteer), Quick Fixes
+    remediation hints, delta comparison (--previous), null-label fix.
 ---
 
 # Accessibility Audit
@@ -57,6 +56,19 @@ Prefer bundled helpers over ad hoc generation when they fit:
   selects representative pages for scanning. Reads sitemap.xml first,
   falls back to HTML navigation crawl. Outputs a scan plan with
   template groups and a ready-to-use URL list for scan.js.
+
+### Dependencies
+
+scan.js requires `axe-core` and `puppeteer`. It resolves these in order:
+
+1. **Skill-local** `deps/` directory (sibling to `scripts/`)
+2. **Target project** `node_modules/` (and common workspace subdirs)
+3. **Global** npm modules
+
+If not found anywhere, scan.js **auto-installs** both packages to the
+skill-local `deps/` directory. This means the skill works against any
+project without requiring the target to have accessibility tooling
+installed. The `deps/` directory is gitignored.
 
 ### Platform-Specific References
 
@@ -311,6 +323,10 @@ node a11y-audit/scripts/report.js \
 Pass `--discover` when a discover.js scan plan was used. This adds a
 Sampling Strategy subsection to the report methodology documenting
 template groups and coverage ratio.
+
+Pass `--previous <prior-audit.json>` to generate a Delta from Previous
+Audit section showing fixed rules, new rules, changed instance counts,
+and net progress.
 
 The script produces `audit-YYYY-MM-DD.md` and `audit-YYYY-MM-DD.json`
 following the contracts in `references/output-contract.md` and

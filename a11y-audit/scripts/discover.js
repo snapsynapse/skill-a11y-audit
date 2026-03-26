@@ -430,7 +430,7 @@ async function main() {
     console.error(`DOM fingerprinting used on ${result.fingerprintedGroups} groups`);
   }
   for (const g of result.groups) {
-    const label = g.entity ? ` (${g.entity.count} ${g.entity.entityType})` : '';
+    const label = g.entity && g.entity.count ? ` (${g.entity.count} ${g.entity.entityType})` : '';
     console.error(`  ${g.pattern}${label}: ${g.count} pages → ${g.selected.length} selected (${g.reason})`);
   }
 }

@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 11
+bundle_version: 12
 bundle_date: 2026-03-26
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -111,11 +111,11 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 11
+    version: 12
     hash: pending
     note: >
-      v11 -- discover.js for template-aware sampling, report.js for
-      deterministic output, Phase 1 condensed
+      v12 -- self-contained deps, Quick Fixes, delta comparison,
+      discover.js sampling, report.js deterministic output
 
   - path: evals/evals.json
     role: evals
@@ -125,15 +125,15 @@ files:
 
   - path: HANDOFF.md
     role: handoff
-    version: 9
+    version: 10
     hash: pending
-    note: discover.js validated, next steps include remediation of newly found violations
+    note: v12 self-contained deps, Quick Fixes, delta comparison validated
 
   - path: CHANGELOG.md
     role: reference
-    version: 11
+    version: 12
     hash: pending
-    note: Append-only change history -- v11 discover.js and sampling
+    note: Append-only change history -- v12 self-contained deps, Quick Fixes, delta
 
   - path: references/claude-code.md
     role: reference
@@ -173,9 +173,9 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 2
+    version: 3
     hash: pending
-    note: Reusable axe-based scanner with --summary flag and optional Lighthouse intent recording
+    note: Self-contained dep resolution (skill-local → project → global → auto-install)
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -191,15 +191,21 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 2
+    version: 3
     hash: pending
-    note: Deterministic report generator for Phases 3+5 with --discover sampling support
+    note: Quick Fixes, delta comparison (--previous), shared-template detection
 
   - path: scripts/discover.js
     role: script
+    version: 2
+    hash: pending
+    note: DOM fingerprinting, API enrichment, sitemap-first sampling
+
+  - path: .gitignore
+    role: config
     version: 1
     hash: pending
-    note: Sitemap-first page discovery with template-aware sampling for large sites
+    note: Excludes deps/ (auto-installed scan.js dependencies)
 
   - path: assets/sample-output/audit-sample.md
     role: asset
@@ -233,6 +239,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 11
+    version: 12
     hash: null
     note: This file -- self-referential hash omitted
