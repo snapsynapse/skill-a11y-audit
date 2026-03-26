@@ -1,0 +1,33 @@
+{
+  "name": "skill-a11y-audit",
+  "version": "0.12.0",
+  "description": "Drop-in accessibility audit for AI coding agents. WCAG 2.1 AA scanning with template-aware sampling, remediation hints, and progress tracking.",
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "wcag",
+    "axe-core",
+    "audit",
+    "agent-skill",
+    "claude-code",
+    "puppeteer",
+    "web-accessibility",
+    "wcag-2.1",
+    "compliance"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snapsynapse/skill-a11y-audit.git"
+  },
+  "author": "Sam Rogers <sam@snapsynapse.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "discover": "node a11y-audit/scripts/discover.js",
+    "scan": "node a11y-audit/scripts/scan.js",
+    "report": "node a11y-audit/scripts/report.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
