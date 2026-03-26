@@ -151,6 +151,55 @@ function aggregateScan(scanData) {
 }
 
 // ---------------------------------------------------------------------------
+// Shared-template detection (pages with identical violation fingerprints)
+// ---------------------------------------------------------------------------
+
+function detectSharedTemplates(scanData, discoverData) {
+  // Build per-page violation fingerprint: sorted rule IDs + impact
+  const pageFingerprints = new Map();
+  for (const result of scanData.results) {
+    const rules = (result.axe.violations || [])
+      .map((v) => `${v.id}:${v.impact}`)
+      .sort();
+    const fp = rules.length > 0 ? rules.join('|') : '__clean__';
+    pageFingerprints.set(result.url, fp);
+  }
+
+  // Group pages by fingerprint
+  const fpGroups = new Map();
+  for (const [url, fp] of pageFingerprints) {
+    if (!fpGroups.has(fp)) fpGroups.set(fp, []);
+    fpGroups.get(fp).push(url);
+  }
+
+  // Cross-reference with discover groups to find template patterns sharing issues
+  const sharedTemplates = [];
+  if (discoverData) {
+    // Build URL → template pattern lookup
+    const urlToPattern = new Map();
+    for (const g of discoverData.groups) {
+      for (const url of g.selected) {
+        urlToPattern.set(url, g.pattern);
+      }
+    }
+
+    for (const [fp, urls] of fpGroups) {
+      if (urls.length < 2) continue;
+      const patterns = [...new Set(urls.map((u) => urlToPattern.get(u) || 'unknown'))];
+      const rules = fp === '__clean__' ? [] : fp.split('|').map((r) => r.split(':')[0]);
+      sharedTemplates.push({
+        patterns,
+        pages: urls,
+        fingerprint: fp === '__clean__' ? 'no violations' : fp,
+        rules,
+      });
+    }
+  }
+
+  return sharedTemplates;
+}
+
+// ---------------------------------------------------------------------------
 // WCAG compliance matrix
 // ---------------------------------------------------------------------------
 
@@ -241,7 +290,7 @@ function buildJson(opts) {
 // ---------------------------------------------------------------------------
 
 function buildMarkdown(opts) {
-  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData } = opts;
+  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates } = opts;
   const lines = [];
   const ln = (s = '') => lines.push(s);
 
@@ -403,7 +452,25 @@ function buildMarkdown(opts) {
     ln('| Template Group | Total Pages | Scanned | Selection |');
     ln('|---|---|---|---|');
     for (const g of discoverData.groups) {
-      ln(`| \`${g.pattern}\` | ${g.count} | ${g.selected.length} | ${g.reason} |`);
+      const entityLabel = g.entity ? ` (${g.entity.count} ${g.entity.entityType})` : '';
+      ln(`| \`${g.pattern}\`${entityLabel} | ${g.count} | ${g.selected.length} | ${g.reason} |`);
+    }
+    ln();
+  }
+
+  // Shared template detection
+  if (sharedTemplates && sharedTemplates.length > 0) {
+    ln('### Shared Template Patterns');
+    ln();
+    ln('Template groups with identical violation fingerprints share the same underlying issues. Fixing the shared template resolves the issue across all pages in those groups.');
+    ln();
+    for (const st of sharedTemplates) {
+      const patternList = st.patterns.map((p) => `\`${p}\``).join(', ');
+      if (st.fingerprint === 'no violations') {
+        ln(`- **Clean:** ${patternList} — no violations detected`);
+      } else {
+        ln(`- **Shared issues on ${patternList}:** ${st.rules.join(', ')}`);
+      }
     }
     ln();
   }
@@ -439,8 +506,11 @@ function main() {
   const contrastDetails = extractContrastDetails(violationMap);
   const lighthouse = scanData.results[0]?.lighthouse || { status: 'skipped', reason: 'Not available' };
 
+  // Shared template detection
+  const sharedTemplates = discoverData ? detectSharedTemplates(scanData, discoverData) : [];
+
   // Generate outputs
-  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData };
+  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates };
   const markdown = buildMarkdown(mdOpts);
   const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl });
   if (discoverData) {
@@ -448,8 +518,20 @@ function main() {
       source: discoverData.source,
       totalPages: discoverData.totalPages,
       selectedPages: discoverData.selectedPages,
-      groups: discoverData.groups.map((g) => ({ pattern: g.pattern, count: g.count, scanned: g.selected.length })),
+      groups: discoverData.groups.map((g) => ({
+        pattern: g.pattern,
+        count: g.count,
+        scanned: g.selected.length,
+        entity: g.entity || null,
+      })),
     };
+  }
+  if (sharedTemplates && sharedTemplates.length > 0) {
+    json.sharedTemplates = sharedTemplates.map((st) => ({
+      patterns: st.patterns,
+      rules: st.rules,
+      pageCount: st.pages.length,
+    }));
   }
 
   // Write files

@@ -2,10 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
+version: 2
 version_date: 2026-03-26
-previous_version: null
-change_summary: Sitemap-first page discovery with template-aware sampling for large sites.
+previous_version: 1
+change_summary: >
+  DOM fingerprinting for smarter representative selection, API entity
+  enrichment for group labels, HTML crawl fallback improvements.
 */
 
 const fs = require('fs');
@@ -35,12 +37,12 @@ function parseArgs(argv) {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
-function fetch(url) {
-  return new Promise((resolve, reject) => {
+function httpFetch(url) {
+  return new Promise((resolve) => {
     const mod = url.startsWith('https') ? https : http;
     mod.get(url, { timeout: 10000 }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return resolve(fetch(res.headers.location));
+        return resolve(httpFetch(res.headers.location));
       }
       if (res.statusCode !== 200) {
         res.resume();
@@ -61,9 +63,7 @@ function parseSitemap(xml) {
   const urls = [];
   const re = /<loc>(.*?)<\/loc>/g;
   let m;
-  while ((m = re.exec(xml)) !== null) {
-    urls.push(m[1].trim());
-  }
+  while ((m = re.exec(xml)) !== null) urls.push(m[1].trim());
   return urls;
 }
 
@@ -78,10 +78,7 @@ function extractLinks(html, baseUrl) {
   while ((m = re.exec(html)) !== null) {
     let href = m[1];
     if (href.startsWith('mailto:') || href.startsWith('javascript:')) continue;
-    if (!href.startsWith('http')) {
-      href = new URL(href, baseUrl).href;
-    }
-    // Only same-origin links
+    if (!href.startsWith('http')) href = new URL(href, baseUrl).href;
     try {
       const u = new URL(href);
       const base = new URL(baseUrl);
@@ -95,41 +92,106 @@ function extractLinks(html, baseUrl) {
 // URL pattern classification
 // ---------------------------------------------------------------------------
 
-function classifyUrl(urlStr, baseOrigin) {
+function classifyUrl(urlStr) {
   const u = new URL(urlStr);
   let pathname = u.pathname;
-  // Normalize: strip trailing index.html, ensure trailing slash consistency
   pathname = pathname.replace(/\/index\.html$/, '/');
   if (pathname === '/') return { pattern: '/', segments: [] };
 
-  // Split into segments
   const parts = pathname.split('/').filter(Boolean);
-  // Strip .html extension from last segment for pattern matching
-  if (parts.length > 0) {
-    parts[parts.length - 1] = parts[parts.length - 1].replace(/\.html$/, '');
-  }
+  if (parts.length > 0) parts[parts.length - 1] = parts[parts.length - 1].replace(/\.html$/, '');
 
-  if (parts.length === 1) {
-    // Top-level page like /about, /matrix, /regulations
-    return { pattern: parts[0], segments: parts };
-  }
+  if (parts.length === 1) return { pattern: parts[0], segments: parts };
 
-  // Multi-segment: replace dynamic segments with *
-  // First segment is the type, rest are dynamic
   const patternParts = [parts[0], ...parts.slice(1).map(() => '*')];
   return { pattern: patternParts.join('/'), segments: parts };
 }
 
 // ---------------------------------------------------------------------------
-// Representative selection
+// DOM fingerprinting (lightweight — loads HTML, counts structural elements)
 // ---------------------------------------------------------------------------
 
-function selectRepresentatives(group, maxPerGroup) {
+function computeFingerprint(html) {
+  if (!html) return { score: 0, elements: {} };
+
+  // Count elements inside <main> if present, else whole body
+  let region = html;
+  const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  if (mainMatch) region = mainMatch[1];
+
+  const counts = {};
+  const tags = ['table', 'details', 'form', 'input', 'select', 'button', 'ul', 'ol', 'dl', 'h1', 'h2', 'h3', 'h4', 'img', 'canvas', 'svg', 'iframe', 'video', 'audio'];
+  for (const tag of tags) {
+    const re = new RegExp(`<${tag}[\\s>]`, 'gi');
+    const matches = region.match(re);
+    if (matches) counts[tag] = matches.length;
+  }
+
+  // Count data attributes that imply interactivity
+  const sortable = (region.match(/data-sortable/gi) || []).length;
+  const filterable = (region.match(/data-filterable/gi) || []).length;
+  if (sortable) counts['[data-sortable]'] = sortable;
+  if (filterable) counts['[data-filterable]'] = filterable;
+
+  // Complexity score: weighted sum
+  const weights = { table: 3, details: 2, form: 3, input: 2, select: 2, button: 1, dl: 2, iframe: 4, video: 4, canvas: 3, svg: 1, '[data-sortable]': 2, '[data-filterable]': 2 };
+  let score = 0;
+  for (const [tag, count] of Object.entries(counts)) {
+    score += count * (weights[tag] || 1);
+  }
+
+  return { score, elements: counts };
+}
+
+async function fingerprintCandidates(urls) {
+  // Load HTML for each candidate and compute fingerprint
+  const results = [];
+  for (const url of urls) {
+    const html = await httpFetch(url);
+    const fp = computeFingerprint(html);
+    results.push({ url, ...fp });
+  }
+  return results.sort((a, b) => b.score - a.score);
+}
+
+// ---------------------------------------------------------------------------
+// Representative selection (with optional fingerprinting)
+// ---------------------------------------------------------------------------
+
+async function selectRepresentatives(group, maxPerGroup, useFingerprint) {
   const urls = group.urls.sort();
   if (urls.length <= Math.max(maxPerGroup, 3)) {
     return { selected: urls, reason: `all ${urls.length} — small group` };
   }
-  // Pick first and last alphabetically, plus middle if max allows
+
+  if (useFingerprint) {
+    // Sample candidates: first, middle, last, plus a few random
+    const candidateIdxs = new Set([0, Math.floor(urls.length / 4), Math.floor(urls.length / 2), Math.floor(3 * urls.length / 4), urls.length - 1]);
+    // Add up to 3 random indices for variety
+    for (let i = 0; i < 3 && candidateIdxs.size < Math.min(10, urls.length); i++) {
+      candidateIdxs.add(Math.floor(Math.random() * urls.length));
+    }
+    const candidates = [...candidateIdxs].map((i) => urls[i]);
+
+    const fingerprinted = await fingerprintCandidates(candidates);
+    if (fingerprinted.length > 0 && fingerprinted[0].score > 0) {
+      // Pick most complex and least complex
+      const selected = [fingerprinted[0].url];
+      const least = fingerprinted[fingerprinted.length - 1];
+      if (least.url !== selected[0]) selected.push(least.url);
+      if (maxPerGroup >= 3 && fingerprinted.length > 2) {
+        const mid = fingerprinted[Math.floor(fingerprinted.length / 2)];
+        if (!selected.includes(mid.url)) selected.push(mid.url);
+      }
+      return {
+        selected: selected.slice(0, maxPerGroup),
+        reason: `${selected.length} of ${urls.length} — by DOM complexity (scores: ${fingerprinted[0].score}→${least.score})`,
+        fingerprints: fingerprinted,
+      };
+    }
+  }
+
+  // Fallback: alphabetic spread
   const selected = [urls[0], urls[urls.length - 1]];
   if (maxPerGroup >= 3 && urls.length > 4) {
     selected.splice(1, 0, urls[Math.floor(urls.length / 2)]);
@@ -141,11 +203,45 @@ function selectRepresentatives(group, maxPerGroup) {
 }
 
 // ---------------------------------------------------------------------------
+// API entity enrichment
+// ---------------------------------------------------------------------------
+
+function enrichGroupLabel(pattern, apiManifest) {
+  if (!apiManifest) return null;
+  // Support both "endpoints" and "files" keys (common API index patterns)
+  const catalog = apiManifest.endpoints || apiManifest.files;
+  if (!catalog) return null;
+
+  // Map URL patterns to API endpoint names
+  const patternToEndpoint = {
+    'regulation/*': 'regulations',
+    'obligation/*': 'obligations',
+    'authority/*': 'authorities',
+    'applies-to/*': 'jurisdictions',
+    'standard/*': 'standards',
+    'requires/*/*': 'provisions',
+  };
+
+  const endpointKey = patternToEndpoint[pattern];
+  if (!endpointKey) return null;
+
+  const endpoint = catalog[endpointKey];
+  if (!endpoint) return null;
+
+  return {
+    entityType: endpointKey,
+    description: endpoint.description || null,
+    count: endpoint.count || null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Main discovery
 // ---------------------------------------------------------------------------
 
 async function discover(runtimeUrl, opts = {}) {
   const maxPerGroup = parseInt(opts.maxPerGroup, 10) || 2;
+  const useFingerprint = opts.fingerprint !== false;
   const baseOrigin = new URL(runtimeUrl).origin;
 
   let allUrls = [];
@@ -155,12 +251,10 @@ async function discover(runtimeUrl, opts = {}) {
   if (!opts.noSitemap) {
     const sitemapPaths = ['/sitemap.xml', '/sitemap_index.xml'];
 
-    // Check robots.txt for sitemap reference
-    const robotsTxt = await fetch(`${baseOrigin}/robots.txt`);
+    const robotsTxt = await httpFetch(`${baseOrigin}/robots.txt`);
     if (robotsTxt) {
       const sitemapMatch = robotsTxt.match(/Sitemap:\s*(\S+)/i);
       if (sitemapMatch) {
-        // Rebase sitemap URL to runtime origin
         try {
           const sitemapUrl = new URL(new URL(sitemapMatch[1]).pathname, baseOrigin).href;
           sitemapPaths.unshift(sitemapUrl.replace(baseOrigin, ''));
@@ -169,29 +263,24 @@ async function discover(runtimeUrl, opts = {}) {
     }
 
     for (const p of [...new Set(sitemapPaths)]) {
-      const xml = await fetch(`${baseOrigin}${p}`);
-      if (xml && xml.includes('<urlset') || xml && xml.includes('<sitemapindex')) {
+      const xml = await httpFetch(`${baseOrigin}${p}`);
+      if (xml && (xml.includes('<urlset') || xml.includes('<sitemapindex'))) {
         let sitemapUrls = parseSitemap(xml);
 
-        // Handle sitemap index (list of sitemaps)
         if (xml.includes('<sitemapindex')) {
           const subSitemaps = parseSitemap(xml);
           sitemapUrls = [];
           for (const sub of subSitemaps) {
             const subUrl = new URL(new URL(sub).pathname, baseOrigin).href;
-            const subXml = await fetch(subUrl);
+            const subXml = await httpFetch(subUrl);
             if (subXml) sitemapUrls.push(...parseSitemap(subXml));
           }
         }
 
-        // Rebase URLs from production origin to runtime origin
         allUrls = sitemapUrls.map((u) => {
           try {
-            const parsed = new URL(u);
-            return `${baseOrigin}${parsed.pathname}`;
-          } catch {
-            return u;
-          }
+            return `${baseOrigin}${new URL(u).pathname}`;
+          } catch { return u; }
         });
         source = `sitemap (${p})`;
         break;
@@ -201,15 +290,14 @@ async function discover(runtimeUrl, opts = {}) {
 
   // 2. Fallback: crawl navigation links
   if (allUrls.length === 0) {
-    const html = await fetch(runtimeUrl);
+    const html = await httpFetch(runtimeUrl);
     if (html) {
       allUrls = extractLinks(html, runtimeUrl);
       source = 'html-crawl (depth 1)';
 
-      // Crawl one level deeper for hub pages
       const hubUrls = [...allUrls];
       for (const hubUrl of hubUrls.slice(0, 20)) {
-        const hubHtml = await fetch(hubUrl);
+        const hubHtml = await httpFetch(hubUrl);
         if (hubHtml) {
           const deeper = extractLinks(hubHtml, hubUrl);
           for (const d of deeper) {
@@ -217,28 +305,35 @@ async function discover(runtimeUrl, opts = {}) {
           }
         }
       }
+      source = `html-crawl (depth 2, ${allUrls.length} links)`;
     }
   }
 
   if (allUrls.length === 0) {
-    return { error: 'No pages discovered. Check the URL and try --sitemap-path.' };
+    return { error: 'No pages discovered. Check the URL and try --no-sitemap for crawl mode.' };
   }
 
   // 3. Classify into groups
   const groupMap = new Map();
   for (const url of allUrls) {
-    const { pattern } = classifyUrl(url, baseOrigin);
-    if (!groupMap.has(pattern)) {
-      groupMap.set(pattern, { pattern, urls: [] });
-    }
+    const { pattern } = classifyUrl(url);
+    if (!groupMap.has(pattern)) groupMap.set(pattern, { pattern, urls: [] });
     groupMap.get(pattern).urls.push(url);
   }
 
-  // 4. Select representatives
+  // 4. Fetch API manifest for enrichment
+  let apiManifest = null;
+  for (const apiPath of ['/api/v1/index.json', '/api/index.json']) {
+    const apiJson = await httpFetch(`${baseOrigin}${apiPath}`);
+    if (apiJson) {
+      try { apiManifest = JSON.parse(apiJson); break; } catch { /* skip */ }
+    }
+  }
+
+  // 5. Select representatives (with fingerprinting for large groups)
   const groups = [];
   const scanList = [];
 
-  // Sort groups: unique/top-level first, then by count descending
   const sorted = [...groupMap.values()].sort((a, b) => {
     const aIsTopLevel = !a.pattern.includes('/') && !a.pattern.includes('*');
     const bIsTopLevel = !b.pattern.includes('/') && !b.pattern.includes('*');
@@ -247,32 +342,35 @@ async function discover(runtimeUrl, opts = {}) {
     return b.urls.length - a.urls.length;
   });
 
+  let fingerprintCount = 0;
   for (const group of sorted) {
     const isTopLevel = !group.pattern.includes('/') && !group.pattern.includes('*');
-    let selected, reason;
+    let selected, reason, fingerprints;
 
     if (isTopLevel || group.urls.length === 1) {
-      // Top-level pages or singletons: always include
       selected = group.urls.sort();
       reason = isTopLevel ? 'top-level page — always included' : 'singleton — always included';
     } else {
-      ({ selected, reason } = selectRepresentatives(group, maxPerGroup));
+      // Only fingerprint groups with 4+ pages to limit HTTP requests
+      const shouldFingerprint = useFingerprint && group.urls.length >= 4;
+      ({ selected, reason, fingerprints } = await selectRepresentatives(group, maxPerGroup, shouldFingerprint));
+      if (shouldFingerprint) fingerprintCount += 1;
     }
 
-    groups.push({
+    // Enrich with API data
+    const enrichment = enrichGroupLabel(group.pattern, apiManifest);
+
+    const groupEntry = {
       pattern: group.pattern,
       count: group.urls.length,
       selected,
       reason,
-    });
-    scanList.push(...selected);
-  }
+    };
+    if (enrichment) groupEntry.entity = enrichment;
+    if (fingerprints) groupEntry.fingerprints = fingerprints.slice(0, 5); // keep top 5
 
-  // 5. Try to enrich with API manifest
-  let apiManifest = null;
-  const apiJson = await fetch(`${baseOrigin}/api/v1/index.json`);
-  if (apiJson) {
-    try { apiManifest = JSON.parse(apiJson); } catch { /* skip */ }
+    groups.push(groupEntry);
+    scanList.push(...selected);
   }
 
   return {
@@ -281,7 +379,11 @@ async function discover(runtimeUrl, opts = {}) {
     totalPages: allUrls.length,
     selectedPages: scanList.length,
     coverageRatio: `${groups.length} template groups, ${scanList.length} pages selected`,
-    apiManifest: apiManifest ? { version: apiManifest.meta?.version, endpoints: Object.keys(apiManifest.endpoints || {}).length } : null,
+    fingerprintedGroups: fingerprintCount,
+    apiManifest: apiManifest ? {
+      version: apiManifest.meta?.version,
+      endpoints: Object.keys(apiManifest.endpoints || apiManifest.files || {}).length,
+    } : null,
     groups,
     scanList,
   };
@@ -295,13 +397,14 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const url = args.url;
   if (!url) {
-    console.error('Usage: discover.js --url <base-url> [--output <path>] [--max-per-group N] [--no-sitemap]');
+    console.error('Usage: discover.js --url <base-url> [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint]');
     process.exit(1);
   }
 
   const result = await discover(url, {
     maxPerGroup: args['max-per-group'],
     noSitemap: args['no-sitemap'] === true || args['no-sitemap'] === 'true',
+    fingerprint: !(args['no-fingerprint'] === true || args['no-fingerprint'] === 'true'),
   });
 
   if (result.error) {
@@ -320,11 +423,15 @@ async function main() {
     console.log(json);
   }
 
-  // Summary to stderr so it's visible even when piping
+  // Summary to stderr
   console.error(`\nDiscovery: ${result.totalPages} pages found via ${result.source}`);
   console.error(`Selected ${result.selectedPages} pages across ${result.groups.length} template groups`);
+  if (result.fingerprintedGroups > 0) {
+    console.error(`DOM fingerprinting used on ${result.fingerprintedGroups} groups`);
+  }
   for (const g of result.groups) {
-    console.error(`  ${g.pattern}: ${g.count} pages → ${g.selected.length} selected (${g.reason})`);
+    const label = g.entity ? ` (${g.entity.count} ${g.entity.entityType})` : '';
+    console.error(`  ${g.pattern}${label}: ${g.count} pages → ${g.selected.length} selected (${g.reason})`);
   }
 }
 

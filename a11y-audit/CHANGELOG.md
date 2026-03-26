@@ -12,20 +12,21 @@ change_summary: >
 
 ## v11 -- 2026-03-26
 
-- **discover.js:** New template-aware page discovery script for large
-  sites. Reads sitemap.xml (via robots.txt or standard paths), falls
-  back to HTML navigation crawl. Groups URLs by path pattern, selects
-  representative pages per group (alphabetic spread heuristic).
-- **Validated on AI Regulation Reference:** 746 pages classified into 16
-  template groups, 22 representatives selected. The expanded scan found
-  12 serious violations (dlitem, nested-interactive, color-contrast) on
-  regulation/*, requires/*/*, and authority/* templates that the previous
+- **discover.js:** Template-aware page discovery with sitemap-first
+  approach. Falls back to HTML navigation crawl if no sitemap exists.
+- **DOM fingerprinting:** Loads candidate pages and scores structural
+  complexity (tables, details, forms, interactive attrs). Picks the
+  most and least complex pages per group instead of alphabetic spread.
+- **API entity enrichment:** Reads `/api/v1/index.json` (or similar)
+  and annotates groups with entity names/counts (e.g., "25 regulations").
+- **Shared template detection:** report.js cross-references per-page
+  violation fingerprints with discover groups. Surfaces which template
+  groups share identical issues so developers fix the shared template once.
+- **No-sitemap fallback validated:** HTML crawl (depth 2) found 132
+  pages and all key template groups on AI Regulation Reference.
+- **Validated on AI Regulation Reference:** 746 pages → 16 groups →
+  22 scanned → 12 serious violations found on templates the previous
   top-level-only scan missed entirely.
-- **report.js --discover:** Optional flag adds a Sampling Strategy
-  subsection to the methodology with template group breakdown. JSON
-  output includes a `sampling` object with group counts.
-- **SKILL.md:** Phase 1 recommends discover.js for sites with >15
-  routes. Phase 2 scope control uses scanList from discover output.
 
 ## v10 -- 2026-03-26
 
