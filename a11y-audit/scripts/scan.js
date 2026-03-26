@@ -75,6 +75,22 @@ function buildLighthouseCommand(url) {
   ].join(' ');
 }
 
+function summarizeAxe(axe) {
+  const tagsOnly = (arr) => (arr || []).map((r) => ({ id: r.id, tags: r.tags }));
+  return {
+    violations: axe.violations,
+    incomplete: axe.incomplete,
+    passes: tagsOnly(axe.passes),
+    inapplicable: tagsOnly(axe.inapplicable),
+    counts: {
+      violations: (axe.violations || []).length,
+      passes: (axe.passes || []).length,
+      incomplete: (axe.incomplete || []).length,
+      inapplicable: (axe.inapplicable || []).length,
+    },
+  };
+}
+
 async function run() {
   const args = parseArgs(process.argv.slice(2));
   const rootDir = path.resolve(args.root || process.cwd());
@@ -82,6 +98,7 @@ async function run() {
   const outputPath = path.resolve(args.output || path.join(process.cwd(), 'a11y-scan-results.json'));
   const browserLib = args.browser || 'puppeteer';
   const runLighthouse = args.lighthouse === 'true';
+  const summaryMode = args.summary === true || args.summary === 'true';
 
   if (urls.length === 0) {
     console.error('Missing --urls url1,url2');
@@ -129,7 +146,7 @@ async function run() {
     });
     results.push({
       url,
-      axe,
+      axe: summaryMode ? summarizeAxe(axe) : axe,
       lighthouse: runLighthouse
         ? {
             status: 'not-run-by-script',

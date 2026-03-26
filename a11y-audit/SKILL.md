@@ -13,12 +13,13 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 9
-  version_date: 2026-03-03
-  previous_version: 8
+  version: 11
+  version_date: 2026-03-26
+  previous_version: 10
   change_summary: >
-    Validated first-run context creation and missing-browser-automation
-    paths. Added non-destructive issue-planning helper.
+    Added discover.js for template-aware page sampling on large sites.
+    Sitemap-first discovery, URL pattern classification, representative
+    selection. Integrated with report.js methodology output.
 ---
 
 # Accessibility Audit
@@ -47,7 +48,15 @@ Prefer bundled helpers over ad hoc generation when they fit:
 - `scripts/bootstrap-context.js` creates a workspace-local
   `.a11y-audit/PROJECT_CONTEXT.md` from simple inputs.
 - `scripts/scan.js` runs reusable axe-based scans and records optional
-  Lighthouse execution intent.
+  Lighthouse execution intent. Use `--summary` to reduce output size
+  (keeps full violation detail, strips node data from passes/inapplicable).
+- `scripts/report.js` generates the markdown report and JSON data file
+  from scan.js output. Handles WCAG compliance matrix, violation
+  aggregation, and color-contrast detail extraction deterministically.
+- `scripts/discover.js` identifies template groups on large sites and
+  selects representative pages for scanning. Reads sitemap.xml first,
+  falls back to HTML navigation crawl. Outputs a scan plan with
+  template groups and a ready-to-use URL list for scan.js.
 
 ### Platform-Specific References
 
@@ -55,9 +64,9 @@ Prefer bundled helpers over ad hoc generation when they fit:
   `.claude/launch.json` handling and Preview tool usage.
 - If running in Codex, read `references/codex.md` for workspace-local
   state handling and execution assumptions.
-- Read `references/output-contract.md` when generating markdown or JSON.
-- Read `references/output-schema.json` when writing machine-readable
-  output.
+- `references/output-contract.md` and `references/output-schema.json`
+  are encoded in `scripts/report.js`. Read them only when modifying the
+  report script.
 - Read `references/issue-trackers.md` only when `output_mode` is
   `markdown+issues`.
 - If the user wants to operationalize recurring audits in CI, start from
@@ -115,39 +124,23 @@ The user can request a partial run. Common patterns:
 
 **Purpose:** Understand the project before scanning.
 
-Read the project to determine:
+1. Read `.a11y-audit/PROJECT_CONTEXT.md` if it exists (standards, routes,
+   output mode, labels). If absent, create it via
+   `scripts/bootstrap-context.js` or from
+   `references/project-context-template.md`.
+2. Read `package.json` for tech stack, existing a11y tooling, and
+   available browser automation (`puppeteer` / `playwright`).
+3. Build a scannable URL list from router config or HTML file glob.
+   For sites with many pages (>15 routes), prefer `scripts/discover.js`
+   to classify pages into template groups and select representatives.
+   Review the scan plan with the user before proceeding to Phase 2.
+4. Confirm a dev server is reachable. Check `.claude/launch.json` and
+   platform-specific references for launch hints. If the app starts on a
+   different URL than expected, switch to the live URL, record the
+   mismatch, and update the context file.
+5. Ask before installing any missing dependencies.
 
-1. **Tech stack**: Read `package.json` (or equivalent) for the frontend
-   framework (React, Vue, Angular, Svelte, plain HTML), component library
-   (Radix UI, Material UI, Headless UI, Chakra), CSS approach (Tailwind,
-   CSS Modules, styled-components), and test framework.
-
-2. **Routes/pages**: Read the router configuration to build a list of
-   scannable URLs. For React Router, read the file containing `<Route>`
-   elements. For Next.js, read the `pages/` or `app/` directory. For plain
-   HTML, glob for `.html` files.
-
-3. **Existing a11y tooling**: Check `package.json` for `@axe-core/cli`,
-   `axe-core`, `pa11y`, `eslint-plugin-jsx-a11y`, `jest-axe`. Check
-   `.github/workflows/` for accessibility-related CI jobs.
-
-4. **Dev server**: Check if a dev server is running or can be started.
-   Check package scripts, repo docs, and any platform-specific reference
-   file for launch hints. Do not assume Claude-only tools are available
-   unless the current agent matches that environment.
-   If the expected URL or port is unavailable but the app starts on a
-   different local URL, switch to the live URL, record the mismatch in
-   the report methodology, and update `.a11y-audit/PROJECT_CONTEXT.md`
-   to the working `base_url`.
-
-5. **Project context**: Look for `PROJECT_CONTEXT.md` at the workspace
-   path `.a11y-audit/PROJECT_CONTEXT.md`. If found, load
-   project-specific standards, routes, labels, and color palette using
-   `references/project-context-template.md` as the field contract.
-
-**Output:** A structured summary reported to the user before proceeding.
-The skill asks before installing any missing dependencies (axe-core,
-lighthouse).
+**Output:** Structured summary reported to the user before proceeding.
 
 ### Phase 2 -- Automated Scanning
 
@@ -183,7 +176,8 @@ Example invocation:
 node a11y-audit/scripts/scan.js \
   --root . \
   --urls http://127.0.0.1:3000/,http://127.0.0.1:3000/about \
-  --output /tmp/a11y-scan.json
+  --output /tmp/a11y-scan.json \
+  --summary
 ```
 
 **Adapt to the project.** If dependencies live in a frontend
@@ -230,8 +224,10 @@ occurred. axe-core results alone are sufficient for a valid audit.
 #### Scope Control
 
 - Default: scan routes discovered in Phase 1
-- If more than 10 routes exist, ask the user which to scan or whether to
-  scan all
+- If a discover.js scan plan exists, use its `scanList` for `--urls`.
+  The report methodology will record the sampling strategy.
+- If more than 10 routes exist and no discover plan is available, ask
+  the user which to scan or whether to scan all
 - The user can provide a specific URL list to override discovery
 - For SPAs: navigate via the router, not by reloading the page (some
   routes may not work as direct URLs)
@@ -253,40 +249,10 @@ For each page, collect:
 **Purpose:** Map automated findings to WCAG 2.1 AA success criteria and
 any project-specific standards.
 
-#### WCAG 2.1 AA Matrix
-
-Build a compliance matrix covering all 50 Level A and AA success criteria.
-For each criterion, determine status:
-
-- **Pass**: axe-core has rules covering this criterion and all passed
-- **Fail**: axe-core found violations mapped to this criterion
-- **Cannot be determined**: no automated test covers this criterion
-  (requires manual review)
-- **Not applicable**: criterion does not apply to this content type
-
-axe-core maps violations to WCAG criteria via the `tags` array on each
-rule. Tags follow the format `wcag2a`, `wcag2aa`, `wcag111` (for SC
-1.1.1), etc.
-
-#### WCAG Criteria Reference
-
-The compliance matrix covers all 50 WCAG 2.1 Level A and AA success
-criteria (Principles 1-4: Perceivable, Operable, Understandable,
-Robust). Do not enumerate them in the skill; use your knowledge of WCAG
-2.1 to build the matrix at generation time.
-
-#### axe Rule to WCAG Mapping
-
-axe-core maps violations to WCAG criteria via the `tags` array on each
-rule. Tags follow the format `wcag2a`, `wcag2aa`, `wcag111` (for SC
-1.1.1), etc. Group violations by these tags to populate the matrix.
-
-For criteria where axe found no violations AND has rules that cover
-the criterion, mark as Pass. For criteria with no axe rule coverage,
-mark as Manual. Determine coverage at runtime from the axe results
-`passes` and `inapplicable` arrays rather than a hardcoded list.
-
-#### Project-Specific Standards
+`scripts/report.js` handles the compliance matrix deterministically. It
+hardcodes all 50 WCAG 2.1 Level A and AA criteria, maps axe tags to
+success criteria, and produces the matrix as part of its markdown and
+JSON output. You do not need to build the matrix manually.
 
 If `.a11y-audit/PROJECT_CONTEXT.md` specifies additional standards
 (e.g., CAN-ASC-6.2), build a secondary mapping. Cross-reference
@@ -329,14 +295,34 @@ cross-link to it rather than duplicating procedures.
 
 **Purpose:** Produce output based on the configured output mode.
 
-Write output to the configured path. Default:
-`docs/accessibility/audits/audit-YYYY-MM-DD.md` (and `.json` if
-applicable). `.a11y-audit/PROJECT_CONTEXT.md` can override the path.
+Run `scripts/report.js` to generate the markdown report and JSON data
+file from the Phase 2 scan output:
 
-Read `references/output-contract.md` for report section order, degraded
-mode rules, and JSON output requirements. Use
-`references/output-schema.json` as the stable machine-readable contract
-for `markdown+json` and `markdown+issues` modes.
+```bash
+node a11y-audit/scripts/report.js \
+  --input /tmp/a11y-scan.json \
+  --output-dir docs/accessibility/audits \
+  --project-name "Project Name" \
+  --runtime-url http://127.0.0.1:3000 \
+  --expected-url http://localhost:3000 \
+  --discover /tmp/a11y-discover.json
+```
+
+Pass `--discover` when a discover.js scan plan was used. This adds a
+Sampling Strategy subsection to the report methodology documenting
+template groups and coverage ratio.
+
+The script produces `audit-YYYY-MM-DD.md` and `audit-YYYY-MM-DD.json`
+following the contracts in `references/output-contract.md` and
+`references/output-schema.json`. You do not need to read those reference
+files unless modifying the report script itself.
+
+After running report.js, review its output and fill in the **Manual
+Testing Recommendations** section with the Phase 4 guidance (report.js
+leaves a placeholder for this since it requires reasoning about the
+specific findings pattern).
+
+`.a11y-audit/PROJECT_CONTEXT.md` can override the output path.
 
 If the user wants a recurring or on-demand CI job, adapt
 `assets/ci/github-actions/accessibility-audit.yml` to the target

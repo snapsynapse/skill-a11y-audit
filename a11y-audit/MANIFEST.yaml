@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 9
-bundle_date: 2026-03-03
+bundle_version: 11
+bundle_date: 2026-03-26
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -111,11 +111,11 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 9
-    hash: sha256:f31b014ab834c3b6e37cd75c5b96f3cb77bda7546cbb0711cfe05558f29936cd
+    version: 11
+    hash: pending
     note: >
-      v9 -- issue planning helper added and remaining runtime guidance
-      narrowed to the live authenticated tracker path
+      v11 -- discover.js for template-aware sampling, report.js for
+      deterministic output, Phase 1 condensed
 
   - path: evals/evals.json
     role: evals
@@ -125,15 +125,15 @@ files:
 
   - path: HANDOFF.md
     role: handoff
-    version: 6
-    hash: sha256:5aa47650dca6f7070805530542487180f80c9dd21e704e717a098189a90205c7
-    note: Current state after direct validation of remaining non-destructive runtime gaps
+    version: 9
+    hash: pending
+    note: discover.js validated, next steps include remediation of newly found violations
 
   - path: CHANGELOG.md
     role: reference
-    version: 9
-    hash: sha256:230204ba6f024b46f85fd9494a036ae7f73b0bec42e4e569f6a1960bd683131a
-    note: Append-only change history -- v9 final pre-publish mitigations recorded
+    version: 11
+    hash: pending
+    note: Append-only change history -- v11 discover.js and sampling
 
   - path: references/claude-code.md
     role: reference
@@ -173,9 +173,9 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 1
-    hash: sha256:5e402a9e582fd06c339d64a85f17b3633dbefc694d2bec1a1ccd73c63c842711
-    note: Reusable axe-based scanner with optional Lighthouse intent recording
+    version: 2
+    hash: pending
+    note: Reusable axe-based scanner with --summary flag and optional Lighthouse intent recording
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -188,6 +188,18 @@ files:
     version: 1
     hash: sha256:68c1ba0847c086cfe56074b3a54b46507a73573690ccc5cd7f86da258b6ba746
     note: Non-destructive issue planning helper for markdown+issues mode
+
+  - path: scripts/report.js
+    role: script
+    version: 2
+    hash: pending
+    note: Deterministic report generator for Phases 3+5 with --discover sampling support
+
+  - path: scripts/discover.js
+    role: script
+    version: 1
+    hash: pending
+    note: Sitemap-first page discovery with template-aware sampling for large sites
 
   - path: assets/sample-output/audit-sample.md
     role: asset
@@ -221,6 +233,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 9
+    version: 11
     hash: null
     note: This file -- self-referential hash omitted

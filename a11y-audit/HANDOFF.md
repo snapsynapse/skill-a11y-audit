@@ -1,12 +1,13 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 6
-version_date: 2026-03-03
-previous_version: 5
+version: 9
+version_date: 2026-03-26
+previous_version: 8
 change_summary: >
-  Validated first-run context creation and missing-browser-automation
-  handling directly, and added a non-destructive issue-planning helper.
+  Added discover.js for template-aware page sampling. Validated on
+  AI Regulation Reference: 746 pages → 22 scanned, found 12 violations
+  missed by the previous top-level-only scan.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,16 +18,21 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: v9, mostly validated
+## Current State: v11, template-aware sampling validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
 reusable scripts, focused reference files, expanded eval coverage,
-sample output artifacts, and a CI template. The main unvalidated areas
-are now live tracker execution and deduplication against a real
-authenticated issue system. The direct degraded paths for
-Lighthouse-unavailable, runtime URL reconciliation, first-run context
-creation, and missing-browser-automation handling have been validated.
+sample output artifacts, and a CI template. The direct degraded paths
+for Lighthouse-unavailable, runtime URL reconciliation, first-run
+context creation, and missing-browser-automation handling have been
+validated.
+
+A full audit was run 2026-03-26 against the AI Regulation Reference
+(10-page static HTML site, http://127.0.0.1:8081). The audit found
+3 rules / 69 instances (color-contrast, landmark-one-main, region),
+all of which were remediated to zero violations. This run revealed
+four token-efficiency improvements, all now implemented in v10.
 
 ### Files in this directory
 
@@ -43,8 +49,10 @@ creation, and missing-browser-automation handling have been validated.
 | references/issue-trackers.md | Issue creation and deduplication rules |
 | references/output-schema.json | Stable JSON output schema |
 | references/project-context-template.md | Canonical context-file contract |
-| scripts/scan.js | Reusable axe-based scanning helper |
+| scripts/scan.js | Reusable axe-based scanning helper (--summary flag) |
 | scripts/bootstrap-context.js | First-run context bootstrap helper |
+| scripts/discover.js | Template-aware page discovery and sampling |
+| scripts/report.js | Deterministic report generator for Phases 3+5 |
 | scripts/plan-issues.js | Non-destructive issue planning helper |
 | assets/sample-output/ | Sample markdown and JSON artifacts |
 | assets/ci/github-actions/accessibility-audit.yml | CI workflow starter |
@@ -115,9 +123,28 @@ creation, and missing-browser-automation handling have been validated.
    planner, and deduplication keys, but the end-to-end authenticated
    ticket creation path has not yet been re-run after the refactor.
 
+## Completed: Token-Efficiency Improvements (v10)
+
+All four improvements from the 2026-03-26 audit are now implemented:
+
+1. **`scripts/report.js`** (~3000 tokens saved): Deterministic report
+   generator with hardcoded 50 WCAG 2.1 AA criteria, axe tag mapping,
+   violation aggregation, color-contrast detail extraction, and output
+   generation per output-contract.md and output-schema.json.
+2. **`--summary` flag on scan.js** (~500 tokens saved): Strips node
+   detail from passes/inapplicable arrays, adds per-page counts.
+3. **Phase 1 condensed** (~500 tokens saved): Replaced ~30-line
+   enumeration with ~10 focused lines.
+4. **Reference reads removed** (~800 tokens saved): Phase 5 invokes
+   report.js directly; agent no longer reads output-contract.md or
+   output-schema.json during normal runs.
+
 ## Suggested Next Steps
 
-1. Run eval-2 against a real authenticated tracker if you want full live issue-mode validation before or after publishing
-2. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
-3. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
-4. The CI template is now referenced directly from `SKILL.md`; use it as the default starting point for operationalized audits
+1. Remediate the 12 violations found by template-aware sampling on AI
+   Regulation Reference (dlitem, nested-interactive, color-contrast on
+   regulation/*, requires/*/*, authority/* templates)
+2. Run eval-2 against a real authenticated tracker for full live issue-mode validation
+3. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
+4. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
+5. Copy updated skill back to `.claude/skills/a11y-audit/` in target projects

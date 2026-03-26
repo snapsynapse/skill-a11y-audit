@@ -1,0 +1,466 @@
+#!/usr/bin/env node
+/*
+skill_bundle: a11y-audit
+file_role: script
+version: 1
+version_date: 2026-03-26
+previous_version: null
+change_summary: Deterministic report generator for Phases 3+5. Produces markdown and JSON from scan.js output.
+*/
+
+const fs = require('fs');
+const path = require('path');
+
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
+
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (!arg.startsWith('--')) continue;
+    const key = arg.slice(2);
+    const next = argv[i + 1];
+    if (!next || next.startsWith('--')) { args[key] = true; continue; }
+    args[key] = next;
+    i += 1;
+  }
+  return args;
+}
+
+// ---------------------------------------------------------------------------
+// WCAG 2.1 AA Criteria (all 50 Level A + AA)
+// ---------------------------------------------------------------------------
+
+const WCAG_CRITERIA = [
+  // Principle 1: Perceivable
+  { sc: '1.1.1', name: 'Non-text Content', level: 'A', principle: 'Perceivable' },
+  { sc: '1.2.1', name: 'Audio-only and Video-only (Prerecorded)', level: 'A', principle: 'Perceivable' },
+  { sc: '1.2.2', name: 'Captions (Prerecorded)', level: 'A', principle: 'Perceivable' },
+  { sc: '1.2.3', name: 'Audio Description or Media Alternative (Prerecorded)', level: 'A', principle: 'Perceivable' },
+  { sc: '1.2.4', name: 'Captions (Live)', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.2.5', name: 'Audio Description (Prerecorded)', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.3.1', name: 'Info and Relationships', level: 'A', principle: 'Perceivable' },
+  { sc: '1.3.2', name: 'Meaningful Sequence', level: 'A', principle: 'Perceivable' },
+  { sc: '1.3.3', name: 'Sensory Characteristics', level: 'A', principle: 'Perceivable' },
+  { sc: '1.3.4', name: 'Orientation', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.3.5', name: 'Identify Input Purpose', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.1', name: 'Use of Color', level: 'A', principle: 'Perceivable' },
+  { sc: '1.4.2', name: 'Audio Control', level: 'A', principle: 'Perceivable' },
+  { sc: '1.4.3', name: 'Contrast (Minimum)', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.4', name: 'Resize Text', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.5', name: 'Images of Text', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.10', name: 'Reflow', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.11', name: 'Non-text Contrast', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.12', name: 'Text Spacing', level: 'AA', principle: 'Perceivable' },
+  { sc: '1.4.13', name: 'Content on Hover or Focus', level: 'AA', principle: 'Perceivable' },
+  // Principle 2: Operable
+  { sc: '2.1.1', name: 'Keyboard', level: 'A', principle: 'Operable' },
+  { sc: '2.1.2', name: 'No Keyboard Trap', level: 'A', principle: 'Operable' },
+  { sc: '2.1.4', name: 'Character Key Shortcuts', level: 'A', principle: 'Operable' },
+  { sc: '2.2.1', name: 'Timing Adjustable', level: 'A', principle: 'Operable' },
+  { sc: '2.2.2', name: 'Pause, Stop, Hide', level: 'A', principle: 'Operable' },
+  { sc: '2.3.1', name: 'Three Flashes or Below Threshold', level: 'A', principle: 'Operable' },
+  { sc: '2.4.1', name: 'Bypass Blocks', level: 'A', principle: 'Operable' },
+  { sc: '2.4.2', name: 'Page Titled', level: 'A', principle: 'Operable' },
+  { sc: '2.4.3', name: 'Focus Order', level: 'A', principle: 'Operable' },
+  { sc: '2.4.4', name: 'Link Purpose (In Context)', level: 'A', principle: 'Operable' },
+  { sc: '2.4.5', name: 'Multiple Ways', level: 'AA', principle: 'Operable' },
+  { sc: '2.4.6', name: 'Headings and Labels', level: 'AA', principle: 'Operable' },
+  { sc: '2.4.7', name: 'Focus Visible', level: 'AA', principle: 'Operable' },
+  { sc: '2.5.1', name: 'Pointer Gestures', level: 'A', principle: 'Operable' },
+  { sc: '2.5.2', name: 'Pointer Cancellation', level: 'A', principle: 'Operable' },
+  { sc: '2.5.3', name: 'Label in Name', level: 'A', principle: 'Operable' },
+  { sc: '2.5.4', name: 'Motion Actuation', level: 'A', principle: 'Operable' },
+  // Principle 3: Understandable
+  { sc: '3.1.1', name: 'Language of Page', level: 'A', principle: 'Understandable' },
+  { sc: '3.1.2', name: 'Language of Parts', level: 'AA', principle: 'Understandable' },
+  { sc: '3.2.1', name: 'On Focus', level: 'A', principle: 'Understandable' },
+  { sc: '3.2.2', name: 'On Input', level: 'A', principle: 'Understandable' },
+  { sc: '3.2.3', name: 'Consistent Navigation', level: 'AA', principle: 'Understandable' },
+  { sc: '3.2.4', name: 'Consistent Identification', level: 'AA', principle: 'Understandable' },
+  { sc: '3.3.1', name: 'Error Identification', level: 'A', principle: 'Understandable' },
+  { sc: '3.3.2', name: 'Labels or Instructions', level: 'A', principle: 'Understandable' },
+  { sc: '3.3.3', name: 'Error Suggestion', level: 'AA', principle: 'Understandable' },
+  { sc: '3.3.4', name: 'Error Prevention (Legal, Financial, Data)', level: 'AA', principle: 'Understandable' },
+  // Principle 4: Robust
+  { sc: '4.1.1', name: 'Parsing', level: 'A', principle: 'Robust' },
+  { sc: '4.1.2', name: 'Name, Role, Value', level: 'A', principle: 'Robust' },
+  { sc: '4.1.3', name: 'Status Messages', level: 'AA', principle: 'Robust' },
+];
+
+// axe tag → WCAG SC mapping. Tags like "wcag111" map to "1.1.1".
+function axeTagToSC(tag) {
+  const m = tag.match(/^wcag(\d)(\d)(\d+)$/);
+  if (!m) return null;
+  return `${m[1]}.${m[2]}.${m[3]}`;
+}
+
+// ---------------------------------------------------------------------------
+// Data aggregation
+// ---------------------------------------------------------------------------
+
+function aggregateScan(scanData) {
+  const violationMap = new Map();   // ruleId → merged violation
+  const passTags = new Set();
+  const failTags = new Set();
+  const inapplicableTags = new Set();
+  const pageUrls = [];
+
+  for (const result of scanData.results) {
+    pageUrls.push(result.url);
+    const axe = result.axe;
+
+    // Violations — full detail, merge across pages
+    for (const v of axe.violations || []) {
+      if (!violationMap.has(v.id)) {
+        violationMap.set(v.id, {
+          rule: v.id,
+          impact: v.impact,
+          description: v.description,
+          help: v.help,
+          helpUrl: v.helpUrl,
+          tags: v.tags || [],
+          pages: [],
+          nodes: [],
+          instances: 0,
+        });
+      }
+      const entry = violationMap.get(v.id);
+      entry.pages.push(result.url);
+      for (const n of v.nodes || []) {
+        entry.nodes.push({ ...n, page: result.url });
+        entry.instances += 1;
+      }
+      for (const t of v.tags || []) failTags.add(t);
+    }
+
+    // Passes — tags only
+    for (const p of axe.passes || []) {
+      for (const t of p.tags || []) passTags.add(t);
+    }
+
+    // Inapplicable — tags only
+    for (const ia of axe.inapplicable || []) {
+      for (const t of ia.tags || []) inapplicableTags.add(t);
+    }
+  }
+
+  return { violationMap, passTags, failTags, inapplicableTags, pageUrls };
+}
+
+// ---------------------------------------------------------------------------
+// WCAG compliance matrix
+// ---------------------------------------------------------------------------
+
+function buildMatrix(passTags, failTags, inapplicableTags) {
+  const matrix = {};
+  for (const criterion of WCAG_CRITERIA) {
+    const scTag = `wcag${criterion.sc.replace(/\./g, '')}`;
+    if (failTags.has(scTag)) {
+      matrix[criterion.sc] = 'fail';
+    } else if (passTags.has(scTag)) {
+      matrix[criterion.sc] = 'pass';
+    } else if (inapplicableTags.has(scTag)) {
+      matrix[criterion.sc] = 'not-applicable';
+    } else {
+      matrix[criterion.sc] = 'manual';
+    }
+  }
+  return matrix;
+}
+
+// ---------------------------------------------------------------------------
+// Color-contrast detail extraction
+// ---------------------------------------------------------------------------
+
+function extractContrastDetails(violationMap) {
+  const cc = violationMap.get('color-contrast');
+  if (!cc) return null;
+  return cc.nodes.map((n) => {
+    const data = n.any && n.any[0] && n.any[0].data;
+    return {
+      selector: (n.target || [])[0] || n.html,
+      page: n.page,
+      fgColor: data ? data.fgColor : null,
+      bgColor: data ? data.bgColor : null,
+      contrastRatio: data ? data.contrastRatio : null,
+      expectedRatio: data ? data.expectedContrastRatio : null,
+      fontSize: data ? data.fontSize : null,
+      fontWeight: data ? data.fontWeight : null,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Impact summary
+// ---------------------------------------------------------------------------
+
+function buildSummary(violationMap) {
+  const summary = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+  for (const v of violationMap.values()) {
+    summary[v.impact] = (summary[v.impact] || 0) + v.instances;
+  }
+  return summary;
+}
+
+// ---------------------------------------------------------------------------
+// JSON output (per output-schema.json)
+// ---------------------------------------------------------------------------
+
+function buildJson(opts) {
+  const { date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl } = opts;
+  const violations = [];
+  for (const v of violationMap.values()) {
+    const wcag = v.tags.map(axeTagToSC).filter(Boolean);
+    violations.push({
+      rule: v.rule,
+      impact: v.impact,
+      wcag: [...new Set(wcag)],
+      pages: [...new Set(v.pages)],
+      instances: v.instances,
+    });
+  }
+  const json = {
+    date,
+    tool: `a11y-audit report.js v1`,
+    pages: pageUrls,
+    lighthouse: lighthouse || { status: 'skipped', reason: 'Not run by report.js' },
+    summary: buildSummary(violationMap),
+    violations,
+    matrix,
+  };
+  if (expectedUrl) json.expected_url = expectedUrl;
+  if (runtimeUrl) json.runtime_url = runtimeUrl;
+  return json;
+}
+
+// ---------------------------------------------------------------------------
+// Markdown output (per output-contract.md section order)
+// ---------------------------------------------------------------------------
+
+function buildMarkdown(opts) {
+  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData } = opts;
+  const lines = [];
+  const ln = (s = '') => lines.push(s);
+
+  // 1. Header
+  ln('# Accessibility Audit Report');
+  ln();
+  ln('## Header');
+  ln();
+  ln('| Field | Value |');
+  ln('|---|---|');
+  ln(`| Project | ${projectName} |`);
+  ln(`| Date | ${date} |`);
+  ln(`| Standards | WCAG 2.1 AA |`);
+  ln(`| Tool Version | axe-core (via scan.js); report.js v1 |`);
+  if (runtimeUrl && expectedUrl && runtimeUrl !== expectedUrl) {
+    ln(`| Runtime URL | ${runtimeUrl} (expected ${expectedUrl}) |`);
+  }
+  ln();
+
+  // 2. Executive Summary
+  ln('## Executive Summary');
+  ln();
+  const total = summary.critical + summary.serious + summary.moderate + summary.minor;
+  const ruleCount = violationMap.size;
+  ln(`${projectName} was audited across ${pageUrls.length} page(s). Automated scanning found **${total} issue instance(s)** across **${ruleCount} rule(s)**.`);
+  ln();
+  ln(`| Impact | Instances |`);
+  ln('|---|---|');
+  for (const level of ['critical', 'serious', 'moderate', 'minor']) {
+    if (summary[level] > 0) ln(`| ${level} | ${summary[level]} |`);
+  }
+  ln();
+  if (lighthouse && lighthouse.status === 'skipped') {
+    ln(`Lighthouse was skipped: ${lighthouse.reason}.`);
+    ln();
+  }
+
+  // 3. Automated Scan Results
+  ln('## Automated Scan Results');
+  ln();
+  ln('### Pages Scanned');
+  ln();
+  for (const url of pageUrls) ln(`- ${url}`);
+  ln();
+  if (violationMap.size === 0) {
+    ln('No automated violations found.');
+    ln();
+  } else {
+    ln('### Findings by Rule');
+    ln();
+    ln('| Rule | Impact | Instances | Pages | WCAG |');
+    ln('|---|---|---|---|---|');
+    for (const v of violationMap.values()) {
+      const wcag = v.tags.map(axeTagToSC).filter(Boolean);
+      const wcagStr = [...new Set(wcag)].map((sc) => `SC ${sc}`).join(', ') || '-';
+      const pageCount = new Set(v.pages).size;
+      ln(`| [${v.rule}](${v.helpUrl}) | ${v.impact} | ${v.instances} | ${pageCount} | ${wcagStr} |`);
+    }
+    ln();
+  }
+
+  // Color-contrast detail
+  if (contrastDetails && contrastDetails.length > 0) {
+    ln('### Color Contrast Details');
+    ln();
+    ln('| Selector | Page | Ratio | Expected | FG | BG |');
+    ln('|---|---|---|---|---|---|');
+    for (const d of contrastDetails) {
+      const ratio = d.contrastRatio ? d.contrastRatio.toFixed(2) : '-';
+      const expected = d.expectedRatio ? `${d.expectedRatio}:1` : '-';
+      const page = d.page ? new URL(d.page).pathname : '-';
+      ln(`| \`${d.selector}\` | ${page} | ${ratio}:1 | ${expected} | ${d.fgColor || '-'} | ${d.bgColor || '-'} |`);
+    }
+    ln();
+  }
+
+  // 4. WCAG 2.1 AA Compliance Matrix
+  ln('## WCAG 2.1 AA Compliance Matrix');
+  ln();
+  ln('> This is an automation-assisted status view, not a conformance certification.');
+  ln();
+  let currentPrinciple = '';
+  ln('| SC | Name | Level | Status |');
+  ln('|---|---|---|---|');
+  for (const c of WCAG_CRITERIA) {
+    if (c.principle !== currentPrinciple) {
+      currentPrinciple = c.principle;
+      ln(`| **${c.principle}** | | | |`);
+    }
+    const status = matrix[c.sc] || 'manual';
+    const icon = status === 'pass' ? 'Pass' : status === 'fail' ? '**Fail**' : status === 'not-applicable' ? 'N/A' : 'Manual';
+    ln(`| SC ${c.sc} | ${c.name} | ${c.level} | ${icon} |`);
+  }
+  ln();
+
+  // 5. Delta from Previous Audit — placeholder (requires prior data)
+  // Omitted per output-contract.md: "Include only if a prior audit output exists"
+
+  // 6. Project-Specific Standard — placeholder
+  // Omitted per output-contract.md: "Omit sections that are truly empty"
+
+  // 7. Manual Testing Recommendations — placeholder for LLM
+  ln('## Manual Testing Recommendations');
+  ln();
+  ln('<!-- report.js: This section should be populated by the auditing agent -->');
+  ln('<!-- based on Phase 4 manual check guidance, which requires reasoning -->');
+  ln('<!-- about the specific findings pattern. -->');
+  ln();
+
+  // 8. Remediation Priority
+  ln('## Remediation Priority');
+  ln();
+  if (violationMap.size === 0) {
+    ln('No violations to prioritize.');
+  } else {
+    ln('| Priority | Rule | Impact | Instances | WCAG |');
+    ln('|---|---|---|---|---|');
+    const sorted = [...violationMap.values()].sort((a, b) => {
+      const order = { critical: 0, serious: 1, moderate: 2, minor: 3 };
+      return (order[a.impact] ?? 4) - (order[b.impact] ?? 4);
+    });
+    sorted.forEach((v, i) => {
+      const wcag = v.tags.map(axeTagToSC).filter(Boolean);
+      const wcagStr = [...new Set(wcag)].map((sc) => `SC ${sc}`).join(', ') || '-';
+      ln(`| P${Math.min(i, 3)} | ${v.rule} | ${v.impact} | ${v.instances} | ${wcagStr} |`);
+    });
+  }
+  ln();
+
+  // 9. Issues Created — placeholder
+  ln('## Issues Created');
+  ln();
+  ln('Issue creation was not executed by the report generator.');
+  ln();
+
+  // 10. Methodology
+  ln('## Methodology');
+  ln();
+  ln('| Field | Value |');
+  ln('|---|---|');
+  ln(`| Scan Date | ${date} |`);
+  ln(`| Pages Scanned | ${pageUrls.length} |`);
+  ln(`| Viewport | 1280 x 800 |`);
+  ln(`| Browser | Headless Chromium (Puppeteer) |`);
+  ln(`| Scanner | axe-core via scan.js |`);
+  if (lighthouse && lighthouse.status === 'skipped') {
+    ln(`| Lighthouse | Skipped: ${lighthouse.reason} |`);
+  }
+  if (runtimeUrl) ln(`| Runtime URL | ${runtimeUrl} |`);
+  if (expectedUrl && runtimeUrl !== expectedUrl) ln(`| Expected URL | ${expectedUrl} |`);
+  ln();
+
+  // Sampling strategy (when discover.js was used)
+  if (discoverData) {
+    ln('### Sampling Strategy');
+    ln();
+    ln(`Pages were selected via template-aware sampling (discover.js). ${discoverData.totalPages} total pages were classified into ${discoverData.groups.length} template groups; ${discoverData.selectedPages} representative pages were scanned.`);
+    ln();
+    ln('| Template Group | Total Pages | Scanned | Selection |');
+    ln('|---|---|---|---|');
+    for (const g of discoverData.groups) {
+      ln(`| \`${g.pattern}\` | ${g.count} | ${g.selected.length} | ${g.reason} |`);
+    }
+    ln();
+  }
+
+  return lines.join('\n');
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const inputPath = args.input;
+  if (!inputPath) {
+    console.error('Usage: report.js --input <scan.json> --output-dir <dir> [--project-name <name>] [--expected-url <url>] [--runtime-url <url>] [--discover <discover.json>]');
+    process.exit(1);
+  }
+
+  const scanData = JSON.parse(fs.readFileSync(path.resolve(inputPath), 'utf8'));
+  const outputDir = path.resolve(args['output-dir'] || process.cwd());
+  const projectName = args['project-name'] || 'Project';
+  const expectedUrl = args['expected-url'] || null;
+  const runtimeUrl = args['runtime-url'] || null;
+  const discoverPath = args.discover || null;
+  const discoverData = discoverPath ? JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8')) : null;
+  const date = new Date().toISOString().slice(0, 10);
+
+  // Aggregate
+  const { violationMap, passTags, failTags, inapplicableTags, pageUrls } = aggregateScan(scanData);
+  const matrix = buildMatrix(passTags, failTags, inapplicableTags);
+  const summary = buildSummary(violationMap);
+  const contrastDetails = extractContrastDetails(violationMap);
+  const lighthouse = scanData.results[0]?.lighthouse || { status: 'skipped', reason: 'Not available' };
+
+  // Generate outputs
+  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData };
+  const markdown = buildMarkdown(mdOpts);
+  const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl });
+  if (discoverData) {
+    json.sampling = {
+      source: discoverData.source,
+      totalPages: discoverData.totalPages,
+      selectedPages: discoverData.selectedPages,
+      groups: discoverData.groups.map((g) => ({ pattern: g.pattern, count: g.count, scanned: g.selected.length })),
+    };
+  }
+
+  // Write files
+  fs.mkdirSync(outputDir, { recursive: true });
+  const mdPath = path.join(outputDir, `audit-${date}.md`);
+  const jsonPath = path.join(outputDir, `audit-${date}.json`);
+  fs.writeFileSync(mdPath, markdown);
+  fs.writeFileSync(jsonPath, JSON.stringify(json, null, 2));
+
+  console.log(mdPath);
+  console.log(jsonPath);
+}
+
+main();

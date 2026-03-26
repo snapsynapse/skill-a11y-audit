@@ -1,15 +1,51 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 9
-version_date: 2026-03-03
-previous_version: 8
+version: 11
+version_date: 2026-03-26
+previous_version: 10
 change_summary: >
-  Validated first-run context creation and missing-browser-automation
-  paths directly, and added a non-destructive issue-planning helper.
+  Added discover.js for template-aware page sampling on large sites.
 ---
 
 # Changelog
+
+## v11 -- 2026-03-26
+
+- **discover.js:** New template-aware page discovery script for large
+  sites. Reads sitemap.xml (via robots.txt or standard paths), falls
+  back to HTML navigation crawl. Groups URLs by path pattern, selects
+  representative pages per group (alphabetic spread heuristic).
+- **Validated on AI Regulation Reference:** 746 pages classified into 16
+  template groups, 22 representatives selected. The expanded scan found
+  12 serious violations (dlitem, nested-interactive, color-contrast) on
+  regulation/*, requires/*/*, and authority/* templates that the previous
+  top-level-only scan missed entirely.
+- **report.js --discover:** Optional flag adds a Sampling Strategy
+  subsection to the methodology with template group breakdown. JSON
+  output includes a `sampling` object with group counts.
+- **SKILL.md:** Phase 1 recommends discover.js for sites with >15
+  routes. Phase 2 scope control uses scanList from discover output.
+
+## v10 -- 2026-03-26
+
+- **report.js:** New deterministic report generator (`scripts/report.js`)
+  handles Phases 3 and 5: WCAG compliance matrix (hardcoded 50 criteria),
+  violation aggregation across pages, color-contrast detail extraction,
+  markdown report per output-contract.md, and JSON per output-schema.json.
+  The LLM no longer builds these manually (~3000 tokens saved).
+- **scan.js --summary:** Added `--summary` flag to `scripts/scan.js` that
+  keeps full violation detail but strips node data from passes and
+  inapplicable arrays, reducing output size (~500 tokens saved).
+- **Phase 1 condensed:** Replaced ~30-line framework-by-framework
+  enumeration with ~10 focused lines. The agent already knows how to
+  discover project structure (~500 tokens saved).
+- **Reference reads removed:** Phase 5 now invokes report.js directly.
+  The agent no longer reads output-contract.md or output-schema.json
+  during normal runs (~800 tokens saved).
+- **Phase 4 stays LLM-generated:** Manual check guidance requires
+  reasoning about the specific findings pattern and remains the agent's
+  responsibility.
 
 ## v9 -- 2026-03-03
 
