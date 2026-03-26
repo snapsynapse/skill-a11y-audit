@@ -184,6 +184,18 @@ Changed: color-contrast 26 → 2 (↓24)
 | Virtual Meeting Reference | 449 | 15 | 20 | 130 | color-contrast on group badges, missing landmarks site-wide |
 | sam-rogers.com (Zola blog) | 206 | 12 | 15 | 33 | list structure in theme nav, landmark-unique on every page |
 
+## Skill Provenance
+
+This bundle follows the
+[Skill Provenance](https://github.com/snapsynapse/skill-provenance)
+open standard. Every file carries embedded version metadata
+(`skill_bundle`, `file_role`, `version`, `version_date`,
+`previous_version`, `change_summary`), and `MANIFEST.yaml` tracks the
+full bundle inventory with versioned hashes. This means any agent or
+human can verify which version of which file produced a given audit
+report, trace changes across sessions, and detect drift between
+installed copies and the canonical source.
+
 ## Repository Layout
 
 ```
