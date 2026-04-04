@@ -210,6 +210,10 @@ a11y-audit/
   assets/               # Sample outputs, CI starter assets
 ```
 
+## About
+
+a11y-audit is a [PAICE.work](https://paice.work/) project. PAICE.work PBC is a public benefit corporation building infrastructure for productive collaboration between humans and autonomous agents.
+
 ## License
 
 MIT

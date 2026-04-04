@@ -19,7 +19,7 @@
     "type": "git",
     "url": "https://github.com/snapsynapse/skill-a11y-audit.git"
   },
-  "author": "Sam Rogers <sam@snapsynapse.com>",
+  "author": "PAICE.work PBC <https://paice.work/>",
   "license": "MIT",
   "private": true,
   "scripts": {
