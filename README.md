@@ -210,6 +210,10 @@ a11y-audit/
   assets/               # Sample outputs, CI starter assets
 ```
 
+## Sponsor
+
+a11y-audit is free and open. If your team uses this skill, consider [sponsoring its development](https://github.com/sponsors/snapsynapse). See [SPONSORS.md](SPONSORS.md).
+
 ## About
 
 a11y-audit is a [PAICE.work](https://paice.work/) project. PAICE.work PBC is a public benefit corporation building infrastructure for productive collaboration between humans and autonomous agents.
