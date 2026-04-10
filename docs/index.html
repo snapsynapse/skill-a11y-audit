@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>skill-a11y-audit &mdash; Zero-setup WCAG audits for AI agents</title>
+  <meta name="description" content="skill-a11y-audit is a drop-in WCAG 2.1 AA auditor for AI coding agents. Template-aware page sampling, zero-config dependency resolution, and actionable remediation hints &mdash; no setup required in your target project.">
+  <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
+  <meta name="author" content="Sam Rogers">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="theme-color" content="#1d6fa4">
+  <link rel="canonical" href="https://skilla11y.dev/">
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="mask-icon" href="/favicon.svg" color="#1d6fa4">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="skill-a11y-audit">
+  <meta property="og:title" content="skill-a11y-audit">
+  <meta property="og:description" content="Zero-setup WCAG audits for AI agents. Drop-in, template-aware, actionable.">
+  <meta property="og:image" content="https://skilla11y.dev/imgs/og.png">
+  <meta property="og:url" content="https://skilla11y.dev/">
+  <meta property="og:locale" content="en_US">
+  <meta property="article:published_time" content="2026-02-06T00:00:00Z">
+  <meta property="article:modified_time" content="2026-04-09T00:00:00Z">
+  <meta property="article:author" content="Sam Rogers">
+  <meta property="article:publisher" content="https://paice.work/">
+  <meta property="article:section" content="Open Patterns">
+  <meta property="article:tag" content="skill-a11y-audit">
+  <meta property="article:tag" content="accessibility">
+  <meta property="article:tag" content="wcag">
+  <meta property="article:tag" content="a11y">
+  <meta property="article:tag" content="ai-agent-skill">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="skill-a11y-audit">
+  <meta name="twitter:description" content="Zero-setup WCAG audits for AI agents. Drop-in, template-aware, actionable.">
+  <meta name="twitter:image" content="https://skilla11y.dev/imgs/og.png">
+  <meta name="twitter:creator" content="@snapsynapse">
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "skill-a11y-audit",
+    "alternativeHeadline": "Zero-setup WCAG audits for AI agents",
+    "description": "skill-a11y-audit is a drop-in accessibility auditor for AI coding agents. It discovers site structure automatically via template-aware sampling, runs axe-core scans with zero configuration, and produces actionable WCAG 2.1 AA compliance reports with remediation hints and delta tracking.",
+    "inLanguage": "en",
+    "url": "https://skilla11y.dev/",
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
+    "datePublished": "2026-02-06",
+    "dateModified": "2026-04-09",
+    "author": {
+      "@type": "Person",
+      "name": "Sam Rogers",
+      "url": "https://paice.work/",
+      "affiliation": { "@type": "Organization", "name": "PAICE.work PBC" }
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "PAICE.work PBC",
+      "url": "https://paice.work/",
+      "logo": { "@type": "ImageObject", "url": "https://paice.work/logo.png" }
+    },
+    "image": "https://skilla11y.dev/imgs/og.png",
+    "keywords": ["skill-a11y-audit", "accessibility audit", "a11y", "wcag 2.1 aa", "axe-core", "ai agent skill", "claude code"],
+    "isPartOf": { "@type": "CreativeWork", "name": "PAICE.work Open Patterns" },
+    "license": "https://opensource.org/licenses/MIT",
+    "copyrightHolder": { "@type": "Organization", "name": "PAICE.work PBC" },
+    "copyrightYear": 2026,
+    "citation": [
+      { "@type": "WebPage", "name": "HardGuard25", "url": "https://hardguard25.com/" },
+      { "@type": "WebPage", "name": "Graceful Boundaries", "url": "https://gracefulboundaries.dev/" },
+      { "@type": "WebPage", "name": "Skill Provenance", "url": "https://skillprovenance.dev/" },
+      { "@type": "WebPage", "name": "Knowledge as Code", "url": "https://knowledge-as-code.com/" }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: DefinedTerm -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "name": "skill-a11y-audit",
+    "alternateName": ["a11y-audit", "skill:a11y-audit", "accessibility audit skill"],
+    "description": "A Claude Code skill that performs WCAG 2.1 AA accessibility audits on web projects using axe-core, with template-aware page sampling, zero-configuration dependency resolution, and actionable remediation hints. Invoked by asking an AI agent to run an accessibility audit.",
+    "url": "https://skilla11y.dev/",
+    "inDefinedTermSet": {
+      "@type": "DefinedTermSet",
+      "name": "PAICE.work Open Patterns",
+      "url": "https://paice.work/"
+    },
+    "sameAs": [
+      "https://github.com/snapsynapse/skill-a11y-audit"
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f4f7fb;
+      --surface2: #e8edf5;
+      --text: #1a1a2e;
+      --text-muted: #4a5568;
+      --accent: #1d6fa4;
+      --accent-hover: #155c88;
+      --border: #d1dae8;
+      --green: #16a34a;
+      --red: #c0392b;
+      --code-bg: #f0f4f9;
+      --code-text: #1a1a2e;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+      --max-width: 960px;
+      --radius: 10px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+    /* Skip link (a11y) */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      z-index: 100;
+    }
+    .skip-link:focus { left: 0; }
+
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Nav */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    nav .logo svg { color: var(--accent); flex: 0 0 auto; }
+    nav .logo:hover svg { color: var(--accent-hover); }
+    nav .links { display: flex; align-items: center; gap: 1.5rem; font-size: 0.9rem; }
+    nav .links a { color: var(--text-muted); }
+    nav .links a:hover { color: var(--text); text-decoration: none; }
+
+    /* GitHub star button */
+    .gh-star {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-alt);
+      color: var(--text) !important;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: border-color 0.1s ease, transform 0.05s ease;
+    }
+    .gh-star:hover {
+      border-color: var(--accent);
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+    .gh-star svg { flex: 0 0 auto; color: #d97706; }
+
+    /* Byline */
+    .byline {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0.75rem 0 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.9rem;
+      align-items: center;
+      justify-content: center;
+    }
+    .byline .sep { color: var(--border); }
+    /* Underline byline links — accent vs text-muted contrast is too low to rely on color alone */
+    .byline a { color: var(--text); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+    .byline a:hover { color: var(--accent-hover); text-decoration-color: var(--accent-hover); }
+    .byline .version {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      background: var(--bg-alt);
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    /* Canonical note */
+    .canonical-note {
+      margin-top: 2.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .canonical-note strong { color: var(--text); }
+    /* Underline inline links in canonical note — accent-on-muted contrast is insufficient */
+    .canonical-note a { text-decoration: underline; text-underline-offset: 2px; }
+
+    /* Sections */
+    section { padding: 4rem 0; }
+    section.alt { background: var(--bg-alt); }
+
+    h1 { font-size: 2.75rem; line-height: 1.15; letter-spacing: -0.02em; font-weight: 800; }
+    h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+    p { margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* Hero */
+    .hero { padding: 5rem 0 4rem; text-align: center; }
+    .hero h1 { margin-bottom: 1rem; }
+    .hero .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
+    }
+    .hero .hook {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* Pipeline display — hero identity element */
+    .pipeline {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 1.5rem 1rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 1rem 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .pipeline:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .pipeline .pipe-count { color: var(--accent); font-weight: 700; }
+    .pipeline .pipe-step { color: var(--text); }
+    .pipeline .pipe-arrow { color: var(--text-muted); }
+
+    /* Pillars */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      text-align: left;
+    }
+    .pillar {
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .pillar h3 { color: var(--accent); font-size: 1rem; }
+    .pillar p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0; }
+
+    /* Buttons */
+    .cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    /* White text on #1d6fa4 = ~5.3:1 — passes WCAG AA */
+    .btn-primary { background: var(--accent); color: #ffffff; }
+    .btn-primary:hover { background: var(--accent-hover); text-decoration: none; color: #ffffff; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-secondary:hover { background: var(--accent); color: #ffffff; text-decoration: none; }
+
+    /* Code blocks */
+    .code-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .code-block { text-align: left; }
+    .code-block h3 { font-size: 0.95rem; margin-bottom: 0.75rem; }
+    .code-block .annotation {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+    }
+    pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    code { font-family: var(--mono); font-size: 0.88em; color: var(--accent); }
+
+    /* Report preview section */
+    .report-block { text-align: left; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .footer-meta p { margin-bottom: 0.25rem; }
+    /* Underline footer links — accent-on-muted contrast is insufficient */
+    .footer-meta a { text-decoration: underline; text-underline-offset: 2px; }
+    .footer-links a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--border); }
+    .footer-links a:hover { text-decoration-color: var(--accent-hover); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      .hero { padding: 3rem 0 2.5rem; }
+      .pipeline { font-size: 0.85rem; }
+      .pillars { grid-template-columns: 1fr; }
+      .code-grid { grid-template-columns: 1fr; }
+      nav .links { display: none; }
+      nav .links.mobile-compact { display: flex; gap: 0.75rem; }
+      .footer-grid { flex-direction: column; }
+      pre { font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<nav>
+  <div class="container">
+    <a href="/" class="logo" aria-label="skill-a11y-audit home">
+      <!-- Eye with check-mark iris: perceivability + audit pass -->
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+        <path d="M2.5 16C2.5 16 8 7 16 7C24 7 29.5 16 29.5 16C29.5 16 24 25 16 25C8 25 2.5 16 2.5 16Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="4.5" stroke="currentColor" stroke-width="2.5"/>
+        <polyline points="13.5,16.2 15.2,17.9 18.5,13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>skill-a11y-audit</span>
+    </a>
+    <div class="links mobile-compact">
+      <a href="#why">Why</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Skill</a>
+      <a href="https://github.com/snapsynapse/skill-a11y-audit" class="gh-star" target="_blank" rel="noopener" aria-label="Star snapsynapse/skill-a11y-audit on GitHub">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+        </svg>
+        <span>Star on GitHub</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main id="main-content">
+
+<section class="hero">
+  <div class="container">
+    <h1>Zero-setup WCAG audits for AI agents.</h1>
+    <p class="subtitle">Drop-in accessibility audit for AI coding agents. Template-aware scanning, actionable remediation hints, zero-config dependency resolution.</p>
+    <p class="byline">
+      By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://paice.work" target="_blank" rel="noopener">PAICE.work PBC</a>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      Published <time datetime="2026-02-06">February 6, 2026</time>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      Updated <time datetime="2026-04-09">April 9, 2026</time>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <span class="version">v2.0.0</span>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
+    </p>
+    <p class="hook">Most accessibility tools require manual setup, produce raw violation dumps, and leave you to figure out what to fix first. skill-a11y-audit discovers your site structure automatically, groups violations by shared template, and tells you exactly what to fix and where &mdash; in one command.</p>
+
+    <div class="pipeline" role="img" tabindex="0" aria-label="Example: 746 pages found, identified 16 template groups, 22 pages selected for scanning">
+      <span class="pipe-count">746</span><span class="pipe-step">&nbsp;pages found</span>
+      <span class="pipe-arrow">&rarr;</span>
+      <span class="pipe-count">16</span><span class="pipe-step">&nbsp;templates</span>
+      <span class="pipe-arrow">&rarr;</span>
+      <span class="pipe-count">22</span><span class="pipe-step">&nbsp;pages scanned</span>
+    </div>
+
+    <div class="cta-row">
+      <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" class="btn btn-primary" target="_blank" rel="noopener">Read the Skill</a>
+      <a href="https://github.com/snapsynapse/skill-a11y-audit" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="why">
+  <div class="container">
+    <h2>Why skill-a11y-audit?</h2>
+    <p>Most accessibility tools scan one page at a time, return raw rule IDs, and require manual setup in every project they touch. That model doesn&rsquo;t scale to real sites or AI agents. skill-a11y-audit is built around three different assumptions.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <h3>Template-aware sampling</h3>
+        <p>Large sites have hundreds of pages but only a handful of distinct templates. The skill identifies your templates, scans representatives from each group, and maps every violation to the template it affects. Fix one component; resolve issues across hundreds of pages.</p>
+      </div>
+      <div class="pillar">
+        <h3>Tells you what to fix</h3>
+        <p>Every violation includes a one-liner remediation hint &mdash; not just the rule ID. Findings are ranked by severity and grouped by template so you know which fix has the highest impact before you open a single file.</p>
+      </div>
+      <div class="pillar">
+        <h3>Zero configuration</h3>
+        <p>Drop the <code>a11y-audit/</code> folder into <code>.claude/skills/</code>. axe-core and Puppeteer resolve automatically from skill-local deps, project <code>node_modules</code>, global install, or auto-install. No prior setup required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="container">
+    <h2>Install</h2>
+    <p>Copy or symlink the skill folder into any project&rsquo;s <code>.claude/skills/</code> directory. Then ask your AI agent to run an audit.</p>
+
+    <div class="code-grid">
+      <div class="code-block">
+        <h3>Copy (one-time snapshot)</h3>
+<pre tabindex="0">cp -r ~/Git/skill-a11y-audit/a11y-audit/ \
+  /path/to/project/.claude/skills/a11y-audit/</pre>
+        <p class="annotation">Stable snapshot of the skill at install time.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>Symlink (always latest)</h3>
+<pre tabindex="0">ln -s ~/Git/skill-a11y-audit/a11y-audit \
+  /path/to/project/.claude/skills/a11y-audit</pre>
+        <p class="annotation">Always uses the latest version of the skill.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>Invoke via Claude Code</h3>
+<pre>Run an accessibility audit on this project.</pre>
+        <p class="annotation">The skill runs discover &rarr; scan &rarr; report automatically.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>Run the scripts directly</h3>
+<pre tabindex="0">node a11y-audit/scripts/discover.js \
+  --url http://localhost:3000 \
+  --output /tmp/discover.json
+
+node a11y-audit/scripts/scan.js \
+  --root . --summary \
+  --output /tmp/scan.json
+
+node a11y-audit/scripts/report.js \
+  --input /tmp/scan.json \
+  --output-dir ./audits</pre>
+        <p class="annotation">Each script writes a JSON file the next step reads.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="report">
+  <div class="container">
+    <div class="report-block">
+      <h2>Sample output</h2>
+      <p>A structured markdown report. Pass <code>--output-mode markdown+json</code> for machine-readable data, or <code>markdown+issues</code> to generate GitHub, Linear, or Jira tickets.</p>
+<pre tabindex="0">## Executive Summary
+Pages scanned: 22 of 746  ·  Template groups: 16
+Violations: 3  ·  Severity: 1 critical, 1 serious, 1 moderate
+
+## Findings by Rule
+
+Rule                  Impact    Instances  Affects
+color-contrast        critical  6          regulation/*, requires/*
+aria-required-attr    serious   2          nav, footer
+landmark-one-main     moderate  1          homepage
+
+## Shared Template Patterns
+Shared issues on regulation/*, requires/*, authority/*: dlitem
+→ Fix the shared build template once → resolves across 144 pages.</pre>
+      <div class="cta-row" style="margin-top: 1.5rem;">
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" class="btn btn-primary" target="_blank" rel="noopener">Read the full skill spec &rarr;</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+    </div>
+
+    <aside class="canonical-note" role="note">
+      <strong>Canonical reference.</strong> This page is the authoritative definition of
+      skill-a11y-audit. Cross-posts on
+      <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
+      are derived from this source and should cite
+      <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
+      Last substantive revision: <time datetime="2026-04-09">2026-04-09</time>.
+      <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-meta">
+        <p>skill-a11y-audit v2.0.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>A <a href="https://paice.work" target="_blank" rel="noopener">PAICE.work PBC</a> project by <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>.</p>
+        <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/snapsynapse/skill-a11y-audit" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Skill</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revisions</a>
+        <a href="https://github.com/sponsors/snapsynapse" target="_blank" rel="noopener">Sponsor</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
