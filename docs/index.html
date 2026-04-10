@@ -8,11 +8,11 @@
   <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
   <meta name="author" content="Sam Rogers">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta name="theme-color" content="#1d6fa4">
+  <meta name="theme-color" content="#15803d">
   <link rel="canonical" href="https://skilla11y.dev/">
 
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="mask-icon" href="/favicon.svg" color="#1d6fa4">
+  <link rel="mask-icon" href="/favicon.svg" color="#22c55e">
   <link rel="apple-touch-icon" href="/favicon.svg">
 
   <!-- Open Graph -->
@@ -21,6 +21,9 @@
   <meta property="og:title" content="skill-a11y-audit">
   <meta property="og:description" content="Zero-setup WCAG audits for AI agents. Drop-in, template-aware, actionable.">
   <meta property="og:image" content="https://skilla11y.dev/imgs/og.png">
+  <meta property="og:image:alt" content="skill-a11y-audit — Zero-setup WCAG audits for AI agents">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
@@ -110,10 +113,10 @@
       --surface2: #e8edf5;
       --text: #1a1a2e;
       --text-muted: #4a5568;
-      --accent: #1d6fa4;
-      --accent-hover: #155c88;
+      --accent: #15803d;
+      --accent-hover: #166534;
       --border: #d1dae8;
-      --green: #16a34a;
+      --green: #22c55e;
       --red: #c0392b;
       --code-bg: #f0f4f9;
       --code-text: #1a1a2e;
@@ -268,6 +271,17 @@
       margin: 0 auto 2.5rem;
     }
 
+    /* Hero image */
+    .hero-img {
+      display: block;
+      width: 100%;
+      max-width: 860px;
+      height: auto;
+      margin: 0 auto 2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
     /* Pipeline display — hero identity element */
     .pipeline {
       font-family: var(--mono);
@@ -316,7 +330,7 @@
       font-size: 0.95rem;
       transition: background 0.15s, color 0.15s;
     }
-    /* White text on #1d6fa4 = ~5.3:1 — passes WCAG AA */
+    /* White on #15803d = 4.95:1 — passes WCAG AA */
     .btn-primary { background: var(--accent); color: #ffffff; }
     .btn-primary:hover { background: var(--accent-hover); text-decoration: none; color: #ffffff; }
     .btn-secondary {
@@ -353,6 +367,10 @@
       border: 1px solid var(--border);
     }
     pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Explicit focus rings for buttons — browser default is invisible on blue bg */
+    .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .btn-primary:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
     code { font-family: var(--mono); font-size: 0.88em; color: var(--accent); }
 
     /* Report preview section */
@@ -397,7 +415,7 @@
 
 <a class="skip-link" href="#main-content">Skip to content</a>
 
-<nav>
+<nav aria-label="Main navigation">
   <div class="container">
     <a href="/" class="logo" aria-label="skill-a11y-audit home">
       <!-- Eye with check-mark iris: perceivability + audit pass -->
@@ -440,6 +458,8 @@
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
     <p class="hook">Most accessibility tools require manual setup, produce raw violation dumps, and leave you to figure out what to fix first. skill-a11y-audit discovers your site structure automatically, groups violations by shared template, and tells you exactly what to fix and where &mdash; in one command.</p>
+
+    <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1200" height="630">
 
     <div class="pipeline" role="img" tabindex="0" aria-label="Example: 746 pages found, identified 16 template groups, 22 pages selected for scanning">
       <span class="pipe-count">746</span><span class="pipe-step">&nbsp;pages found</span>
