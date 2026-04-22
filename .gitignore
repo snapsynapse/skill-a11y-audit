@@ -7,3 +7,13 @@ node_modules/
 dist/
 coverage/
 tmp/
+
+# --- baseline additions (automated audit 2026-04-21) ---
+.env
+.env.*
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.venv/
+venv/
