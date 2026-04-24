@@ -49,7 +49,17 @@
         "Only priority-1 routes from context file were scanned"
       ]
     },
-    "results": null
+    "results": {
+      "status": "partial",
+      "date": "2026-04-23",
+      "notes": [
+        "Mitigated locally with fixture inputs under a11y-audit/evals/fixtures/eval-2",
+        "plan-issues.js now reads workspace context, applies P1 thresholding, attaches configured priority/status/WCAG labels, records additional standards, and skips simulated duplicates from an existing-key index",
+        "Fixture output produced one duplicate P1 color-contrast ticket for / and one create P0 label ticket for /checkout, matching context-driven expectations",
+        "Attempted live GitHub validation on 2026-04-23, but the GitHub app returned 403 Resource not accessible by integration and local gh auth status reported an invalid token",
+        "The remaining unvalidated portion is the authenticated live GitHub issue creation step itself, pending repo write access or refreshed CLI credentials"
+      ]
+    }
   },
   {
     "id": "eval-3",
@@ -195,6 +205,82 @@
         "Non-destructive issue planning validated via scripts/plan-issues.js against PAICE2 helper output",
         "Generated /tmp/a11y-issue-plan.md with stable deduplication keys and threshold filtering",
         "Live tracker-side deduplication remains unvalidated until a real authenticated issue creation run is performed"
+      ]
+    }
+  },
+  {
+    "id": "eval-9",
+    "prompt": "Validate template-aware discovery against a site whose robots.txt or sitemap index points to an absolute sitemap URL on a different host or subdomain. Preserve absolute sitemap locations exactly as published, follow nested sitemap indexes without rewriting them onto the runtime base origin, and only normalize relative locations against the source sitemap URL. Generate the discovery JSON and confirm the selected scan list still targets the intended site.",
+    "expectations": {
+      "structural": [
+        "Discovery output records the discovered source and selected scan list",
+        "Selected URLs remain on the intended published origins instead of being rewritten to the runtime base origin",
+        "Nested sitemap index entries are followed successfully when they use absolute URLs"
+      ],
+      "behavioral": [
+        "Absolute sitemap URLs are preserved as-is",
+        "Relative sitemap URLs are resolved relative to the referring sitemap document rather than blindly against the runtime base origin",
+        "Discovery does not silently crawl a different site tree when sitemap hosting differs from the runtime URL"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-04-23",
+      "notes": [
+        "Validated locally with mocked HTTP responses after making discover.js importable without changing CLI behavior",
+        "Discovery preserved the robots.txt sitemap URL on http://cdn.test and followed a nested sitemap index without rewriting entries onto the runtime origin",
+        "Generated scanList remained on the published sitemap host: http://cdn.test/docs/a and http://cdn.test/docs/b"
+      ]
+    }
+  },
+  {
+    "id": "eval-10",
+    "prompt": "Run discovery twice against the same large sitemap-backed site with DOM fingerprinting enabled and no content changes between runs. The selected representative pages, group ordering, and discovery JSON should be identical across both runs so trend tracking and CI diffs remain stable.",
+    "expectations": {
+      "structural": [
+        "The two discovery JSON outputs are byte-for-byte equivalent or semantically identical after stable serialization",
+        "Each template group reports the same selected representative pages in both runs",
+        "The scan list ordering is stable between runs"
+      ],
+      "behavioral": [
+        "Representative sampling is deterministic for the same input site",
+        "DOM fingerprinting does not rely on unseeded randomness",
+        "Repeated discovery runs do not introduce noisy diffs that would invalidate delta tracking"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-04-23",
+      "notes": [
+        "Validated locally with mocked sitemap and page responses across repeated discover() runs",
+        "Two consecutive discovery runs produced identical JSON output and the same scanList ordering",
+        "Representative selection is now deterministic because candidate generation uses stable spread indexes instead of unseeded randomness"
+      ]
+    }
+  },
+  {
+    "id": "eval-11",
+    "prompt": "Generate a report with --previous where a rule keeps the same total instance count but moves to different pages or template groups between audits. The delta output should flag the rule as changed rather than unchanged, and the JSON delta should identify the page or route movement clearly enough for remediation triage.",
+    "expectations": {
+      "structural": [
+        "Markdown delta output marks the rule as changed when its affected pages differ between audits",
+        "JSON delta output includes page-aware or route-aware change information, not just aggregate instance counts",
+        "Unchanged classification is reserved for rules whose counts and affected coverage are both stable"
+      ],
+      "behavioral": [
+        "Delta comparison considers affected pages or route groups in addition to rule id",
+        "A regression that moves between templates is surfaced explicitly even when totals match",
+        "The report remains useful for template-level remediation planning after page movement"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-04-23",
+      "notes": [
+        "Validated locally with fixture inputs under a11y-audit/evals/fixtures/eval-11",
+        "report.js now marks color-contrast as changed when it moves from blog/* pages to docs/* pages with the same total instance count",
+        "Generated markdown shows color-contrast under the Changed section and keeps region under Unchanged",
+        "Generated JSON delta.changed includes previousPages, currentPages, addedPages, and removedPages for page-aware triage"
       ]
     }
   }

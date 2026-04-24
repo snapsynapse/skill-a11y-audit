@@ -1,14 +1,54 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 12
-version_date: 2026-03-26
-previous_version: 11
+version: 15
+version_date: 2026-04-23
+previous_version: 14
 change_summary: >
-  Self-contained deps, remediation hints, delta comparison, null-label fix.
+  Strengthened markdown+issues dry-run validation with context-aware
+  issue planning and a runnable eval-2 fixture.
 ---
 
 # Changelog
+
+## v15 -- 2026-04-23
+
+- Expanded `scripts/plan-issues.js` so the dry-run path now reads
+  project context, applies configured severity thresholds, adds priority
+  and WCAG labels, records additional standards, and marks duplicates
+  from a supplied existing-key index.
+- Added runnable fixture coverage for `eval-2`, covering the strongest
+  local mitigation path for issue mode short of authenticated live
+  tracker writes.
+- Updated `references/issue-trackers.md` so the documented safe dry-run
+  path matches the richer helper behavior.
+
+## v14 -- 2026-04-23
+
+- Added `evals/run-discover-fixture.js`, a reusable mocked-network
+  fixture runner for `discover.js`.
+- Added runnable fixture assets for `eval-9` (cross-origin sitemap
+  preservation) and `eval-10` (deterministic discovery sampling).
+- Validated both discovery fixtures locally so the two discovery-related
+  regressions now have in-repo reproduction paths, not just notes in
+  `evals/evals.json`.
+
+## v13 -- 2026-04-23
+
+- Discovery now preserves published sitemap URLs instead of rewriting
+  them onto the runtime origin. This includes `robots.txt` sitemap
+  entries, sitemap indexes, nested sitemap URLs, and redirect targets.
+- Discovery sampling is now deterministic. Candidate selection uses
+  stable spread indexes and fingerprint ranking now breaks ties by URL,
+  eliminating noisy CI diffs across repeated runs.
+- `discover.js` is importable without changing CLI behavior, which makes
+  mocked-network regression validation possible inside the repo.
+- `report.js` delta comparison is now page-aware. A rule that moves
+  between pages or template groups with the same instance count is
+  reported as changed rather than unchanged.
+- Added and validated eval coverage for the resolved issues:
+  `eval-9` (cross-origin sitemap preservation), `eval-10`
+  (deterministic discovery), and `eval-11` (page-aware delta changes).
 
 ## v12 -- 2026-03-26
 

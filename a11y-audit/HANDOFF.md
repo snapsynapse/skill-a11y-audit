@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 10
-version_date: 2026-03-26
-previous_version: 9
+version: 13
+version_date: 2026-04-23
+previous_version: 12
 change_summary: >
-  Self-contained deps, Quick Fixes, delta comparison. Validated on
-  AI Regulation Reference + Virtual Meeting Reference.
+  Strengthened markdown+issues dry-run validation with a runnable
+  eval-2 fixture and context-aware issue planning.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: v12, self-contained and portable
+## Current State: v15, self-contained and portable
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -26,6 +26,23 @@ sample output artifacts, and a CI template. The direct degraded paths
 for Lighthouse-unavailable, runtime URL reconciliation, first-run
 context creation, and missing-browser-automation handling have been
 validated.
+
+The three most recent correctness issues are now resolved:
+
+- `discover.js` preserves published sitemap URLs across `robots.txt`,
+  sitemap indexes, nested sitemap files, and redirects instead of
+  rewriting them onto the runtime origin.
+- Representative page selection is deterministic across repeated runs.
+- `report.js` delta comparison is page-aware and reports rule movement
+  even when total instance counts stay flat.
+
+Those fixes now have runnable local regression fixtures:
+
+- `eval-2` covers context-aware issue planning, standards carry-through,
+  configured labels, thresholding, and duplicate skipping in dry-run mode
+- `eval-9` covers cross-origin sitemap preservation
+- `eval-10` covers deterministic discovery across repeated runs
+- `eval-11` covers page-aware delta reporting
 
 A full audit was run 2026-03-26 against the AI Regulation Reference
 (10-page static HTML site, http://127.0.0.1:8081). The audit found
@@ -41,7 +58,7 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 8 eval cases with direct results for eval-1, eval-4, and eval-5 |
+| evals/evals.json | 11 eval cases with passing results for eval-1, eval-4, eval-5, eval-9, eval-10, and eval-11 |
 | references/claude-code.md | Claude-specific launch and Preview notes |
 | references/codex.md | Codex-specific execution notes |
 | references/output-contract.md | Markdown/JSON output rules |
@@ -140,10 +157,8 @@ All four improvements from the 2026-03-26 audit are now implemented:
 
 ## Suggested Next Steps
 
-1. Remediate the 12 violations found by template-aware sampling on AI
-   Regulation Reference (dlitem, nested-interactive, color-contrast on
-   regulation/*, requires/*/*, authority/* templates)
-2. Run eval-2 against a real authenticated tracker for full live issue-mode validation
-3. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
-4. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
+1. Run eval-2 against a real authenticated tracker for full live issue-mode validation
+2. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
+3. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
+4. Decide whether to fold the discovery fixture runner into CI
 5. Copy updated skill back to `.claude/skills/a11y-audit/` in target projects

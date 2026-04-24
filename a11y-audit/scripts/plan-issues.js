@@ -54,10 +54,78 @@ function routeFromUrl(url) {
   }
 }
 
+function parseCsv(value) {
+  if (!value) return [];
+  return value.split(',').map((entry) => entry.trim()).filter(Boolean);
+}
+
+function parseProjectContext(content) {
+  const data = {};
+  let currentKey = null;
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trimEnd();
+    const keyMatch = line.match(/^- ([a-z0-9_]+):\s*(.*)$/i);
+    if (keyMatch) {
+      const [, key, value] = keyMatch;
+      if (value === '') {
+        data[key] = [];
+        currentKey = key;
+      } else {
+        data[key] = value.trim();
+        currentKey = null;
+      }
+      continue;
+    }
+
+    const itemMatch = line.match(/^\s*- (.+)$/);
+    if (itemMatch && currentKey) {
+      if (!Array.isArray(data[currentKey])) data[currentKey] = [];
+      data[currentKey].push(itemMatch[1].trim());
+    }
+  }
+
+  return data;
+}
+
+function principleLabelForWcag(wcagList, labels) {
+  const principles = new Set();
+  for (const sc of wcagList) {
+    const major = String(sc).split('.')[0];
+    if (major === '1') principles.add('wcag-perceivable');
+    if (major === '2') principles.add('wcag-operable');
+    if (major === '3') principles.add('wcag-understandable');
+    if (major === '4') principles.add('wcag-robust');
+  }
+  return labels.filter((label) => principles.has(label));
+}
+
+function wcagFromTags(tags) {
+  return [...new Set((tags || [])
+    .map((tag) => {
+      const match = tag.match(/^wcag(\d)(\d)(\d+)$/);
+      if (!match) return null;
+      return `${match[1]}.${match[2]}.${match[3]}`;
+    })
+    .filter(Boolean))];
+}
+
 const args = parseArgs(process.argv.slice(2));
 const inputPath = path.resolve(args.input || '');
 const outputPath = path.resolve(args.output || 'issue-plan.md');
-const threshold = args.threshold || 'P1';
+const contextPath = args.context ? path.resolve(args.context) : null;
+const context = contextPath && fs.existsSync(contextPath)
+  ? parseProjectContext(fs.readFileSync(contextPath, 'utf8'))
+  : {};
+const threshold = args.threshold || context.issue_severity_threshold || 'P1';
+const existingPath = args.existing ? path.resolve(args.existing) : null;
+const existingKeys = existingPath && fs.existsSync(existingPath)
+  ? new Set(JSON.parse(fs.readFileSync(existingPath, 'utf8')))
+  : new Set();
+const priorityLabels = parseCsv(context.issue_labels_priority);
+const statusLabels = parseCsv(context.issue_labels_status);
+const wcagLabels = parseCsv(context.issue_labels_wcag);
+const additionalStandards = parseCsv(context.additional_standards);
 
 if (!inputPath || !fs.existsSync(inputPath)) {
   console.error('Missing --input path to helper scan JSON');
@@ -75,6 +143,12 @@ for (const result of input.results || []) {
     const priority = priorityForImpact(violation.impact || 'minor');
     if (!thresholdAllows(priority, threshold)) continue;
     if (!byRule.has(key)) {
+      const wcag = wcagFromTags(violation.tags || []);
+      const labels = [];
+      const priorityIndex = ['P0', 'P1', 'P2', 'P3'].indexOf(priority);
+      if (priorityIndex >= 0 && priorityLabels[priorityIndex]) labels.push(priorityLabels[priorityIndex]);
+      labels.push(...statusLabels);
+      labels.push(...principleLabelForWcag(wcag, wcagLabels));
       byRule.set(key, {
         key,
         rule: violation.id,
@@ -83,7 +157,10 @@ for (const result of input.results || []) {
         route,
         help: violation.help,
         helpUrl: violation.helpUrl,
-        instances: 0
+        instances: 0,
+        wcag,
+        labels,
+        duplicate: existingKeys.has(key),
       });
     }
     byRule.get(key).instances += (violation.nodes || []).length;
@@ -91,22 +168,35 @@ for (const result of input.results || []) {
 }
 
 const issues = [...byRule.values()].sort((a, b) => a.key.localeCompare(b.key));
+const planned = issues.filter((issue) => !issue.duplicate);
+const duplicates = issues.filter((issue) => issue.duplicate);
 const lines = [
   '# Accessibility Issue Plan',
   '',
   `Input: \`${inputPath}\``,
   `Threshold: \`${threshold}\``,
-  `Planned tickets: ${issues.length}`,
+  contextPath ? `Context: \`${contextPath}\`` : 'Context: none',
+  `Planned tickets: ${planned.length}`,
+  `Skipped duplicates: ${duplicates.length}`,
   '',
-  '| Priority | Rule | Route | Instances | Dedup Key | Summary |',
-  '|---|---|---|---:|---|---|'
+  '| Status | Priority | Rule | Route | Instances | WCAG | Labels | Dedup Key | Summary |',
+  '|---|---|---|---|---:|---|---|---|---|'
 ];
 
 for (const issue of issues) {
-  lines.push(`| ${issue.priority} | ${issue.rule} | ${issue.route} | ${issue.instances} | \`<!-- a11y-audit-key: ${issue.rule}::${issue.route} -->\` | ${issue.help || 'Accessibility issue'} |`);
+  const dedupKey = `<!-- a11y-audit-key: ${issue.rule}::${issue.route} -->`;
+  const status = issue.duplicate ? 'duplicate' : 'create';
+  const wcag = issue.wcag.length > 0 ? issue.wcag.join(', ') : '-';
+  const labels = issue.labels.length > 0 ? issue.labels.join(', ') : '-';
+  lines.push(`| ${status} | ${issue.priority} | ${issue.rule} | ${issue.route} | ${issue.instances} | ${wcag} | ${labels} | \`${dedupKey}\` | ${issue.help || 'Accessibility issue'} |`);
 }
 
-lines.push('', 'Use this plan for user review and deduplication checks before live ticket creation.');
+lines.push('');
+if (additionalStandards.length > 0) {
+  lines.push(`Additional standards: ${additionalStandards.join(', ')}`);
+  lines.push('');
+}
+lines.push('Use this plan for user review, label verification, standards mapping review, and deduplication checks before live ticket creation.');
 
 fs.writeFileSync(outputPath, `${lines.join('\n')}\n`);
 console.log(outputPath);

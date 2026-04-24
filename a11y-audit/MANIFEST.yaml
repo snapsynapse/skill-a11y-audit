@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 12
-bundle_date: 2026-03-26
+bundle_version: 15
+bundle_date: 2026-04-23
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -86,6 +86,19 @@ compatibility:
         missing-browser-automation handling. Issue mode has a safe
         planning/deduplication step, though live authenticated tracker
         writes are still pending.
+    - platform: OpenAI Codex
+      model: GPT-5 Codex
+      surface: Code
+      status: pass
+      date: 2026-04-23
+      skill_version: 15
+      notes: >
+        Resolved all three reviewed correctness issues: discovery now
+        preserves published sitemap URLs, representative selection is
+        deterministic, and report.js delta comparison is page-aware.
+        eval-2 now also has a stronger local dry-run mitigation through
+        context-aware issue planning plus a runnable fixture, though
+        live authenticated issue creation remains pending.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -119,21 +132,99 @@ files:
 
   - path: evals/evals.json
     role: evals
-    version: 5
-    hash: sha256:b9136068eb62fcc323dec7abbcb081c457f4979d390bb5111023929cadb76713
-    note: 8 eval cases -- eval-6 and eval-7 now pass; eval-8 has partial dry-run validation
+    version: 7
+    hash: sha256:890961e5efc4f4d68ba3dbe8e9768825e93bd2dd9bf9d29d744701d58595cdbe
+    note: 11 eval cases -- eval-2 now has partial mitigated validation; eval-9/10/11 pass
 
   - path: HANDOFF.md
     role: handoff
-    version: 10
-    hash: pending
-    note: v12 self-contained deps, Quick Fixes, delta comparison validated
+    version: 13
+    hash: sha256:fdb0bd7f3f86fba73a6ecff585fd9f8895c621463b74d3d1c01ab1c7c19986c1
+    note: v15 adds runnable eval-2 issue-mode mitigation context
 
   - path: CHANGELOG.md
     role: reference
-    version: 12
-    hash: pending
-    note: Append-only change history -- v12 self-contained deps, Quick Fixes, delta
+    version: 15
+    hash: sha256:a8579c23aff952847497ebeed904798a853f734939eb85c9a2b752a99b0069c9
+    note: Append-only change history -- v15 strengthens issue-mode dry-run validation
+
+  - path: evals/run-discover-fixture.js
+    role: evals
+    version: 1
+    hash: sha256:f3097709f3f2becbc6e9dbfb235e5fe329770cd58aca24599214d638b1d74818
+    note: Reusable mocked-network fixture runner for discover.js
+
+  - path: evals/fixtures/eval-9/README.md
+    role: evals
+    version: 1
+    hash: sha256:c2878384b14f0e0ba693ebf3c1bf3cde44f672c21c01d358cb608d17354d70a3
+    note: Fixture documentation for cross-origin sitemap preservation
+
+  - path: evals/fixtures/eval-9/config.json
+    role: evals
+    version: 1
+    hash: sha256:1cef1b5d33e237b9009dca37159e41554d40c39754637d01b37680044c9d455c
+    note: Fixture config for eval-9 discover.js run
+
+  - path: evals/fixtures/eval-9/responses.json
+    role: evals
+    version: 1
+    hash: sha256:c5262f40f7b41fde5b8dc78a905a9873af2dc24e249df1f287f826abe5f97609
+    note: Mocked HTTP response map for eval-9
+
+  - path: evals/fixtures/eval-9/expected.json
+    role: evals
+    version: 1
+    hash: sha256:2d8c07a6af743e8e402f274b9ef54c1ad8ff1dbc242c939c643478756c989e3e
+    note: Expected discovery output for eval-9
+
+  - path: evals/fixtures/eval-10/README.md
+    role: evals
+    version: 1
+    hash: sha256:c7ea1ee5eb3ec3107c286b264719bb2e4bf2723349449ac0794e4dd92529dbc4
+    note: Fixture documentation for deterministic discovery validation
+
+  - path: evals/fixtures/eval-10/config.json
+    role: evals
+    version: 1
+    hash: sha256:8ed21dee26d385b8587fa84195269b0be813a3cd8f8b711cce24de87e6b77721
+    note: Fixture config for repeated eval-10 discover.js runs
+
+  - path: evals/fixtures/eval-10/responses.json
+    role: evals
+    version: 1
+    hash: sha256:73dd4702f9c82865c7ffece7d6915352a064b37141de0af71ecd685b3872fb97
+    note: Mocked HTTP response map for eval-10
+
+  - path: evals/fixtures/eval-10/expected.json
+    role: evals
+    version: 1
+    hash: sha256:f6b15b751b3a41cab9c6b87f2414a3cc4f8ae74120b5cd7319524dc715d07864
+    note: Expected repeated discovery output for eval-10
+
+  - path: evals/fixtures/eval-2/README.md
+    role: evals
+    version: 1
+    hash: sha256:dc01c9edc3b4063f94c4486c7beef73e2cd6e2393f7469dc1adc96185c750127
+    note: Fixture documentation for issue-mode dry-run mitigation
+
+  - path: evals/fixtures/eval-2/context.md
+    role: evals
+    version: 1
+    hash: sha256:0e50f30be36cec75e88f220ef79f2e6b333370b0aa1c12ceac07e68359d97f4c
+    note: Fixture project context for eval-2
+
+  - path: evals/fixtures/eval-2/current-scan.json
+    role: evals
+    version: 1
+    hash: sha256:04fc3867e3f866459e28c1f7fedf49029a6a1b3998bef082f8655761cf342e6e
+    note: Fixture scan input for eval-2 issue planning
+
+  - path: evals/fixtures/eval-2/existing-keys.json
+    role: evals
+    version: 1
+    hash: sha256:e2abbadfb2a95d91ca93dfaed0894dbe2688f7944ebab1a3279585b9af0ad2a7
+    note: Simulated existing deduplication keys for eval-2
 
   - path: references/claude-code.md
     role: reference
@@ -161,9 +252,9 @@ files:
 
   - path: references/issue-trackers.md
     role: reference
-    version: 1
-    hash: sha256:144a9b8a48b8bce83e122845ca3359aa48cfdec86c27d3704b1c4a53b4fc7b1f
-    note: Issue creation, deduplication, and priority mapping guidance
+    version: 2
+    hash: sha256:abd9c081c862ddf70fae30ab23727df5b4b95d6ba39ec6108e7177bcfc002f85
+    note: Issue creation, deduplication, priority mapping, and stronger dry-run guidance
 
   - path: references/output-schema.json
     role: reference
@@ -185,21 +276,21 @@ files:
 
   - path: scripts/plan-issues.js
     role: script
-    version: 1
-    hash: sha256:68c1ba0847c086cfe56074b3a54b46507a73573690ccc5cd7f86da258b6ba746
-    note: Non-destructive issue planning helper for markdown+issues mode
+    version: 2
+    hash: sha256:fa42cc5f58d7d75f42cc836ff6e15de914fb0d6f7926737482997f023ceafc3b
+    note: Context-aware non-destructive issue planning helper for markdown+issues mode
 
   - path: scripts/report.js
     role: script
-    version: 3
-    hash: pending
-    note: Quick Fixes, delta comparison (--previous), shared-template detection
+    version: 4
+    hash: sha256:471792737738dba550500ceca92be594af5605531d2eebc0c2b5fa284e018ebc
+    note: Quick Fixes, page-aware delta comparison (--previous), shared-template detection
 
   - path: scripts/discover.js
     role: script
-    version: 2
-    hash: pending
-    note: DOM fingerprinting, API enrichment, sitemap-first sampling
+    version: 3
+    hash: sha256:8ce30f0ce02d06695c0f5d9d40ccaba7e88822a28b40cd03017f0b5cb7938e14
+    note: DOM fingerprinting, API enrichment, sitemap-first sampling with published-URL preservation and deterministic selection
 
   - path: .gitignore
     role: config
@@ -239,6 +330,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 12
+    version: 15
     hash: null
     note: This file -- self-referential hash omitted

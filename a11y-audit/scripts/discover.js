@@ -37,12 +37,15 @@ function parseArgs(argv) {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
-function httpFetch(url) {
+function fetchResource(url) {
   return new Promise((resolve) => {
-    const mod = url.startsWith('https') ? https : http;
-    mod.get(url, { timeout: 10000 }, (res) => {
+    const requestUrl = new URL(url);
+    const mod = requestUrl.protocol === 'https:' ? https : http;
+    const req = mod.get(requestUrl, { timeout: 10000 }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return resolve(httpFetch(res.headers.location));
+        const redirectUrl = new URL(res.headers.location, requestUrl).href;
+        res.resume();
+        return resolve(fetchResource(redirectUrl));
       }
       if (res.statusCode !== 200) {
         res.resume();
@@ -50,9 +53,26 @@ function httpFetch(url) {
       }
       const chunks = [];
       res.on('data', (c) => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    }).on('error', () => resolve(null));
+      res.on('end', () => resolve({
+        body: Buffer.concat(chunks).toString('utf8'),
+        url: requestUrl.href,
+      }));
+    });
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+    req.on('error', () => resolve(null));
   });
+}
+
+async function httpFetch(url) {
+  const resource = await fetchResource(url);
+  return resource ? resource.body : null;
+}
+
+function resolvePublishedUrl(value, baseUrl) {
+  return new URL(value, baseUrl).href;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,12 +171,27 @@ async function fingerprintCandidates(urls) {
     const fp = computeFingerprint(html);
     results.push({ url, ...fp });
   }
-  return results.sort((a, b) => b.score - a.score);
+  return results.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.url.localeCompare(b.url);
+  });
 }
 
 // ---------------------------------------------------------------------------
 // Representative selection (with optional fingerprinting)
 // ---------------------------------------------------------------------------
+
+function buildCandidateIndexes(total, limit = 8) {
+  if (total <= 0) return [];
+  if (total === 1) return [0];
+
+  const candidateCount = Math.min(limit, total);
+  const indexes = new Set();
+  for (let i = 0; i < candidateCount; i += 1) {
+    indexes.add(Math.floor((i * (total - 1)) / (candidateCount - 1)));
+  }
+  return [...indexes].sort((a, b) => a - b);
+}
 
 async function selectRepresentatives(group, maxPerGroup, useFingerprint) {
   const urls = group.urls.sort();
@@ -165,13 +200,8 @@ async function selectRepresentatives(group, maxPerGroup, useFingerprint) {
   }
 
   if (useFingerprint) {
-    // Sample candidates: first, middle, last, plus a few random
-    const candidateIdxs = new Set([0, Math.floor(urls.length / 4), Math.floor(urls.length / 2), Math.floor(3 * urls.length / 4), urls.length - 1]);
-    // Add up to 3 random indices for variety
-    for (let i = 0; i < 3 && candidateIdxs.size < Math.min(10, urls.length); i++) {
-      candidateIdxs.add(Math.floor(Math.random() * urls.length));
-    }
-    const candidates = [...candidateIdxs].map((i) => urls[i]);
+    const candidateIdxs = buildCandidateIndexes(urls.length);
+    const candidates = candidateIdxs.map((i) => urls[i]);
 
     const fingerprinted = await fingerprintCandidates(candidates);
     if (fingerprinted.length > 0 && fingerprinted[0].score > 0) {
@@ -249,40 +279,51 @@ async function discover(runtimeUrl, opts = {}) {
 
   // 1. Try sitemap via well-known paths
   if (!opts.noSitemap) {
-    const sitemapPaths = ['/sitemap.xml', '/sitemap_index.xml'];
+    const sitemapUrls = [
+      `${baseOrigin}/sitemap.xml`,
+      `${baseOrigin}/sitemap_index.xml`,
+    ];
 
-    const robotsTxt = await httpFetch(`${baseOrigin}/robots.txt`);
-    if (robotsTxt) {
-      const sitemapMatch = robotsTxt.match(/Sitemap:\s*(\S+)/i);
+    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`);
+    if (robotsResource) {
+      const sitemapMatch = robotsResource.body.match(/Sitemap:\s*(\S+)/i);
       if (sitemapMatch) {
         try {
-          const sitemapUrl = new URL(new URL(sitemapMatch[1]).pathname, baseOrigin).href;
-          sitemapPaths.unshift(sitemapUrl.replace(baseOrigin, ''));
+          sitemapUrls.unshift(resolvePublishedUrl(sitemapMatch[1], robotsResource.url));
         } catch { /* use defaults */ }
       }
     }
 
-    for (const p of [...new Set(sitemapPaths)]) {
-      const xml = await httpFetch(`${baseOrigin}${p}`);
+    for (const sitemapUrl of [...new Set(sitemapUrls)]) {
+      const xmlResource = await fetchResource(sitemapUrl);
+      const xml = xmlResource && xmlResource.body;
       if (xml && (xml.includes('<urlset') || xml.includes('<sitemapindex'))) {
-        let sitemapUrls = parseSitemap(xml);
+        let discoveredUrls = parseSitemap(xml).map((entry) => {
+          try {
+            return resolvePublishedUrl(entry, xmlResource.url);
+          } catch {
+            return entry;
+          }
+        });
 
         if (xml.includes('<sitemapindex')) {
-          const subSitemaps = parseSitemap(xml);
-          sitemapUrls = [];
+          const subSitemaps = discoveredUrls;
+          discoveredUrls = [];
           for (const sub of subSitemaps) {
-            const subUrl = new URL(new URL(sub).pathname, baseOrigin).href;
-            const subXml = await httpFetch(subUrl);
-            if (subXml) sitemapUrls.push(...parseSitemap(subXml));
+            const subXmlResource = await fetchResource(sub);
+            if (!subXmlResource) continue;
+            discoveredUrls.push(...parseSitemap(subXmlResource.body).map((entry) => {
+              try {
+                return resolvePublishedUrl(entry, subXmlResource.url);
+              } catch {
+                return entry;
+              }
+            }));
           }
         }
 
-        allUrls = sitemapUrls.map((u) => {
-          try {
-            return `${baseOrigin}${new URL(u).pathname}`;
-          } catch { return u; }
-        });
-        source = `sitemap (${p})`;
+        allUrls = [...new Set(discoveredUrls)];
+        source = `sitemap (${sitemapUrl})`;
         break;
       }
     }
@@ -435,7 +476,22 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err.stack || String(err));
-  process.exit(1);
-});
+module.exports = {
+  buildCandidateIndexes,
+  classifyUrl,
+  computeFingerprint,
+  discover,
+  extractLinks,
+  fetchResource,
+  fingerprintCandidates,
+  httpFetch,
+  parseSitemap,
+  selectRepresentatives,
+};
+
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err.stack || String(err));
+    process.exit(1);
+  });
+}

@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-03-03
+version: 2
+version_date: 2026-04-23
 previous_version: null
 change_summary: >
-  Added a dedicated reference for issue tracker configuration,
-  deduplication, and ticket structure.
+  Expanded the safe dry-run path to use project context, labels,
+  additional standards, and simulated duplicate indexes.
 ---
 
 # Issue Trackers
@@ -76,14 +76,17 @@ what was skipped as duplicate, and what remained below threshold.
 ## Safe Dry-Run Path
 
 Before live issue creation, you can generate a markdown issue plan from
-helper scan JSON:
+helper scan JSON plus project context:
 
 ```bash
 node a11y-audit/scripts/plan-issues.js \
   --input docs/accessibility/audits/audit-YYYY-MM-DD.json \
+  --context .a11y-audit/PROJECT_CONTEXT.md \
+  --existing /tmp/a11y-existing-keys.json \
   --output /tmp/a11y-issue-plan.md \
   --threshold P1
 ```
 
-Use that plan to confirm scope, deduplication keys, and priority
-threshold before invoking a tracker CLI.
+Use that plan to confirm scope, configured labels, standards mapping,
+deduplication keys, duplicate skipping, and priority threshold before
+invoking a tracker CLI.

@@ -294,13 +294,25 @@ function computeDelta(currentViolationMap, previousJson) {
 
   const prevMap = new Map();
   for (const v of previousJson.violations) {
-    prevMap.set(v.rule, v);
+    prevMap.set(v.rule, {
+      ...v,
+      pages: [...new Set(v.pages || [])].sort(),
+    });
   }
 
   const fixed = [];      // rules in previous but not current
   const newRules = [];   // rules in current but not previous
   const changed = [];    // rules in both but instance count changed
   const unchanged = [];  // same rule, same count
+
+  const diffPages = (previousPages, currentPages) => {
+    const previousSet = new Set(previousPages);
+    const currentSet = new Set(currentPages);
+    return {
+      added: currentPages.filter((page) => !previousSet.has(page)),
+      removed: previousPages.filter((page) => !currentSet.has(page)),
+    };
+  };
 
   for (const [rule, prev] of prevMap) {
     if (!currentViolationMap.has(rule)) {
@@ -310,18 +322,27 @@ function computeDelta(currentViolationMap, previousJson) {
 
   for (const [rule, curr] of currentViolationMap) {
     const prev = prevMap.get(rule);
+    const currentPages = [...new Set(curr.pages || [])].sort();
     if (!prev) {
-      newRules.push({ rule, impact: curr.impact, instances: curr.instances });
-    } else if (curr.instances !== prev.instances) {
+      newRules.push({ rule, impact: curr.impact, instances: curr.instances, pages: currentPages });
+    } else {
+      const pageDelta = diffPages(prev.pages || [], currentPages);
+      const pagesChanged = pageDelta.added.length > 0 || pageDelta.removed.length > 0;
+      if (curr.instances !== prev.instances || pagesChanged) {
       changed.push({
         rule,
         impact: curr.impact,
         previousInstances: prev.instances,
         currentInstances: curr.instances,
         delta: curr.instances - prev.instances,
+        previousPages: prev.pages || [],
+        currentPages,
+        addedPages: pageDelta.added,
+        removedPages: pageDelta.removed,
       });
-    } else {
-      unchanged.push({ rule, impact: curr.impact, instances: curr.instances });
+      } else {
+        unchanged.push({ rule, impact: curr.impact, instances: curr.instances, pages: currentPages });
+      }
     }
   }
 
@@ -518,7 +539,11 @@ function buildMarkdown(opts) {
       ln();
       for (const c of delta.changed) {
         const direction = c.delta > 0 ? '↑' : '↓';
-        ln(`- ${c.rule}: ${c.previousInstances} → ${c.currentInstances} (${direction}${Math.abs(c.delta)})`);
+        const pageNotes = [];
+        if ((c.addedPages || []).length > 0) pageNotes.push(`added pages: ${c.addedPages.join(', ')}`);
+        if ((c.removedPages || []).length > 0) pageNotes.push(`removed pages: ${c.removedPages.join(', ')}`);
+        const pageSuffix = pageNotes.length > 0 ? `; ${pageNotes.join('; ')}` : '';
+        ln(`- ${c.rule}: ${c.previousInstances} → ${c.currentInstances} (${direction}${Math.abs(c.delta)})${pageSuffix}`);
       }
       ln();
     }
@@ -686,7 +711,14 @@ function main() {
       netDelta: delta.netDelta,
       fixed: delta.fixed.map((f) => f.rule),
       newRules: delta.newRules.map((n) => n.rule),
-      changed: delta.changed.map((c) => ({ rule: c.rule, delta: c.delta })),
+      changed: delta.changed.map((c) => ({
+        rule: c.rule,
+        delta: c.delta,
+        previousPages: c.previousPages,
+        currentPages: c.currentPages,
+        addedPages: c.addedPages,
+        removedPages: c.removedPages,
+      })),
     };
   }
 
