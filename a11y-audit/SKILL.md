@@ -13,12 +13,12 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 12
-  version_date: 2026-03-26
-  previous_version: 11
+  version: 13
+  version_date: 2026-05-19
+  previous_version: 12
   change_summary: >
-    Self-contained deps (auto-install axe-core + puppeteer), Quick Fixes
-    remediation hints, delta comparison (--previous), null-label fix.
+    Documented the dependency auto-install consent boundary now enforced
+    by executable eval coverage.
 ---
 
 # Accessibility Audit
@@ -69,6 +69,10 @@ If not found anywhere, scan.js **auto-installs** both packages to the
 skill-local `deps/` directory. This means the skill works against any
 project without requiring the target to have accessibility tooling
 installed. The `deps/` directory is gitignored.
+
+Because `scan.js` may auto-install missing dependencies, agents should
+ask before invoking scan.js when the target workspace does not already
+provide `axe-core` and the chosen browser automation package.
 
 ### Platform-Specific References
 

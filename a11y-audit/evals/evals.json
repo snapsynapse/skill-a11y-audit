@@ -78,7 +78,15 @@
         "No Lighthouse run required for quick check"
       ]
     },
-    "results": null
+    "results": {
+      "status": "pass",
+      "date": "2026-05-19",
+      "notes": [
+        "Validated with deterministic fixture inputs under a11y-audit/evals/fixtures/eval-3",
+        "Quick-scan eval uses prebuilt scan-shaped JSON for a single plain HTML page and does not generate a markdown report",
+        "Fixture summary reports one critical button-name violation and a skipped Lighthouse status because quick checks do not require Lighthouse"
+      ]
+    }
   },
   {
     "id": "eval-4",
@@ -103,7 +111,8 @@
         "Validated in Codex against PAICE2 using the bundled scripts/scan.js helper",
         "Markdown report generated at docs/accessibility/audits/audit-2026-03-03-codex-eval-4-5.md",
         "Executive summary and methodology both recorded the Lighthouse skip reason explicitly",
-        "No Lighthouse score was invented in the output"
+        "No Lighthouse score was invented in the output",
+        "Added deterministic fixture coverage under a11y-audit/evals/fixtures/eval-4 to assert skipped Lighthouse markdown and JSON contract behavior"
       ]
     }
   },

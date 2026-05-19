@@ -14,15 +14,10 @@ focused on:
 
 ## Before Opening a PR
 
-Run the same checks used in the GitHub Actions workflow:
+Run the same validation command used in the GitHub Actions workflow:
 
 ```bash
-node --check a11y-audit/scripts/scan.js
-node --check a11y-audit/scripts/bootstrap-context.js
-node --check a11y-audit/scripts/plan-issues.js
-node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/evals/evals.json","utf8"))'
-node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/references/output-schema.json","utf8"))'
-node -e 'JSON.parse(require("fs").readFileSync("a11y-audit/assets/sample-output/audit-sample.json","utf8"))'
+npm run validate
 ```
 
 If you update bundle files, also keep these in sync:
@@ -44,7 +39,8 @@ If you update bundle files, also keep these in sync:
 ## Validation Philosophy
 
 - Structural validation is not enough when behavior changes.
-- If you change runtime behavior, add or update an eval in
+- If you change runtime behavior, add or update an executable eval in
+  `a11y-audit/evals/run-evals.js` and record the expectation in
   `a11y-audit/evals/evals.json`.
 - If you add a new helper or output mode, include at least one sample
   artifact or explicit eval expectation.

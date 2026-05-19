@@ -1,15 +1,33 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 15
-version_date: 2026-04-23
-previous_version: 14
+version: 16
+version_date: 2026-05-19
+previous_version: 15
 change_summary: >
-  Strengthened markdown+issues dry-run validation with context-aware
-  issue planning and a runnable eval-2 fixture.
+  Added executable offline eval validation and wired CI to npm run
+  validate.
 ---
 
 # Changelog
+
+## v16 -- 2026-05-19
+
+- Added `evals/run-evals.js`, a deterministic offline eval runner that
+  validates discovery fixtures, issue planning, quick-scan behavior,
+  skipped-Lighthouse report contracts, page-aware deltas, dependency
+  policy documentation, syntax checks, JSON parsing, YAML parsing, and
+  context bootstrap smoke behavior.
+- Added fixture coverage for `eval-3` quick-scan behavior and `eval-4`
+  skipped-Lighthouse report contract behavior.
+- Updated `package.json`, `.github/workflows/validate-skill.yml`, and
+  `CONTRIBUTING.md` so `npm run validate` is the single local and CI
+  validation entrypoint.
+- Updated `SKILL.md` to make the dependency auto-install consent
+  boundary explicit before agents invoke `scan.js` in workspaces without
+  existing scan dependencies.
+- Updated `evals/evals.json` so the human acceptance ledger records the
+  deterministic eval-3 fixture and the new eval-4 contract fixture.
 
 ## v15 -- 2026-04-23
 

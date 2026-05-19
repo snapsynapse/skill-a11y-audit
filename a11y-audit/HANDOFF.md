@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 13
-version_date: 2026-04-23
-previous_version: 12
+version: 14
+version_date: 2026-05-19
+previous_version: 13
 change_summary: >
-  Strengthened markdown+issues dry-run validation with a runnable
-  eval-2 fixture and context-aware issue planning.
+  Recorded executable offline eval validation and the npm run validate
+  CI entrypoint.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: v15, self-contained and portable
+## Current State: v16, self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -25,7 +25,8 @@ reusable scripts, focused reference files, expanded eval coverage,
 sample output artifacts, and a CI template. The direct degraded paths
 for Lighthouse-unavailable, runtime URL reconciliation, first-run
 context creation, and missing-browser-automation handling have been
-validated.
+validated. The repo now has a deterministic offline eval runner wired to
+`npm run validate`, which is also the GitHub Actions validation command.
 
 The three most recent correctness issues are now resolved:
 
@@ -40,6 +41,8 @@ Those fixes now have runnable local regression fixtures:
 
 - `eval-2` covers context-aware issue planning, standards carry-through,
   configured labels, thresholding, and duplicate skipping in dry-run mode
+- `eval-3` covers quick-scan summary behavior without report generation
+- `eval-4` covers skipped-Lighthouse markdown and JSON report contracts
 - `eval-9` covers cross-origin sitemap preservation
 - `eval-10` covers deterministic discovery across repeated runs
 - `eval-11` covers page-aware delta reporting
@@ -58,7 +61,8 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 11 eval cases with passing results for eval-1, eval-4, eval-5, eval-9, eval-10, and eval-11 |
+| evals/evals.json | 11 eval cases with passing results recorded for eval-1 through eval-11 where deterministic or prior runtime validation exists |
+| evals/run-evals.js | Offline executable eval and validation runner |
 | references/claude-code.md | Claude-specific launch and Preview notes |
 | references/codex.md | Codex-specific execution notes |
 | references/output-contract.md | Markdown/JSON output rules |
@@ -160,5 +164,5 @@ All four improvements from the 2026-03-26 audit are now implemented:
 1. Run eval-2 against a real authenticated tracker for full live issue-mode validation
 2. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
 3. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
-4. Decide whether to fold the discovery fixture runner into CI
-5. Copy updated skill back to `.claude/skills/a11y-audit/` in target projects
+4. Copy updated skill back to `.claude/skills/a11y-audit/` in target projects
+5. Keep new regression fixes covered by `npm run validate` before updating bundle metadata

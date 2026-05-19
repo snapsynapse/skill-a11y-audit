@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 15
-bundle_date: 2026-04-23
+bundle_version: 16
+bundle_date: 2026-05-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -99,6 +99,18 @@ compatibility:
         eval-2 now also has a stronger local dry-run mitigation through
         context-aware issue planning plus a runnable fixture, though
         live authenticated issue creation remains pending.
+    - platform: OpenAI Codex
+      model: GPT-5
+      surface: Code
+      status: pass
+      date: 2026-05-19
+      skill_version: 16
+      notes: >
+        Added and ran deterministic offline executable eval validation.
+        `npm run validate` now covers syntax checks, JSON/YAML parsing,
+        context bootstrap smoke validation, discovery fixtures, issue
+        planning, quick-scan behavior, skipped-Lighthouse report
+        contracts, page-aware deltas, and dependency policy docs.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -124,35 +136,41 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 12
-    hash: pending
+    version: 13
+    hash: sha256:bcec8fb89abacba1be5a16dbf6e5e1ebf747967844aafa26819b7027399026d8
     note: >
-      v12 -- self-contained deps, Quick Fixes, delta comparison,
-      discover.js sampling, report.js deterministic output
+      v13 -- documents dependency auto-install consent boundary before
+      invoking scan.js
 
   - path: evals/evals.json
     role: evals
-    version: 7
-    hash: sha256:890961e5efc4f4d68ba3dbe8e9768825e93bd2dd9bf9d29d744701d58595cdbe
-    note: 11 eval cases -- eval-2 now has partial mitigated validation; eval-9/10/11 pass
+    version: 8
+    hash: sha256:c2fd53a675d210d5e4af7372c8c3848023e65f4d81d2a5660217601306e7793c
+    note: 11 eval cases -- eval-3 and eval-4 now have deterministic fixture coverage recorded
 
   - path: HANDOFF.md
     role: handoff
-    version: 13
-    hash: sha256:fdb0bd7f3f86fba73a6ecff585fd9f8895c621463b74d3d1c01ab1c7c19986c1
-    note: v15 adds runnable eval-2 issue-mode mitigation context
+    version: 14
+    hash: sha256:2227befc48c47fe437cc886d5e2050984fba2215fc0bca21421db2bcc2c23fd2
+    note: v16 records executable offline eval validation and npm run validate
 
   - path: CHANGELOG.md
     role: reference
-    version: 15
-    hash: sha256:a8579c23aff952847497ebeed904798a853f734939eb85c9a2b752a99b0069c9
-    note: Append-only change history -- v15 strengthens issue-mode dry-run validation
+    version: 16
+    hash: sha256:831411bb2a24411ba9c3ada3b7fed23aa0837b6d992373ad5a4c446c71dd39ba
+    note: Append-only change history -- v16 adds executable offline validation
 
   - path: evals/run-discover-fixture.js
     role: evals
     version: 1
     hash: sha256:f3097709f3f2becbc6e9dbfb235e5fe329770cd58aca24599214d638b1d74818
     note: Reusable mocked-network fixture runner for discover.js
+
+  - path: evals/run-evals.js
+    role: evals
+    version: 1
+    hash: sha256:62dc1089567a9a5386ded7925623e076863d7fb0169b38ebde9e6b247ad3ddad
+    note: Deterministic offline eval and validation runner
 
   - path: evals/fixtures/eval-9/README.md
     role: evals
@@ -225,6 +243,36 @@ files:
     version: 1
     hash: sha256:e2abbadfb2a95d91ca93dfaed0894dbe2688f7944ebab1a3279585b9af0ad2a7
     note: Simulated existing deduplication keys for eval-2
+
+  - path: evals/fixtures/eval-3/README.md
+    role: evals
+    version: 1
+    hash: sha256:186b0c7385d7b207f4d72bfba01ee391c17919a4a6ade63f6b158a0f3f167b5b
+    note: Fixture documentation for quick-scan summary validation
+
+  - path: evals/fixtures/eval-3/current-scan.json
+    role: evals
+    version: 1
+    hash: sha256:9adcc6668c185fafc314c0a3e0c4cc79da8879b0a2244c8abef93e5353883042
+    note: Prebuilt scan-shaped JSON for eval-3 quick-scan validation
+
+  - path: evals/fixtures/eval-3/index.html
+    role: evals
+    version: 1
+    hash: sha256:49b5e6c2c5d8f4022cdcc4534f5129b248c88ad3e09b1d88b874e468d8014fe9
+    note: Plain HTML source fixture for eval-3
+
+  - path: evals/fixtures/eval-4/README.md
+    role: evals
+    version: 1
+    hash: sha256:00d414d032183d06af7efbb92fd35b4ac16bcbb2cf1a4ceb0af0eb71312e53b4
+    note: Fixture documentation for skipped-Lighthouse report contract validation
+
+  - path: evals/fixtures/eval-4/current-scan.json
+    role: evals
+    version: 1
+    hash: sha256:b8498cd6be508016702a4dcd81f6555258e3d0f7de8b84a04fba46f61888faad
+    note: Prebuilt scan-shaped JSON for eval-4 skipped-Lighthouse report validation
 
   - path: references/claude-code.md
     role: reference
@@ -330,6 +378,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 15
+    version: 16
     hash: null
     note: This file -- self-referential hash omitted
