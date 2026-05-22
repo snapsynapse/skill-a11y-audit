@@ -101,6 +101,18 @@ node a11y-audit/scripts/report.js \
 No prior setup needed. scan.js auto-installs axe-core and Puppeteer on
 first run if they aren't already available.
 
+## Assistant Guide
+
+This repository publishes a GuideCheck `assistant-guide.txt` for bounded
+assistant use:
+
+- Web: https://skilla11y.dev/.well-known/assistant-guide.txt
+- Repository copy: [assistant-guide.txt](assistant-guide.txt)
+
+The guide is a plain-text instruction surface for installing the skill,
+running audits, generating reports, and making narrow maintenance edits. It
+does not make audit results a legal conformance certification.
+
 ## How It Works
 
 ### Template-Aware Sampling

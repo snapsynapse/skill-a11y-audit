@@ -22,20 +22,20 @@ Prompt: "Run an accessibility audit on this project."
 
 Or run scripts directly:
 
-- `scripts/discover.js --url <base-url>` — discover pages and select representatives
-- `scripts/scan.js --urls <url-list>` — scan pages with axe-core
-- `scripts/report.js --input <scan.json>` — generate markdown + JSON report
+- `scripts/discover.js --url <base-url>`: discover pages and select representatives
+- `scripts/scan.js --urls <url-list>`: scan pages with axe-core
+- `scripts/report.js --input <scan.json>`: generate markdown + JSON report
 
 ## Key files
 
 - [Assistant Guide](https://skilla11y.dev/.well-known/assistant-guide.txt): bounded assistant install, audit execution, and maintenance instructions
-- [SKILL.md](a11y-audit/SKILL.md): core skill instructions (agent-readable)
-- [scripts/](a11y-audit/scripts/): discover.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
-- [references/output-contract.md](a11y-audit/references/output-contract.md): report format specification
-- [references/output-schema.json](a11y-audit/references/output-schema.json): JSON output schema
-- [assets/sample-output/](a11y-audit/assets/sample-output/): example report from a real site audit
-- [CHANGELOG.md](a11y-audit/CHANGELOG.md): version history
-- [MANIFEST.yaml](a11y-audit/MANIFEST.yaml): bundle inventory
+- [SKILL.md](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md): core skill instructions
+- [scripts](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/scripts): discover.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
+- [output contract](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-contract.md): report format specification
+- [output schema](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-schema.json): JSON output schema
+- [sample output](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/assets/sample-output): example report from a real site audit
+- [CHANGELOG](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/CHANGELOG.md): version history
+- [MANIFEST](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/MANIFEST.yaml): bundle inventory
 
 ## Report sections
 
@@ -51,9 +51,9 @@ Or run scripts directly:
 
 ## Output modes
 
-- `markdown` — report only
-- `markdown+json` — report + machine-readable data
-- `markdown+issues` — report + GitHub/GitLab/Linear/Jira tickets
+- `markdown`: report only
+- `markdown+json`: report + machine-readable data
+- `markdown+issues`: report + GitHub/GitLab/Linear/Jira tickets
 
 ## Compatibility
 
