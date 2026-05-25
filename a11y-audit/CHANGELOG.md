@@ -11,6 +11,13 @@ change_summary: >
 
 # Changelog
 
+## Assistant guide v0.2.0 -- 2026-05-24
+
+- Added Level 4 provenance metadata for the GuideCheck
+  `assistant-guide.txt` artifact, including a sidecar manifest URL.
+- Prepared the public repository copy at `/assistant-guide.txt` as the
+  cross-channel hash anchor for the published guide.
+
 ## v16 -- 2026-05-19
 
 - Added `evals/run-evals.js`, a deterministic offline eval runner that
