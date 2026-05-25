@@ -11,12 +11,14 @@ change_summary: >
 
 # Changelog
 
-## Assistant guide v0.2.0 -- 2026-05-24
+## Assistant guide v0.3.0 -- 2026-05-24
 
 - Added Level 4 provenance metadata for the GuideCheck
-  `assistant-guide.txt` artifact, including a sidecar manifest URL.
+  `assistant-guide.txt` artifact, including a text sidecar manifest URL.
 - Prepared the public repository copy at `/assistant-guide.txt` as the
   cross-channel hash anchor for the published guide.
+- Tightened action block metadata to satisfy the GuideCheck hosted
+  verifier's guide-file checks.
 
 ## v16 -- 2026-05-19
 
