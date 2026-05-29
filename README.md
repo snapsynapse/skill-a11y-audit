@@ -1,4 +1,4 @@
-# a11y-audit
+# Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
 [![GitHub release](https://img.shields.io/github/release/snapsynapse/skill-a11y-audit.svg)](https://github.com/snapsynapse/skill-a11y-audit/releases/latest)
@@ -224,7 +224,7 @@ a11y-audit/
 
 ## Sponsor
 
-a11y-audit is free and open. If your team uses this skill, consider [sponsoring its development](https://github.com/sponsors/snapsynapse). See [SPONSORS.md](SPONSORS.md).
+Skill A11y Audit is free and open. If your team uses this skill, consider [sponsoring its development](https://github.com/sponsors/snapsynapse). See [SPONSORS.md](SPONSORS.md).
 
 ## About
 
