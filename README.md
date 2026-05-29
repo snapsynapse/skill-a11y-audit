@@ -9,6 +9,18 @@ project and get a WCAG 2.1 AA compliance report with prioritized
 findings, actionable fix suggestions, and progress tracking — without
 the target project needing any accessibility tooling installed.
 
+## Who this is for
+
+Developers and AI coding agents who need a WCAG 2.1 AA audit of any web project without installing accessibility tooling into it.
+
+## What problem it solves
+
+Most accessibility tools require manual setup and produce raw violation dumps with no prioritization. Skill A11y Audit is a drop-in WCAG 2.1 AA audit that runs against any web project and returns prioritized, actionable fixes.
+
+## Canonical URL
+
+https://skilla11y.dev/
+
 ## Why
 
 Most accessibility tools require manual setup, produce raw violation
