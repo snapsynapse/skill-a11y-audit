@@ -13,12 +13,12 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 13
-  version_date: 2026-05-19
-  previous_version: 12
+  version: 14
+  version_date: 2026-05-31
+  previous_version: 13
   change_summary: >
-    Documented the dependency auto-install consent boundary now enforced
-    by executable eval coverage.
+    Documented same-origin discovery defaults, cross-origin sitemap
+    opt-in, and fixed Puppeteer-only scanner dependency behavior.
 ---
 
 # Accessibility Audit
@@ -55,7 +55,9 @@ Prefer bundled helpers over ad hoc generation when they fit:
 - `scripts/discover.js` identifies template groups on large sites and
   selects representative pages for scanning. Reads sitemap.xml first,
   falls back to HTML navigation crawl. Outputs a scan plan with
-  template groups and a ready-to-use URL list for scan.js.
+  template groups and a ready-to-use URL list for scan.js. Discovery is
+  same-origin by default; use `--allow-cross-origin-sitemaps` only after
+  the user approves sitemap-declared cross-origin targets.
 
 ### Dependencies
 
@@ -73,6 +75,9 @@ installed. The `deps/` directory is gitignored.
 Because `scan.js` may auto-install missing dependencies, agents should
 ask before invoking scan.js when the target workspace does not already
 provide `axe-core` and the chosen browser automation package.
+
+The bundled scanner supports Puppeteer only. Treat `--browser` as a
+fixed option, not a user-controlled package installer.
 
 ### Platform-Specific References
 

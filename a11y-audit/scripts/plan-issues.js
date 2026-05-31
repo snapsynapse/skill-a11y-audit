@@ -2,10 +2,10 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-03-03
-previous_version: null
-change_summary: Added a non-destructive issue planning helper for markdown+issues mode.
+version: 2
+version_date: 2026-05-31
+previous_version: 1
+change_summary: Escapes target-derived Markdown fields and hardens issue dedupe comments.
 */
 
 const fs = require('fs');
@@ -110,6 +110,30 @@ function wcagFromTags(tags) {
     .filter(Boolean))];
 }
 
+function normalizeCell(value) {
+  return String(value ?? '')
+    .replace(/\r?\n/g, ' ')
+    .replace(/\|/g, '\\|')
+    .replace(/`/g, '\\`')
+    .trim();
+}
+
+function escapeInlineCode(value) {
+  return String(value ?? '')
+    .replace(/\r?\n/g, ' ')
+    .replace(/`/g, '\\`')
+    .replace(/\|/g, '\\|')
+    .trim();
+}
+
+function htmlCommentSafe(value) {
+  return String(value ?? '')
+    .replace(/--/g, '- -')
+    .replace(/[<>]/g, '')
+    .replace(/\r?\n/g, ' ')
+    .trim();
+}
+
 const args = parseArgs(process.argv.slice(2));
 const inputPath = path.resolve(args.input || '');
 const outputPath = path.resolve(args.output || 'issue-plan.md');
@@ -184,16 +208,16 @@ const lines = [
 ];
 
 for (const issue of issues) {
-  const dedupKey = `<!-- a11y-audit-key: ${issue.rule}::${issue.route} -->`;
+  const dedupKey = `<!-- a11y-audit-key: ${htmlCommentSafe(issue.rule)}::${htmlCommentSafe(issue.route)} -->`;
   const status = issue.duplicate ? 'duplicate' : 'create';
   const wcag = issue.wcag.length > 0 ? issue.wcag.join(', ') : '-';
   const labels = issue.labels.length > 0 ? issue.labels.join(', ') : '-';
-  lines.push(`| ${status} | ${issue.priority} | ${issue.rule} | ${issue.route} | ${issue.instances} | ${wcag} | ${labels} | \`${dedupKey}\` | ${issue.help || 'Accessibility issue'} |`);
+  lines.push(`| ${normalizeCell(status)} | ${normalizeCell(issue.priority)} | ${normalizeCell(issue.rule)} | ${normalizeCell(issue.route)} | ${issue.instances} | ${normalizeCell(wcag)} | ${normalizeCell(labels)} | \`${escapeInlineCode(dedupKey)}\` | ${normalizeCell(issue.help || 'Accessibility issue')} |`);
 }
 
 lines.push('');
 if (additionalStandards.length > 0) {
-  lines.push(`Additional standards: ${additionalStandards.join(', ')}`);
+  lines.push(`Additional standards: ${additionalStandards.map(normalizeCell).join(', ')}`);
   lines.push('');
 }
 lines.push('Use this plan for user review, label verification, standards mapping review, and deduplication checks before live ticket creation.');

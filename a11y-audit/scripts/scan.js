@@ -2,18 +2,18 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 2
-version_date: 2026-03-26
-previous_version: 1
+version: 3
+version_date: 2026-05-31
+previous_version: 2
 change_summary: >
-  Self-contained dependency resolution. Checks skill-local node_modules
-  first, then target project, then auto-installs to skill deps dir.
+  Validates the supported browser before dependency lookup and invokes
+  dependency installation with argv rather than shell interpolation.
 */
 
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -39,6 +39,11 @@ function parseArgs(argv) {
 function splitCsv(value) {
   if (!value) return [];
   return value.split(',').map((entry) => entry.trim()).filter(Boolean);
+}
+
+function validateBrowserLib(browserLib) {
+  if (browserLib === 'puppeteer') return browserLib;
+  throw new Error(`Unsupported browser library: ${browserLib}. This bundled script supports puppeteer only.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -83,6 +88,11 @@ function findPackage(packageName, projectRoot) {
 }
 
 function ensureDependency(packageName, projectRoot) {
+  if (!/^(@[a-z0-9._-]+\/)?[a-z0-9._-]+$/i.test(packageName)) {
+    console.error(`Invalid package name: ${packageName}`);
+    process.exit(1);
+  }
+
   const found = findPackage(packageName, projectRoot);
   if (found) return found;
 
@@ -102,12 +112,16 @@ function ensureDependency(packageName, projectRoot) {
   }
 
   try {
-    execSync(`npm install --prefix "${SKILL_DEPS_DIR}" ${packageName}`, {
+    const install = spawnSync('npm', ['install', '--prefix', SKILL_DEPS_DIR, packageName], {
+      encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 120000,
     });
+    if (install.status !== 0) {
+      throw new Error(install.stderr || install.stdout || `npm install exited with ${install.status}`);
+    }
   } catch (err) {
-    console.error(`Failed to install ${packageName}: ${err.stderr || err.message}`);
+    console.error(`Failed to install ${packageName}: ${err.message}`);
     process.exit(1);
   }
 
@@ -176,7 +190,13 @@ async function run() {
   const rootDir = path.resolve(args.root || process.cwd());
   const urls = splitCsv(args.urls);
   const outputPath = path.resolve(args.output || path.join(process.cwd(), 'a11y-scan-results.json'));
-  const browserLib = args.browser || 'puppeteer';
+  let browserLib;
+  try {
+    browserLib = validateBrowserLib(args.browser || 'puppeteer');
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
   const runLighthouse = args.lighthouse === 'true';
   const summaryMode = args.summary === true || args.summary === 'true';
 
@@ -195,13 +215,7 @@ async function run() {
   const axeSourcePath = path.join(axeDep.root, 'axe.min.js');
   const axeSource = fs.readFileSync(axeSourcePath, 'utf8');
 
-  let browserModule;
-  if (browserLib === 'puppeteer') {
-    browserModule = await loadPuppeteer(browserDep.root);
-  } else {
-    console.error('Only puppeteer is supported by this bundled script version');
-    process.exit(1);
-  }
+  const browserModule = await loadPuppeteer(browserDep.root);
 
   const browser = await browserModule.default.launch({
     headless: true,
@@ -246,7 +260,14 @@ async function run() {
   console.log(outputPath);
 }
 
-run().catch((error) => {
-  console.error(error.stack || String(error));
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((error) => {
+    console.error(error.stack || String(error));
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  splitCsv,
+  validateBrowserLib,
+};

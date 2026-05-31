@@ -292,5 +292,30 @@
         "Generated JSON delta.changed includes previousPages, currentPages, addedPages, and removedPages for page-aware triage"
       ]
     }
+  },
+  {
+    "id": "eval-12",
+    "prompt": "Run discovery against a site whose robots.txt points to a sitemap on a different origin without explicitly allowing cross-origin sitemap traversal. Discovery should not fetch or fingerprint the cross-origin sitemap, should disclose the blocked origin, and should continue with same-origin discovery when available.",
+    "expectations": {
+      "structural": [
+        "Discovery output records the origin policy",
+        "Discovery output records any blocked cross-origin fetches",
+        "The selected scan list remains same-origin unless cross-origin sitemap traversal is explicitly enabled"
+      ],
+      "behavioral": [
+        "Cross-origin sitemap traversal is opt-in",
+        "Blocked cross-origin targets are disclosed rather than silently ignored",
+        "Same-origin sitemap discovery still proceeds after blocking the cross-origin sitemap"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-05-31",
+      "notes": [
+        "Validated locally with mocked HTTP responses under a11y-audit/evals/fixtures/eval-12",
+        "Default discovery blocked http://cdn.test/sitemap.xml from robots.txt and recorded the blocked origin and reason",
+        "Discovery continued with http://base.test/sitemap.xml and selected only same-origin scan targets"
+      ]
+    }
   }
 ]

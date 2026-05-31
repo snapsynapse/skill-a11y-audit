@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 16
-bundle_date: 2026-05-19
+bundle_version: 17
+bundle_date: 2026-05-31
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -111,6 +111,19 @@ compatibility:
         context bootstrap smoke validation, discovery fixtures, issue
         planning, quick-scan behavior, skipped-Lighthouse report
         contracts, page-aware deltas, and dependency policy docs.
+    - platform: OpenAI Codex
+      model: GPT-5
+      surface: Code
+      status: pass
+      date: 2026-05-31
+      skill_version: 17
+      notes: >
+        Security hardening pass validated by `npm run validate`.
+        Scanner dependency installation now rejects unsupported browser
+        package names before dependency lookup and invokes npm with argv.
+        Discovery is same-origin by default with explicit cross-origin
+        sitemap opt-in, bounded fetches, and blocked-origin disclosure.
+        Report and issue-plan Markdown now escape target-derived fields.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -136,17 +149,17 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 13
-    hash: sha256:bcec8fb89abacba1be5a16dbf6e5e1ebf747967844aafa26819b7027399026d8
+    version: 14
+    hash: sha256:021a3984890aeb2397e4d9429b489152ea71e9e1b74b9cdd682523742e56e58a
     note: >
-      v13 -- documents dependency auto-install consent boundary before
-      invoking scan.js
+      v14 -- documents same-origin discovery defaults, cross-origin
+      sitemap opt-in, and fixed Puppeteer-only scanner behavior
 
   - path: evals/evals.json
     role: evals
-    version: 8
-    hash: sha256:c2fd53a675d210d5e4af7372c8c3848023e65f4d81d2a5660217601306e7793c
-    note: 11 eval cases -- eval-3 and eval-4 now have deterministic fixture coverage recorded
+    version: 9
+    hash: sha256:ce5cb6df6c4468b109fd41ccd33ed5c24d75d7262de66d2b72450f962499462e
+    note: 12 eval cases -- eval-12 covers same-origin discovery defaults
 
   - path: HANDOFF.md
     role: handoff
@@ -156,9 +169,9 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 16
-    hash: sha256:831411bb2a24411ba9c3ada3b7fed23aa0837b6d992373ad5a4c446c71dd39ba
-    note: Append-only change history -- v16 adds executable offline validation
+    version: 17
+    hash: sha256:dd4a9c20192a054ae63778d94fb2012d2412e782a23ea7763ce6f9d80110eabc
+    note: Append-only change history -- v17 records security hardening pass
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -168,9 +181,9 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 1
-    hash: sha256:62dc1089567a9a5386ded7925623e076863d7fb0169b38ebde9e6b247ad3ddad
-    note: Deterministic offline eval and validation runner
+    version: 2
+    hash: sha256:1958c614acffe82075663a1229edb4344a671d3c60e29700daccae4962b6a6d8
+    note: Deterministic offline eval runner with hardening regressions
 
   - path: evals/fixtures/eval-9/README.md
     role: evals
@@ -181,8 +194,8 @@ files:
   - path: evals/fixtures/eval-9/config.json
     role: evals
     version: 1
-    hash: sha256:1cef1b5d33e237b9009dca37159e41554d40c39754637d01b37680044c9d455c
-    note: Fixture config for eval-9 discover.js run
+    hash: sha256:07a281b197d3871602b3de4870870c049b61f862fbde48b834c556371d3034f4
+    note: Fixture config for eval-9 explicit cross-origin sitemap run
 
   - path: evals/fixtures/eval-9/responses.json
     role: evals
@@ -193,8 +206,8 @@ files:
   - path: evals/fixtures/eval-9/expected.json
     role: evals
     version: 1
-    hash: sha256:2d8c07a6af743e8e402f274b9ef54c1ad8ff1dbc242c939c643478756c989e3e
-    note: Expected discovery output for eval-9
+    hash: sha256:77874d398b69fd3c64a4631a953e9af2b9212cb00a11ca3cc15c09dbefd24696
+    note: Expected discovery output for eval-9 with origin disclosure
 
   - path: evals/fixtures/eval-10/README.md
     role: evals
@@ -217,8 +230,32 @@ files:
   - path: evals/fixtures/eval-10/expected.json
     role: evals
     version: 1
-    hash: sha256:f6b15b751b3a41cab9c6b87f2414a3cc4f8ae74120b5cd7319524dc715d07864
-    note: Expected repeated discovery output for eval-10
+    hash: sha256:eae2c8b500359e05cae71526167317f076db5345cd41854d1b3d3bc5f874dbee
+    note: Expected repeated discovery output for eval-10 with origin disclosure
+
+  - path: evals/fixtures/eval-12/README.md
+    role: evals
+    version: 1
+    hash: sha256:64f27fe0cd07585e6c3d79b99952398f6b7f2069c4f45521c41183bf7273fb3d
+    note: Fixture documentation for default same-origin discovery policy
+
+  - path: evals/fixtures/eval-12/config.json
+    role: evals
+    version: 1
+    hash: sha256:1cef1b5d33e237b9009dca37159e41554d40c39754637d01b37680044c9d455c
+    note: Fixture config for default same-origin discovery policy
+
+  - path: evals/fixtures/eval-12/responses.json
+    role: evals
+    version: 1
+    hash: sha256:7cc002e9354988d4cab807cbba0862771c618015db9bfb1c544f09acb92d77b7
+    note: Mocked HTTP response map for eval-12
+
+  - path: evals/fixtures/eval-12/expected.json
+    role: evals
+    version: 1
+    hash: sha256:64735e95ae3f22eee8e6a3342cb0e3221dad59c46b858e04a0d85b9bda1b585f
+    note: Expected blocked-origin discovery output for eval-12
 
   - path: evals/fixtures/eval-2/README.md
     role: evals
@@ -313,8 +350,8 @@ files:
   - path: scripts/scan.js
     role: script
     version: 3
-    hash: pending
-    note: Self-contained dep resolution (skill-local → project → global → auto-install)
+    hash: sha256:124d51a247df3a8514e9ae343e2a14d4835959f7bf2a02b55a96e5c431002f66
+    note: Argv-based dependency installation with supported-browser validation
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -325,20 +362,20 @@ files:
   - path: scripts/plan-issues.js
     role: script
     version: 2
-    hash: sha256:fa42cc5f58d7d75f42cc836ff6e15de914fb0d6f7926737482997f023ceafc3b
-    note: Context-aware non-destructive issue planning helper for markdown+issues mode
+    hash: sha256:217f5617ffe968007e19d84899d733203e5712b856f76bcdd7805010157644ad
+    note: Context-aware non-destructive issue planning with Markdown escaping
 
   - path: scripts/report.js
     role: script
-    version: 4
-    hash: sha256:471792737738dba550500ceca92be594af5605531d2eebc0c2b5fa284e018ebc
-    note: Quick Fixes, page-aware delta comparison (--previous), shared-template detection
+    version: 2
+    hash: sha256:b2546b02b4c0e1f3b23caf684ffd3ddc3057f3c0fa4842db76fc5463fddaa1cd
+    note: Deterministic report generation with Markdown escaping and origin disclosure
 
   - path: scripts/discover.js
     role: script
     version: 3
-    hash: sha256:8ce30f0ce02d06695c0f5d9d40ccaba7e88822a28b40cd03017f0b5cb7938e14
-    note: DOM fingerprinting, API enrichment, sitemap-first sampling with published-URL preservation and deterministic selection
+    hash: sha256:3c15baed0cbd8a52553b99a24671f3dc9353764fe06be4e9786f6753a64cfbf8
+    note: Bounded same-origin discovery with explicit cross-origin sitemap opt-in
 
   - path: .gitignore
     role: config

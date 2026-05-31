@@ -167,6 +167,20 @@ scan.js resolves axe-core and Puppeteer in this order:
 3. **Global** npm modules
 4. **Auto-install** to skill-local `deps/` if not found anywhere
 
+### Version Model
+
+This repository has three release identifiers because the published
+surfaces move at different compatibility levels:
+
+- `package.json` uses the public repository release line, currently 2.x.
+- `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
+  incremented whenever the skill bundle changes.
+- `assistant-guide.txt` uses the GuideCheck guide version, incremented
+  only when the assistant guide contract changes.
+
+Release notes should mention each identifier when more than one surface
+changes.
+
 ### Delta Tracking
 
 Pass a previous audit JSON to see progress:

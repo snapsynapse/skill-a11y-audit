@@ -1,15 +1,29 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 16
-version_date: 2026-05-19
-previous_version: 15
+version: 17
+version_date: 2026-05-31
+previous_version: 16
 change_summary: >
-  Added executable offline eval validation and wired CI to npm run
-  validate.
+  Recorded security hardening for scanner dependency installation,
+  discovery origin policy, Markdown escaping, and version-model docs.
 ---
 
 # Changelog
+
+## v2.0.1 -- 2026-05-31
+
+- Hardened `scan.js` dependency installation by validating browser
+  selection before dependency lookup and invoking `npm install` with argv
+  rather than shell interpolation.
+- Added bounded discovery fetches, redirect limits, same-origin discovery
+  defaults, explicit cross-origin sitemap opt-in, and origin disclosure in
+  discovery/report output.
+- Escaped target-derived Markdown fields in generated audit reports and
+  issue plans to reduce agent-facing instruction injection and table
+  breakage from untrusted scan data.
+- Documented the repository release, bundle inventory, and assistant
+  guide version model.
 
 ## Assistant guide v0.3.0 -- 2026-05-24
 

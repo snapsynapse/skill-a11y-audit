@@ -2,18 +2,21 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 2
-version_date: 2026-03-26
-previous_version: 1
+version: 3
+version_date: 2026-05-31
+previous_version: 2
 change_summary: >
-  DOM fingerprinting for smarter representative selection, API entity
-  enrichment for group labels, HTML crawl fallback improvements.
+  Added bounded fetches, same-origin discovery defaults, explicit
+  cross-origin sitemap opt-in, and origin disclosure.
 */
 
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+
+const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
+const DEFAULT_MAX_REDIRECTS = 5;
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -37,25 +40,61 @@ function parseArgs(argv) {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
-function fetchResource(url) {
+function fetchResource(url, opts = {}, state = {}) {
   return new Promise((resolve) => {
     const requestUrl = new URL(url);
+    const redirects = state.redirects || 0;
+    const maxRedirects = Number.isFinite(opts.maxRedirects) ? opts.maxRedirects : DEFAULT_MAX_REDIRECTS;
+    const maxBytes = Number.isFinite(opts.maxBytes) ? opts.maxBytes : DEFAULT_MAX_BYTES;
+    const allowedOrigins = opts.allowedOrigins || null;
+
+    if (allowedOrigins && !allowedOrigins.has(requestUrl.origin)) {
+      return resolve({
+        blocked: true,
+        reason: 'cross-origin',
+        url: requestUrl.href,
+        origin: requestUrl.origin,
+      });
+    }
+
     const mod = requestUrl.protocol === 'https:' ? https : http;
     const req = mod.get(requestUrl, { timeout: 10000 }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         const redirectUrl = new URL(res.headers.location, requestUrl).href;
         res.resume();
-        return resolve(fetchResource(redirectUrl));
+        if (redirects >= maxRedirects) {
+          return resolve({
+            blocked: true,
+            reason: 'redirect-limit',
+            url: redirectUrl,
+            origin: new URL(redirectUrl).origin,
+          });
+        }
+        return resolve(fetchResource(redirectUrl, opts, { redirects: redirects + 1 }));
       }
       if (res.statusCode !== 200) {
         res.resume();
         return resolve(null);
       }
       const chunks = [];
-      res.on('data', (c) => chunks.push(c));
+      let totalBytes = 0;
+      let tooLarge = false;
+      res.on('data', (c) => {
+        totalBytes += c.length;
+        if (totalBytes > maxBytes) {
+          tooLarge = true;
+          res.resume();
+          req.destroy();
+          return;
+        }
+        chunks.push(c);
+      });
       res.on('end', () => resolve({
-        body: Buffer.concat(chunks).toString('utf8'),
+        body: tooLarge ? null : Buffer.concat(chunks).toString('utf8'),
         url: requestUrl.href,
+        blocked: tooLarge,
+        reason: tooLarge ? 'max-bytes' : null,
+        origin: requestUrl.origin,
       }));
     });
     req.on('timeout', () => {
@@ -66,9 +105,9 @@ function fetchResource(url) {
   });
 }
 
-async function httpFetch(url) {
-  const resource = await fetchResource(url);
-  return resource ? resource.body : null;
+async function httpFetch(url, opts = {}) {
+  const resource = await fetchResource(url, opts);
+  return resource && !resource.blocked ? resource.body : null;
 }
 
 function resolvePublishedUrl(value, baseUrl) {
@@ -163,11 +202,11 @@ function computeFingerprint(html) {
   return { score, elements: counts };
 }
 
-async function fingerprintCandidates(urls) {
+async function fingerprintCandidates(urls, fetchOpts = {}) {
   // Load HTML for each candidate and compute fingerprint
   const results = [];
   for (const url of urls) {
-    const html = await httpFetch(url);
+    const html = await httpFetch(url, fetchOpts);
     const fp = computeFingerprint(html);
     results.push({ url, ...fp });
   }
@@ -193,7 +232,7 @@ function buildCandidateIndexes(total, limit = 8) {
   return [...indexes].sort((a, b) => a - b);
 }
 
-async function selectRepresentatives(group, maxPerGroup, useFingerprint) {
+async function selectRepresentatives(group, maxPerGroup, useFingerprint, fetchOpts = {}) {
   const urls = group.urls.sort();
   if (urls.length <= Math.max(maxPerGroup, 3)) {
     return { selected: urls, reason: `all ${urls.length} — small group` };
@@ -203,7 +242,7 @@ async function selectRepresentatives(group, maxPerGroup, useFingerprint) {
     const candidateIdxs = buildCandidateIndexes(urls.length);
     const candidates = candidateIdxs.map((i) => urls[i]);
 
-    const fingerprinted = await fingerprintCandidates(candidates);
+    const fingerprinted = await fingerprintCandidates(candidates, fetchOpts);
     if (fingerprinted.length > 0 && fingerprinted[0].score > 0) {
       // Pick most complex and least complex
       const selected = [fingerprinted[0].url];
@@ -273,9 +312,28 @@ async function discover(runtimeUrl, opts = {}) {
   const maxPerGroup = parseInt(opts.maxPerGroup, 10) || 2;
   const useFingerprint = opts.fingerprint !== false;
   const baseOrigin = new URL(runtimeUrl).origin;
+  const allowCrossOriginSitemaps = opts.allowCrossOriginSitemaps === true;
+  const fetchOpts = {
+    allowedOrigins: allowCrossOriginSitemaps ? null : new Set([baseOrigin]),
+    maxBytes: Number.isFinite(opts.maxBytes) ? opts.maxBytes : DEFAULT_MAX_BYTES,
+    maxRedirects: Number.isFinite(opts.maxRedirects) ? opts.maxRedirects : DEFAULT_MAX_REDIRECTS,
+  };
 
   let allUrls = [];
   let source = 'unknown';
+  const blockedFetches = [];
+
+  const recordBlocked = (resource) => {
+    if (resource && resource.blocked) {
+      blockedFetches.push({
+        url: resource.url,
+        origin: resource.origin,
+        reason: resource.reason,
+      });
+      return true;
+    }
+    return false;
+  };
 
   // 1. Try sitemap via well-known paths
   if (!opts.noSitemap) {
@@ -284,8 +342,10 @@ async function discover(runtimeUrl, opts = {}) {
       `${baseOrigin}/sitemap_index.xml`,
     ];
 
-    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`);
-    if (robotsResource) {
+    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`, fetchOpts);
+    if (recordBlocked(robotsResource)) {
+      // Continue with default same-origin sitemap paths.
+    } else if (robotsResource) {
       const sitemapMatch = robotsResource.body.match(/Sitemap:\s*(\S+)/i);
       if (sitemapMatch) {
         try {
@@ -295,7 +355,8 @@ async function discover(runtimeUrl, opts = {}) {
     }
 
     for (const sitemapUrl of [...new Set(sitemapUrls)]) {
-      const xmlResource = await fetchResource(sitemapUrl);
+      const xmlResource = await fetchResource(sitemapUrl, fetchOpts);
+      if (recordBlocked(xmlResource)) continue;
       const xml = xmlResource && xmlResource.body;
       if (xml && (xml.includes('<urlset') || xml.includes('<sitemapindex'))) {
         let discoveredUrls = parseSitemap(xml).map((entry) => {
@@ -310,7 +371,8 @@ async function discover(runtimeUrl, opts = {}) {
           const subSitemaps = discoveredUrls;
           discoveredUrls = [];
           for (const sub of subSitemaps) {
-            const subXmlResource = await fetchResource(sub);
+            const subXmlResource = await fetchResource(sub, fetchOpts);
+            if (recordBlocked(subXmlResource)) continue;
             if (!subXmlResource) continue;
             discoveredUrls.push(...parseSitemap(subXmlResource.body).map((entry) => {
               try {
@@ -331,14 +393,14 @@ async function discover(runtimeUrl, opts = {}) {
 
   // 2. Fallback: crawl navigation links
   if (allUrls.length === 0) {
-    const html = await httpFetch(runtimeUrl);
+    const html = await httpFetch(runtimeUrl, fetchOpts);
     if (html) {
       allUrls = extractLinks(html, runtimeUrl);
       source = 'html-crawl (depth 1)';
 
       const hubUrls = [...allUrls];
       for (const hubUrl of hubUrls.slice(0, 20)) {
-        const hubHtml = await httpFetch(hubUrl);
+        const hubHtml = await httpFetch(hubUrl, fetchOpts);
         if (hubHtml) {
           const deeper = extractLinks(hubHtml, hubUrl);
           for (const d of deeper) {
@@ -365,7 +427,7 @@ async function discover(runtimeUrl, opts = {}) {
   // 4. Fetch API manifest for enrichment
   let apiManifest = null;
   for (const apiPath of ['/api/v1/index.json', '/api/index.json']) {
-    const apiJson = await httpFetch(`${baseOrigin}${apiPath}`);
+    const apiJson = await httpFetch(`${baseOrigin}${apiPath}`, fetchOpts);
     if (apiJson) {
       try { apiManifest = JSON.parse(apiJson); break; } catch { /* skip */ }
     }
@@ -394,7 +456,7 @@ async function discover(runtimeUrl, opts = {}) {
     } else {
       // Only fingerprint groups with 4+ pages to limit HTTP requests
       const shouldFingerprint = useFingerprint && group.urls.length >= 4;
-      ({ selected, reason, fingerprints } = await selectRepresentatives(group, maxPerGroup, shouldFingerprint));
+      ({ selected, reason, fingerprints } = await selectRepresentatives(group, maxPerGroup, shouldFingerprint, fetchOpts));
       if (shouldFingerprint) fingerprintCount += 1;
     }
 
@@ -414,9 +476,20 @@ async function discover(runtimeUrl, opts = {}) {
     scanList.push(...selected);
   }
 
+  const discoveredOrigins = [...new Set(allUrls.map((url) => {
+    try {
+      return new URL(url).origin;
+    } catch {
+      return null;
+    }
+  }).filter(Boolean))].sort();
+
   return {
     source,
     runtimeUrl,
+    originPolicy: allowCrossOriginSitemaps ? 'cross-origin-sitemaps-allowed' : 'same-origin',
+    discoveredOrigins,
+    blockedFetches,
     totalPages: allUrls.length,
     selectedPages: scanList.length,
     coverageRatio: `${groups.length} template groups, ${scanList.length} pages selected`,
@@ -438,7 +511,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const url = args.url;
   if (!url) {
-    console.error('Usage: discover.js --url <base-url> [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint]');
+    console.error('Usage: discover.js --url <base-url> [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint] [--allow-cross-origin-sitemaps]');
     process.exit(1);
   }
 
@@ -446,6 +519,7 @@ async function main() {
     maxPerGroup: args['max-per-group'],
     noSitemap: args['no-sitemap'] === true || args['no-sitemap'] === 'true',
     fingerprint: !(args['no-fingerprint'] === true || args['no-fingerprint'] === 'true'),
+    allowCrossOriginSitemaps: args['allow-cross-origin-sitemaps'] === true || args['allow-cross-origin-sitemaps'] === 'true',
   });
 
   if (result.error) {
@@ -466,6 +540,10 @@ async function main() {
 
   // Summary to stderr
   console.error(`\nDiscovery: ${result.totalPages} pages found via ${result.source}`);
+  console.error(`Origin policy: ${result.originPolicy}; origins: ${result.discoveredOrigins.join(', ') || 'none'}`);
+  if (result.blockedFetches.length > 0) {
+    console.error(`Blocked fetches: ${result.blockedFetches.length}`);
+  }
   console.error(`Selected ${result.selectedPages} pages across ${result.groups.length} template groups`);
   if (result.fingerprintedGroups > 0) {
     console.error(`DOM fingerprinting used on ${result.fingerprintedGroups} groups`);

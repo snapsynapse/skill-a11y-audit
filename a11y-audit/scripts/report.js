@@ -2,10 +2,10 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-03-26
-previous_version: null
-change_summary: Deterministic report generator for Phases 3+5. Produces markdown and JSON from scan.js output.
+version: 2
+version_date: 2026-05-31
+previous_version: 1
+change_summary: Escapes target-derived Markdown fields and discloses discovery origin policy.
 */
 
 const fs = require('fs');
@@ -243,6 +243,46 @@ function extractContrastDetails(violationMap) {
 }
 
 // ---------------------------------------------------------------------------
+// Markdown safety
+// ---------------------------------------------------------------------------
+
+function normalizeCell(value) {
+  return String(value ?? '')
+    .replace(/\r?\n/g, ' ')
+    .replace(/\|/g, '\\|')
+    .replace(/`/g, '\\`')
+    .trim();
+}
+
+function escapeInlineCode(value) {
+  return String(value ?? '')
+    .replace(/\r?\n/g, ' ')
+    .replace(/`/g, '\\`')
+    .replace(/\|/g, '\\|')
+    .trim();
+}
+
+function escapeLinkLabel(value) {
+  return normalizeCell(value).replace(/([\[\]])/g, '\\$1');
+}
+
+function safeMarkdownUrl(value) {
+  try {
+    const url = new URL(String(value));
+    if (url.protocol === 'https:' || url.protocol === 'http:') return url.href;
+  } catch { /* fall through */ }
+  return null;
+}
+
+function pathnameOrDash(value) {
+  try {
+    return new URL(value).pathname || '/';
+  } catch {
+    return '-';
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Impact summary
 // ---------------------------------------------------------------------------
 
@@ -403,12 +443,12 @@ function buildMarkdown(opts) {
   ln();
   ln('| Field | Value |');
   ln('|---|---|');
-  ln(`| Project | ${projectName} |`);
+  ln(`| Project | ${normalizeCell(projectName)} |`);
   ln(`| Date | ${date} |`);
   ln(`| Standards | WCAG 2.1 AA |`);
   ln(`| Tool Version | axe-core (via scan.js); report.js v1 |`);
   if (runtimeUrl && expectedUrl && runtimeUrl !== expectedUrl) {
-    ln(`| Runtime URL | ${runtimeUrl} (expected ${expectedUrl}) |`);
+    ln(`| Runtime URL | ${normalizeCell(runtimeUrl)} (expected ${normalizeCell(expectedUrl)}) |`);
   }
   ln();
 
@@ -417,7 +457,7 @@ function buildMarkdown(opts) {
   ln();
   const total = summary.critical + summary.serious + summary.moderate + summary.minor;
   const ruleCount = violationMap.size;
-  ln(`${projectName} was audited across ${pageUrls.length} page(s). Automated scanning found **${total} issue instance(s)** across **${ruleCount} rule(s)**.`);
+  ln(`${normalizeCell(projectName)} was audited across ${pageUrls.length} page(s). Automated scanning found **${total} issue instance(s)** across **${ruleCount} rule(s)**.`);
   ln();
   ln(`| Impact | Instances |`);
   ln('|---|---|');
@@ -426,7 +466,7 @@ function buildMarkdown(opts) {
   }
   ln();
   if (lighthouse && lighthouse.status === 'skipped') {
-    ln(`Lighthouse was skipped: ${lighthouse.reason}.`);
+    ln(`Lighthouse was skipped: ${normalizeCell(lighthouse.reason)}.`);
     ln();
   }
 
@@ -435,7 +475,7 @@ function buildMarkdown(opts) {
   ln();
   ln('### Pages Scanned');
   ln();
-  for (const url of pageUrls) ln(`- ${url}`);
+  for (const url of pageUrls) ln(`- ${normalizeCell(url)}`);
   ln();
   if (violationMap.size === 0) {
     ln('No automated violations found.');
@@ -449,7 +489,10 @@ function buildMarkdown(opts) {
       const wcag = v.tags.map(axeTagToSC).filter(Boolean);
       const wcagStr = [...new Set(wcag)].map((sc) => `SC ${sc}`).join(', ') || '-';
       const pageCount = new Set(v.pages).size;
-      ln(`| [${v.rule}](${v.helpUrl}) | ${v.impact} | ${v.instances} | ${pageCount} | ${wcagStr} |`);
+      const label = escapeLinkLabel(v.rule);
+      const href = safeMarkdownUrl(v.helpUrl);
+      const ruleCell = href ? `[${label}](${href})` : label;
+      ln(`| ${ruleCell} | ${normalizeCell(v.impact)} | ${v.instances} | ${pageCount} | ${normalizeCell(wcagStr)} |`);
     }
     ln();
 
@@ -464,7 +507,7 @@ function buildMarkdown(opts) {
       ln('### Quick Fixes');
       ln();
       for (const v of hints) {
-        ln(`- **${v.rule}** (${v.impact}, ${v.instances} instances): ${REMEDIATION_HINTS[v.rule]}`);
+        ln(`- **${normalizeCell(v.rule)}** (${normalizeCell(v.impact)}, ${v.instances} instances): ${normalizeCell(REMEDIATION_HINTS[v.rule])}`);
       }
       ln();
     }
@@ -479,8 +522,8 @@ function buildMarkdown(opts) {
     for (const d of contrastDetails) {
       const ratio = d.contrastRatio ? d.contrastRatio.toFixed(2) : '-';
       const expected = d.expectedRatio ? `${d.expectedRatio}:1` : '-';
-      const page = d.page ? new URL(d.page).pathname : '-';
-      ln(`| \`${d.selector}\` | ${page} | ${ratio}:1 | ${expected} | ${d.fgColor || '-'} | ${d.bgColor || '-'} |`);
+      const page = d.page ? pathnameOrDash(d.page) : '-';
+      ln(`| \`${escapeInlineCode(d.selector)}\` | ${normalizeCell(page)} | ${normalizeCell(`${ratio}:1`)} | ${normalizeCell(expected)} | ${normalizeCell(d.fgColor || '-')} | ${normalizeCell(d.bgColor || '-')} |`);
     }
     ln();
   }
@@ -508,7 +551,7 @@ function buildMarkdown(opts) {
   if (delta) {
     ln('## Delta from Previous Audit');
     ln();
-    ln(`Compared against audit from ${delta.previousDate}${delta.previousPages ? ` (${delta.previousPages} pages)` : ''}.`);
+    ln(`Compared against audit from ${normalizeCell(delta.previousDate)}${delta.previousPages ? ` (${delta.previousPages} pages)` : ''}.`);
     ln();
     ln(`| Metric | Previous | Current | Change |`);
     ln('|---|---|---|---|');
@@ -520,7 +563,7 @@ function buildMarkdown(opts) {
       ln('**Fixed** (no longer detected):');
       ln();
       for (const f of delta.fixed) {
-        ln(`- ~~${f.rule}~~ (${f.impact}, was ${f.previousInstances} instances)`);
+        ln(`- ~~${normalizeCell(f.rule)}~~ (${normalizeCell(f.impact)}, was ${f.previousInstances} instances)`);
       }
       ln();
     }
@@ -529,7 +572,7 @@ function buildMarkdown(opts) {
       ln('**New** (not in previous audit):');
       ln();
       for (const n of delta.newRules) {
-        ln(`- **${n.rule}** (${n.impact}, ${n.instances} instances)`);
+        ln(`- **${normalizeCell(n.rule)}** (${normalizeCell(n.impact)}, ${n.instances} instances)`);
       }
       ln();
     }
@@ -540,16 +583,16 @@ function buildMarkdown(opts) {
       for (const c of delta.changed) {
         const direction = c.delta > 0 ? '↑' : '↓';
         const pageNotes = [];
-        if ((c.addedPages || []).length > 0) pageNotes.push(`added pages: ${c.addedPages.join(', ')}`);
-        if ((c.removedPages || []).length > 0) pageNotes.push(`removed pages: ${c.removedPages.join(', ')}`);
+        if ((c.addedPages || []).length > 0) pageNotes.push(`added pages: ${c.addedPages.map(normalizeCell).join(', ')}`);
+        if ((c.removedPages || []).length > 0) pageNotes.push(`removed pages: ${c.removedPages.map(normalizeCell).join(', ')}`);
         const pageSuffix = pageNotes.length > 0 ? `; ${pageNotes.join('; ')}` : '';
-        ln(`- ${c.rule}: ${c.previousInstances} → ${c.currentInstances} (${direction}${Math.abs(c.delta)})${pageSuffix}`);
+        ln(`- ${normalizeCell(c.rule)}: ${c.previousInstances} → ${c.currentInstances} (${direction}${Math.abs(c.delta)})${pageSuffix}`);
       }
       ln();
     }
 
     if (delta.unchanged.length > 0) {
-      ln(`**Unchanged**: ${delta.unchanged.map((u) => u.rule).join(', ')}`);
+      ln(`**Unchanged**: ${delta.unchanged.map((u) => normalizeCell(u.rule)).join(', ')}`);
       ln();
     }
   }
@@ -580,7 +623,7 @@ function buildMarkdown(opts) {
     sorted.forEach((v, i) => {
       const wcag = v.tags.map(axeTagToSC).filter(Boolean);
       const wcagStr = [...new Set(wcag)].map((sc) => `SC ${sc}`).join(', ') || '-';
-      ln(`| P${Math.min(i, 3)} | ${v.rule} | ${v.impact} | ${v.instances} | ${wcagStr} |`);
+      ln(`| P${Math.min(i, 3)} | ${normalizeCell(v.rule)} | ${normalizeCell(v.impact)} | ${v.instances} | ${normalizeCell(wcagStr)} |`);
     });
   }
   ln();
@@ -602,23 +645,26 @@ function buildMarkdown(opts) {
   ln(`| Browser | Headless Chromium (Puppeteer) |`);
   ln(`| Scanner | axe-core via scan.js |`);
   if (lighthouse && lighthouse.status === 'skipped') {
-    ln(`| Lighthouse | Skipped: ${lighthouse.reason} |`);
+    ln(`| Lighthouse | Skipped: ${normalizeCell(lighthouse.reason)} |`);
   }
-  if (runtimeUrl) ln(`| Runtime URL | ${runtimeUrl} |`);
-  if (expectedUrl && runtimeUrl !== expectedUrl) ln(`| Expected URL | ${expectedUrl} |`);
+  if (runtimeUrl) ln(`| Runtime URL | ${normalizeCell(runtimeUrl)} |`);
+  if (expectedUrl && runtimeUrl !== expectedUrl) ln(`| Expected URL | ${normalizeCell(expectedUrl)} |`);
   ln();
 
   // Sampling strategy (when discover.js was used)
   if (discoverData) {
     ln('### Sampling Strategy');
     ln();
-    ln(`Pages were selected via template-aware sampling (discover.js). ${discoverData.totalPages} total pages were classified into ${discoverData.groups.length} template groups; ${discoverData.selectedPages} representative pages were scanned.`);
+    const originNote = discoverData.discoveredOrigins && discoverData.discoveredOrigins.length > 0
+      ? ` Origins: ${discoverData.discoveredOrigins.map(normalizeCell).join(', ')}.`
+      : '';
+    ln(`Pages were selected via template-aware sampling (discover.js). ${discoverData.totalPages} total pages were classified into ${discoverData.groups.length} template groups; ${discoverData.selectedPages} representative pages were scanned.${originNote}`);
     ln();
     ln('| Template Group | Total Pages | Scanned | Selection |');
     ln('|---|---|---|---|');
     for (const g of discoverData.groups) {
       const entityLabel = g.entity && g.entity.count ? ` (${g.entity.count} ${g.entity.entityType})` : '';
-      ln(`| \`${g.pattern}\`${entityLabel} | ${g.count} | ${g.selected.length} | ${g.reason} |`);
+      ln(`| \`${escapeInlineCode(g.pattern)}\`${normalizeCell(entityLabel)} | ${g.count} | ${g.selected.length} | ${normalizeCell(g.reason)} |`);
     }
     ln();
   }
@@ -630,11 +676,11 @@ function buildMarkdown(opts) {
     ln('Template groups with identical violation fingerprints share the same underlying issues. Fixing the shared template resolves the issue across all pages in those groups.');
     ln();
     for (const st of sharedTemplates) {
-      const patternList = st.patterns.map((p) => `\`${p}\``).join(', ');
+      const patternList = st.patterns.map((p) => `\`${escapeInlineCode(p)}\``).join(', ');
       if (st.fingerprint === 'no violations') {
         ln(`- **Clean:** ${patternList} — no violations detected`);
       } else {
-        ln(`- **Shared issues on ${patternList}:** ${st.rules.join(', ')}`);
+        ln(`- **Shared issues on ${patternList}:** ${st.rules.map(normalizeCell).join(', ')}`);
       }
     }
     ln();
@@ -686,6 +732,9 @@ function main() {
   if (discoverData) {
     json.sampling = {
       source: discoverData.source,
+      originPolicy: discoverData.originPolicy || null,
+      discoveredOrigins: discoverData.discoveredOrigins || [],
+      blockedFetches: discoverData.blockedFetches || [],
       totalPages: discoverData.totalPages,
       selectedPages: discoverData.selectedPages,
       groups: discoverData.groups.map((g) => ({

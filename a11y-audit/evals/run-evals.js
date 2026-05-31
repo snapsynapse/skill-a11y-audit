@@ -2,10 +2,10 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-05-19
-previous_version: null
-change_summary: Added a deterministic offline eval and validation runner.
+version: 2
+version_date: 2026-05-31
+previous_version: 1
+change_summary: Added scanner, discovery origin policy, and Markdown escaping hardening regressions.
 */
 
 const assert = require('assert');
@@ -285,10 +285,107 @@ function eval11ReportDelta() {
   assert.match(md, /\*\*Unchanged\*\*: region/);
 }
 
+function scannerBrowserValidation() {
+  const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  assert.strictEqual(scan.validateBrowserLib('puppeteer'), 'puppeteer');
+  assert.throws(
+    () => scan.validateBrowserLib('puppeteer; echo injected'),
+    /Unsupported browser library/
+  );
+  const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
+  assert.match(scanSource, /spawnSync\('npm', \['install', '--prefix', SKILL_DEPS_DIR, packageName\]/);
+  assert.doesNotMatch(scanSource, /execSync\(`npm install/);
+}
+
+function markdownEscapingRegression() {
+  const dir = tmpPath('markdown-escaping');
+  resetDir(dir);
+  const inputPath = path.join(dir, 'scan.json');
+  fs.writeFileSync(inputPath, JSON.stringify({
+    generated_at: '2026-05-31T00:00:00Z',
+    urls: ['https://example.com/a|b'],
+    results: [
+      {
+        url: 'https://example.com/a|b',
+        axe: {
+          violations: [
+            {
+              id: 'color-contrast',
+              impact: 'serious',
+              description: 'desc',
+              help: 'Fix | this\nnow',
+              helpUrl: 'javascript:alert(1)',
+              tags: ['wcag111'],
+              nodes: [
+                {
+                  target: ['main` | td'],
+                  html: '<main></main>',
+                  any: [{ data: { fgColor: '#000', bgColor: '#fff', contrastRatio: 1.2, expectedContrastRatio: 4.5 } }],
+                },
+              ],
+            },
+          ],
+          passes: [],
+          incomplete: [],
+          inapplicable: [],
+        },
+        lighthouse: { status: 'skipped', reason: 'not | run\nnow' },
+      },
+    ],
+  }, null, 2));
+  runNode([
+    'a11y-audit/scripts/report.js',
+    '--input', inputPath,
+    '--project-name', 'Demo | Project',
+    '--runtime-url', 'https://example.com/a|b',
+    '--output-dir', dir,
+  ]);
+  const md = fs.readFileSync(findGeneratedFile(dir, '.md'), 'utf8');
+  assert.match(md, /Demo \\| Project/);
+  assert.match(md, /not \\| run now/);
+  assert.match(md, /color-contrast/);
+  assert.doesNotMatch(md, /\]\(javascript:alert/);
+  assert.match(md, /main\\` \\| td/);
+}
+
+function issuePlanEscapingRegression() {
+  const dir = tmpPath('issue-plan-escaping');
+  resetDir(dir);
+  const inputPath = path.join(dir, 'scan.json');
+  const outputPath = path.join(dir, 'issue-plan.md');
+  fs.writeFileSync(inputPath, JSON.stringify({
+    results: [
+      {
+        url: 'https://example.com/route--><script>|x',
+        axe: {
+          violations: [
+            {
+              id: 'label|bad',
+              impact: 'critical',
+              help: 'Do | not\nexecute',
+              tags: ['wcag131'],
+              nodes: [{ target: ['input'] }],
+            },
+          ],
+        },
+      },
+    ],
+  }, null, 2));
+  runNode([
+    'a11y-audit/scripts/plan-issues.js',
+    '--input', inputPath,
+    '--output', outputPath,
+  ]);
+  const plan = fs.readFileSync(outputPath, 'utf8');
+  assert.match(plan, /label\\|bad/);
+  assert.match(plan, /Do \\| not execute/);
+  assert.doesNotMatch(plan, /--><script>/);
+}
+
 function dependencyPolicyCheck() {
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
   const skill = fs.readFileSync(repoPath('a11y-audit/SKILL.md'), 'utf8');
-  assert.match(scanSource, /npm install --prefix/);
+  assert.match(scanSource, /spawnSync\('npm'/);
   assert.match(scanSource, /skill-deps \(auto-installed\)/);
   assert.match(skill, /`scan\.js` may auto-install missing dependencies/);
   assert.match(skill, /ask before invoking scan\.js/);
@@ -305,10 +402,14 @@ if (validateMode) {
 
 test('eval-9 preserves cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
+test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
 test('eval-2 plans issues with labels and deduplication', eval2IssuePlanning);
 test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);
 test('eval-11 reports page-aware delta movement', eval11ReportDelta);
+test('scan.js rejects unsupported browser package names before install', scannerBrowserValidation);
+test('report.js escapes target-derived markdown fields', markdownEscapingRegression);
+test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingRegression);
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);
 
 const failed = results.filter((result) => !result.ok);
