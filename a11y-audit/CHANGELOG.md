@@ -1,15 +1,31 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 17
-version_date: 2026-05-31
-previous_version: 16
+version: 18
+version_date: 2026-06-03
+previous_version: 17
 change_summary: >
-  Recorded security hardening for scanner dependency installation,
-  discovery origin policy, Markdown escaping, and version-model docs.
+  Records the CI-ready CLI additions to scan.js (--sitemap, --fail-on)
+  and the new reusable composite action so consumer repos can replace
+  hand-rolled pa11y-ci steps with this skill.
 ---
 
 # Changelog
+
+## v2.1.0 -- 2026-06-03
+
+- Added CI-ready CLI flags to `scripts/scan.js`:
+  - `--sitemap <url>` discovers targets from a sitemap.xml at scan time,
+    with optional `--sitemap-find` / `--sitemap-replace` host rewriting
+    and `--sitemap-exclude <regex>` URL filtering.
+  - `--fail-on errors` makes the script exit non-zero (status 2) when
+    axe reports any violation, so the scan's exit code carries the gate
+    semantic to CI without callers parsing JSON.
+- Added a reusable GitHub composite action at
+  `.github/actions/scan/action.yml` that wraps the scanner (optional
+  http-server, scan, artifact upload). Consumer repos that previously
+  hand-rolled `pa11y-ci` now collapse to a few lines invoking this
+  action.
 
 ## v2.0.1 -- 2026-05-31
 

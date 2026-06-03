@@ -2,12 +2,14 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 3
-version_date: 2026-05-31
-previous_version: 2
+version: 4
+version_date: 2026-06-03
+previous_version: 3
 change_summary: >
-  Validates the supported browser before dependency lookup and invokes
-  dependency installation with argv rather than shell interpolation.
+  Adds CI-ready CLI: --sitemap (with optional find/replace/exclude) for
+  URL discovery, and --fail-on errors to exit non-zero when axe reports
+  violations. Lets the skill replace hand-rolled pa11y-ci steps in
+  consumer repos without changing the existing --urls path.
 */
 
 const fs = require('fs');
@@ -44,6 +46,55 @@ function splitCsv(value) {
 function validateBrowserLib(browserLib) {
   if (browserLib === 'puppeteer') return browserLib;
   throw new Error(`Unsupported browser library: ${browserLib}. This bundled script supports puppeteer only.`);
+}
+
+// ---------------------------------------------------------------------------
+// Sitemap loading
+// ---------------------------------------------------------------------------
+
+// Fetch a sitemap.xml URL, extract <loc> entries, and apply optional
+// find/replace and exclude transforms. Used by CI callers that need to scan
+// every URL on a built site without listing them in --urls. Requires the
+// global fetch (Node 18+).
+async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}) {
+  if (typeof fetch !== 'function') {
+    throw new Error('Sitemap loading requires Node.js 18+ (global fetch).');
+  }
+  const response = await fetch(sitemapUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sitemap ${sitemapUrl}: HTTP ${response.status}`);
+  }
+  const xml = await response.text();
+  const locMatches = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
+  const excludeRegex = exclude ? new RegExp(exclude) : null;
+  const urls = [];
+  for (const tag of locMatches) {
+    let url = tag.replace(/^<loc>/, '').replace(/<\/loc>$/, '').trim();
+    if (find && url.includes(find)) {
+      url = url.split(find).join(replace || '');
+    }
+    if (excludeRegex && excludeRegex.test(url)) continue;
+    urls.push(url);
+  }
+  return urls;
+}
+
+// Count axe violation instances across every scanned URL. Used by --fail-on
+// errors so the script's exit code carries the gate semantic to CI without
+// the caller having to parse the JSON output.
+function countViolations(results) {
+  let count = 0;
+  for (const r of results || []) {
+    const axe = r.axe || {};
+    if (Array.isArray(axe.violations)) {
+      for (const v of axe.violations) {
+        count += Array.isArray(v.nodes) ? v.nodes.length : 1;
+      }
+    } else if (axe.counts && typeof axe.counts.violations === 'number') {
+      count += axe.counts.violations;
+    }
+  }
+  return count;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,9 +250,24 @@ async function run() {
   }
   const runLighthouse = args.lighthouse === 'true';
   const summaryMode = args.summary === true || args.summary === 'true';
+  const failOn = typeof args['fail-on'] === 'string' ? args['fail-on'] : null;
+
+  if (args.sitemap && typeof args.sitemap === 'string') {
+    try {
+      const sitemapUrls = await loadUrlsFromSitemap(args.sitemap, {
+        find: typeof args['sitemap-find'] === 'string' ? args['sitemap-find'] : null,
+        replace: typeof args['sitemap-replace'] === 'string' ? args['sitemap-replace'] : null,
+        exclude: typeof args['sitemap-exclude'] === 'string' ? args['sitemap-exclude'] : null,
+      });
+      for (const u of sitemapUrls) urls.push(u);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js --urls url1,url2 [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url>) [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--fail-on errors]');
     process.exit(1);
   }
 
@@ -258,6 +324,15 @@ async function run() {
   }, null, 2));
 
   console.log(outputPath);
+
+  if (failOn === 'errors') {
+    const total = countViolations(results);
+    if (total > 0) {
+      console.error(`a11y scan: ${total} axe violation instance(s) across ${urls.length} URL(s) — see ${outputPath}`);
+      process.exit(2);
+    }
+    console.error(`a11y scan: 0 violations across ${urls.length} URL(s).`);
+  }
 }
 
 if (require.main === module) {
@@ -270,4 +345,6 @@ if (require.main === module) {
 module.exports = {
   splitCsv,
   validateBrowserLib,
+  loadUrlsFromSitemap,
+  countViolations,
 };

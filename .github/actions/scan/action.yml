@@ -1,0 +1,120 @@
+name: 'a11y scan'
+description: >
+  Run the skill-a11y-audit scanner (axe-core via Puppeteer) against a
+  local sitemap or explicit URL list, fail the job on any WCAG violation,
+  and upload the raw JSON results as an artifact. Replaces hand-rolled
+  pa11y-ci steps in consumer repos.
+
+inputs:
+  serve-path:
+    description: >
+      Directory to serve over http-server while scanning. Leave empty if
+      the scan target is already reachable (e.g. a preview deploy URL).
+    required: false
+    default: ''
+  port:
+    description: Port for the local http-server. Ignored when serve-path is empty.
+    required: false
+    default: '8088'
+  sitemap:
+    description: >
+      Sitemap URL to discover targets from (e.g.
+      http://localhost:8088/sitemap.xml). Combined with `urls` if both set.
+    required: false
+    default: ''
+  sitemap-find:
+    description: Substring in sitemap <loc> entries to replace before scanning.
+    required: false
+    default: ''
+  sitemap-replace:
+    description: Replacement for sitemap-find (typically the local http-server origin).
+    required: false
+    default: ''
+  sitemap-exclude:
+    description: Regex of sitemap URLs to drop (e.g. non-HTML assets).
+    required: false
+    default: ''
+  urls:
+    description: Comma-separated explicit URLs to scan, on top of any sitemap discovery.
+    required: false
+    default: ''
+  fail-on:
+    description: '`errors` to fail the job on any axe violation, or `none` to report only.'
+    required: false
+    default: 'errors'
+  output:
+    description: Path to write the scan results JSON.
+    required: false
+    default: 'a11y-scan-results.json'
+  summary:
+    description: '`true` to write the compact summary shape, `false` for full axe output.'
+    required: false
+    default: 'true'
+  node-version:
+    description: Node.js version for the scan environment.
+    required: false
+    default: '20'
+  upload-artifact:
+    description: '`true` to upload the results JSON as a workflow artifact.'
+    required: false
+    default: 'true'
+  artifact-name:
+    description: Name of the uploaded artifact.
+    required: false
+    default: 'a11y-scan-results'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Start local http-server
+      if: inputs.serve-path != ''
+      shell: bash
+      run: |
+        npx --yes http-server "${{ inputs.serve-path }}" -p "${{ inputs.port }}" -c-1 > /tmp/a11y-http.log 2>&1 &
+        echo $! > /tmp/a11y-http.pid
+        for i in $(seq 1 30); do
+          curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null && break || sleep 0.5
+        done
+        curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null || (cat /tmp/a11y-http.log; exit 1)
+
+    - name: Run a11y scan
+      shell: bash
+      env:
+        SITEMAP: ${{ inputs.sitemap }}
+        SITEMAP_FIND: ${{ inputs.sitemap-find }}
+        SITEMAP_REPLACE: ${{ inputs.sitemap-replace }}
+        SITEMAP_EXCLUDE: ${{ inputs.sitemap-exclude }}
+        URLS: ${{ inputs.urls }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        OUTPUT: ${{ inputs.output }}
+        SUMMARY: ${{ inputs.summary }}
+      run: |
+        ARGS=()
+        [ -n "$SITEMAP" ]         && ARGS+=(--sitemap "$SITEMAP")
+        [ -n "$SITEMAP_FIND" ]    && ARGS+=(--sitemap-find "$SITEMAP_FIND")
+        [ -n "$SITEMAP_REPLACE" ] && ARGS+=(--sitemap-replace "$SITEMAP_REPLACE")
+        [ -n "$SITEMAP_EXCLUDE" ] && ARGS+=(--sitemap-exclude "$SITEMAP_EXCLUDE")
+        [ -n "$URLS" ]            && ARGS+=(--urls "$URLS")
+        [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
+        [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
+        ARGS+=(--output "$OUTPUT")
+        node "${{ github.action_path }}/../../../a11y-audit/scripts/scan.js" "${ARGS[@]}"
+
+    - name: Stop local http-server
+      if: always() && inputs.serve-path != ''
+      shell: bash
+      run: |
+        if [ -f /tmp/a11y-http.pid ]; then kill "$(cat /tmp/a11y-http.pid)" 2>/dev/null || true; fi
+
+    - name: Upload results artifact
+      if: always() && inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output }}
+        if-no-files-found: ignore
