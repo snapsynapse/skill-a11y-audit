@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 18
-bundle_date: 2026-06-03
+bundle_version: 19
+bundle_date: 2026-06-04
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -169,9 +169,9 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 18
-    hash: sha256:16883f1c684aeeb8cce31f2a9cadccaaadcc10adbda04b54183104f3bcefd757
-    note: Append-only change history -- v18 records v2.1.0 CI-ready scanner additions
+    version: 19
+    hash: sha256:158c647a71d9875d5a1512fed14f7feb0b1dff916479f068d491241cd0e2d000
+    note: Append-only change history -- v19 records v2.1.1 sitemap index recursion
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -349,9 +349,9 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 4
-    hash: sha256:204dc92eb04cc97427c11a2d3ec281fdd009edad6b00ed4f85d836f9696e1598
-    note: v4 adds --sitemap discovery and --fail-on errors for CI use
+    version: 5
+    hash: sha256:f5e26661cf73fcbfaaf3ffa33fd438d4f233c4e80a2970ea34902b58cc440e5e
+    note: v5 recurses into <sitemapindex> documents for large multi-section sites
 
   - path: scripts/bootstrap-context.js
     role: script

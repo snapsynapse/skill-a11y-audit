@@ -2,14 +2,15 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 4
-version_date: 2026-06-03
-previous_version: 3
+version: 5
+version_date: 2026-06-04
+previous_version: 4
 change_summary: >
-  Adds CI-ready CLI: --sitemap (with optional find/replace/exclude) for
-  URL discovery, and --fail-on errors to exit non-zero when axe reports
-  violations. Lets the skill replace hand-rolled pa11y-ci steps in
-  consumer repos without changing the existing --urls path.
+  Recurses into <sitemapindex> documents so --sitemap works against
+  large sites that split their sitemap into per-section files
+  (publedge.org, etc.). Guards against cycles with a 50-document cap.
+  find/replace runs before child fetches so the rewritten host applies
+  recursively; exclude only filters leaf URLs.
 */
 
 const fs = require('fs');
@@ -54,17 +55,27 @@ function validateBrowserLib(browserLib) {
 
 // Fetch a sitemap.xml URL, extract <loc> entries, and apply optional
 // find/replace and exclude transforms. Used by CI callers that need to scan
-// every URL on a built site without listing them in --urls. Requires the
-// global fetch (Node 18+).
-async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}) {
+// every URL on a built site without listing them in --urls. Transparently
+// recurses into <sitemapindex> documents (large sites commonly split their
+// sitemaps into per-section files). find/replace runs before the recursion
+// fetch so the rewritten host is used for child sitemaps too. The exclude
+// regex applies only to leaf URLs, never to child-sitemap fetches.
+// Requires the global fetch (Node 18+); guards against pathological cycles.
+async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}, _seen = new Set()) {
   if (typeof fetch !== 'function') {
     throw new Error('Sitemap loading requires Node.js 18+ (global fetch).');
+  }
+  if (_seen.has(sitemapUrl)) return [];
+  _seen.add(sitemapUrl);
+  if (_seen.size > 50) {
+    throw new Error(`Sitemap recursion exceeded 50 documents (cycle?). Last: ${sitemapUrl}`);
   }
   const response = await fetch(sitemapUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch sitemap ${sitemapUrl}: HTTP ${response.status}`);
   }
   const xml = await response.text();
+  const isIndex = /<sitemapindex\b/i.test(xml);
   const locMatches = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
   const excludeRegex = exclude ? new RegExp(exclude) : null;
   const urls = [];
@@ -72,6 +83,11 @@ async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}) 
     let url = tag.replace(/^<loc>/, '').replace(/<\/loc>$/, '').trim();
     if (find && url.includes(find)) {
       url = url.split(find).join(replace || '');
+    }
+    if (isIndex) {
+      const childUrls = await loadUrlsFromSitemap(url, { find, replace, exclude }, _seen);
+      for (const c of childUrls) urls.push(c);
+      continue;
     }
     if (excludeRegex && excludeRegex.test(url)) continue;
     urls.push(url);

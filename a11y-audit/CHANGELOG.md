@@ -1,16 +1,25 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 18
-version_date: 2026-06-03
-previous_version: 17
+version: 19
+version_date: 2026-06-04
+previous_version: 18
 change_summary: >
-  Records the CI-ready CLI additions to scan.js (--sitemap, --fail-on)
-  and the new reusable composite action so consumer repos can replace
-  hand-rolled pa11y-ci steps with this skill.
+  Records v2.1.1: sitemap index recursion so --sitemap works against
+  large sites whose sitemap.xml is an index of per-section files.
 ---
 
 # Changelog
+
+## v2.1.1 -- 2026-06-04
+
+- `scripts/scan.js` (v5): `--sitemap` now transparently recurses into
+  `<sitemapindex>` documents, following each child `<sitemap><loc>` to
+  the leaf URL set. Cycle-protected (50-doc cap), and find/replace runs
+  before the child fetch so the rewritten host applies recursively.
+  Caught while wiring publedge.org to the composite action — its
+  sitemap.xml is a 7-section index, which the previous loader couldn't
+  walk.
 
 ## v2.1.0 -- 2026-06-03
 
