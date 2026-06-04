@@ -17,3 +17,6 @@ __pycache__/
 .idea/
 .venv/
 venv/
+
+# Handoff documents for AI assistants — not for public repo
+handoffs/

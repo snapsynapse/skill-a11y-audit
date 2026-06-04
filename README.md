@@ -254,7 +254,7 @@ Skill A11y Audit is free and open. If your team uses this skill, consider [spons
 
 ## About
 
-a11y-audit is a [PAICE.work](https://paice.work/) project. PAICE.work PBC is a public benefit corporation building infrastructure for productive collaboration between humans and autonomous agents.
+Skill A11y Audit is an open skill under [Snap Synapse LLC](https://snapsynapse.com/) stewardship, authored by [Sam Rogers](https://www.linkedin.com/in/samrogers). It is used in every public web page across the [PAICE portfolio](https://paice.foundation/) and is MIT-licensed for any use.
 
 ## License
 

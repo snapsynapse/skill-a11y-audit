@@ -19,7 +19,7 @@
     "type": "git",
     "url": "https://github.com/snapsynapse/skill-a11y-audit.git"
   },
-  "author": "PAICE.work PBC <https://paice.work/>",
+  "author": "Snap Synapse LLC <https://snapsynapse.com/>",
   "license": "MIT",
   "private": true,
   "scripts": {
