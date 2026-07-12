@@ -13,12 +13,14 @@ description: >
 metadata:
   skill_bundle: a11y-audit
   file_role: skill
-  version: 14
-  version_date: 2026-05-31
-  previous_version: 13
+  version: 15
+  version_date: 2026-07-11
+  previous_version: 14
   change_summary: >
-    Documented same-origin discovery defaults, cross-origin sitemap
-    opt-in, and fixed Puppeteer-only scanner dependency behavior.
+    Documented axe-core version pinning and cross-version delta guards.
+    Corrected the continuous-monitoring exclusion: CI gating via the
+    bundled composite action is supported; hosted scheduled monitoring
+    is not.
 ---
 
 # Accessibility Audit
@@ -78,6 +80,17 @@ provide `axe-core` and the chosen browser automation package.
 
 The bundled scanner supports Puppeteer only. Treat `--browser` as a
 fixed option, not a user-controlled package installer.
+
+**Version pinning and delta integrity.** axe-core rule sets change
+between releases, so scan.js pins its axe-core auto-install to a
+known-good version (`--axe-version <x.y.z|latest>` overrides it). Every
+scan records the resolved `axe_version` and `browser_version` in its
+output JSON, report.js carries `axe_version` into the audit JSON, and
+the Delta from Previous Audit section flags comparisons where the two
+audits ran different axe-core versions — rule-set drift between versions
+must not be presented as site regressions or fixes. When a
+project-resolved axe-core wins the dependency lookup, its version is
+recorded the same way.
 
 ### Platform-Specific References
 
@@ -418,8 +431,12 @@ After completing an audit, verify these quality checks:
 - **Code fixes**: reports findings but does not modify source code.
 - **VPAT generation**: does not produce Voluntary Product Accessibility
   Templates (specific legal format).
-- **Continuous monitoring**: runs on demand, not as a CI pipeline.
-  The `markdown+json` output mode provides structured data for building
-  CI integrations, but the skill itself does not run in CI.
+- **Hosted continuous monitoring**: no scheduled scanning service or
+  dashboard. CI gating *is* supported: the repo ships a composite
+  GitHub Action (`.github/actions/scan`) that runs the scanner on
+  push/PR and fails on violations, plus a workflow starter at
+  `assets/ci/github-actions/accessibility-audit.yml`. The
+  `markdown+json` output mode provides structured data for building
+  further integrations.
 - **Third-party auditing**: only audits the project's own frontend,
   not embedded third-party services.

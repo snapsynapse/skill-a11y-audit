@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 19
-bundle_date: 2026-06-04
+bundle_version: 20
+bundle_date: 2026-07-11
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
@@ -124,6 +124,20 @@ compatibility:
         Discovery is same-origin by default with explicit cross-origin
         sitemap opt-in, bounded fetches, and blocked-origin disclosure.
         Report and issue-plan Markdown now escape target-derived fields.
+    - platform: Anthropic Claude
+      model: Claude Fable 5
+      surface: Code
+      status: pass
+      date: 2026-07-11
+      skill_version: 15
+      notes: >
+        Durability review pass (v2.2.0): axe-core auto-install pinned to
+        a known-good version with --axe-version override, resolved
+        axe/browser versions recorded in scan output, report delta
+        section guards cross-version comparisons, and stale no-CI claims
+        corrected. Validated via npm run validate (15/15, including new
+        eval-11 mismatch assertions and validateAxeVersion hardening
+        regressions). Roadmap logged in HANDOFF.md.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -149,11 +163,12 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 14
-    hash: sha256:021a3984890aeb2397e4d9429b489152ea71e9e1b74b9cdd682523742e56e58a
+    version: 15
+    hash: sha256:f37b8b5dc6320ff9859f9859a501e3af0edc4d2a33a8f24e24e292e1df22f17c
     note: >
-      v14 -- documents same-origin discovery defaults, cross-origin
-      sitemap opt-in, and fixed Puppeteer-only scanner behavior
+      v15 -- documents axe-core version pinning and cross-version delta
+      guards; corrects the continuous-monitoring exclusion (CI gating
+      via the composite action is supported)
 
   - path: evals/evals.json
     role: evals
@@ -163,15 +178,18 @@ files:
 
   - path: HANDOFF.md
     role: handoff
-    version: 14
-    hash: sha256:2227befc48c47fe437cc886d5e2050984fba2215fc0bca21421db2bcc2c23fd2
-    note: v16 records executable offline eval validation and npm run validate
+    version: 15
+    hash: sha256:0ac0923168ed6e2e77d30ccda72e95dc9648e386452470b89fec799153f386e2
+    note: >
+      v15 records the 2026-07-11 durability review and the prioritized
+      roadmap (pluggable standards, SARIF, CI baseline, Playwright,
+      fix-plan artifact, authenticated pages, MCP packaging)
 
   - path: CHANGELOG.md
     role: reference
-    version: 19
-    hash: sha256:158c647a71d9875d5a1512fed14f7feb0b1dff916479f068d491241cd0e2d000
-    note: Append-only change history -- v19 records v2.1.1 sitemap index recursion
+    version: 20
+    hash: sha256:31f53dba2283bf4642b1e982f5c579e60649b8e939e71408a74cf88e61073ce9
+    note: Append-only change history -- v20 records v2.2.0 version pinning and delta guards
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -181,9 +199,11 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 2
-    hash: sha256:1958c614acffe82075663a1229edb4344a671d3c60e29700daccae4962b6a6d8
-    note: Deterministic offline eval runner with hardening regressions
+    version: 3
+    hash: sha256:04d71e82acc957fbd167bf15d1373415003d4a5d8144e4b2e87b07c644bcd1e9
+    note: >
+      Deterministic offline eval runner -- v3 adds axe version pinning
+      and cross-version delta guard regressions
 
   - path: evals/fixtures/eval-9/README.md
     role: evals
@@ -349,9 +369,11 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 5
-    hash: sha256:f5e26661cf73fcbfaaf3ffa33fd438d4f233c4e80a2970ea34902b58cc440e5e
-    note: v5 recurses into <sitemapindex> documents for large multi-section sites
+    version: 6
+    hash: sha256:0650e6d504d174911819bb2041ffa27a80c16ff0c545a9017105c2566e5bed2e
+    note: >
+      v6 pins axe-core auto-install (--axe-version override) and records
+      resolved axe/browser versions in scan output
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -367,9 +389,11 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 2
-    hash: sha256:b2546b02b4c0e1f3b23caf684ffd3ddc3057f3c0fa4842db76fc5463fddaa1cd
-    note: Deterministic report generation with Markdown escaping and origin disclosure
+    version: 3
+    hash: sha256:137f9ca0861365eb0722d390738e131652c478ce5bda5f95a0f1809973db658d
+    note: >
+      v3 carries axe_version into audit JSON and guards delta sections
+      against cross-version axe-core comparisons
 
   - path: scripts/discover.js
     role: script
@@ -415,6 +439,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 16
+    version: 17
     hash: null
     note: This file -- self-referential hash omitted

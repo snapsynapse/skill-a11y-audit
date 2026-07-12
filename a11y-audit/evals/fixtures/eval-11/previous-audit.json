@@ -1,6 +1,7 @@
 {
   "date": "2026-04-01",
   "tool": "a11y-audit report.js v1",
+  "axe_version": "4.10.2",
   "pages": [
     "https://example.com/",
     "https://example.com/blog/post-a",

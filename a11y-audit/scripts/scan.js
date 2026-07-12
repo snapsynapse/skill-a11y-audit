@@ -2,15 +2,14 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 5
-version_date: 2026-06-04
-previous_version: 4
+version: 6
+version_date: 2026-07-11
+previous_version: 5
 change_summary: >
-  Recurses into <sitemapindex> documents so --sitemap works against
-  large sites that split their sitemap into per-section files
-  (publedge.org, etc.). Guards against cycles with a 50-document cap.
-  find/replace runs before child fetches so the rewritten host applies
-  recursively; exclude only filters leaf URLs.
+  Pins axe-core auto-install to a known-good version (override with
+  --axe-version) and records the resolved axe-core and browser package
+  versions in the output JSON so downstream delta comparisons can detect
+  rule-set drift between audits.
 */
 
 const fs = require('fs');
@@ -47,6 +46,20 @@ function splitCsv(value) {
 function validateBrowserLib(browserLib) {
   if (browserLib === 'puppeteer') return browserLib;
   throw new Error(`Unsupported browser library: ${browserLib}. This bundled script supports puppeteer only.`);
+}
+
+// axe-core rule sets change between releases, so an unpinned auto-install
+// makes repeat audits drift: the same site can gain "new" violations that
+// are really new rules, which corrupts delta reports. Auto-install therefore
+// pins a known-good version. Override with --axe-version <x.y.z|latest> when
+// a newer rule set is deliberately wanted. A project- or global-resolved
+// axe-core still wins over auto-install; the resolved version is recorded in
+// the output JSON either way so report.js can flag cross-version deltas.
+const PINNED_VERSIONS = { 'axe-core': '4.12.1' };
+
+function validateAxeVersion(value) {
+  if (value === 'latest' || /^\d+\.\d+\.\d+(-[\w.]+)?$/.test(value)) return value;
+  throw new Error(`Invalid --axe-version: ${value}. Use an exact version (e.g. 4.12.1) or "latest".`);
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +167,16 @@ function findPackage(packageName, projectRoot) {
   return null;
 }
 
-function ensureDependency(packageName, projectRoot) {
+function readPkgVersion(packageRoot) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+    return typeof pkg.version === 'string' ? pkg.version : null;
+  } catch {
+    return null;
+  }
+}
+
+function ensureDependency(packageName, projectRoot, installVersion) {
   if (!/^(@[a-z0-9._-]+\/)?[a-z0-9._-]+$/i.test(packageName)) {
     console.error(`Invalid package name: ${packageName}`);
     process.exit(1);
@@ -163,8 +185,12 @@ function ensureDependency(packageName, projectRoot) {
   const found = findPackage(packageName, projectRoot);
   if (found) return found;
 
-  // Auto-install to skill-local deps directory
-  console.error(`${packageName} not found — installing to ${SKILL_DEPS_DIR}...`);
+  // Auto-install to skill-local deps directory, pinned when a known-good
+  // version is defined ("latest" falls through to the npm dist-tag).
+  const installSpec = installVersion && installVersion !== 'latest'
+    ? `${packageName}@${installVersion}`
+    : packageName;
+  console.error(`${packageName} not found — installing ${installSpec} to ${SKILL_DEPS_DIR}...`);
   fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
 
   // Create a minimal package.json if it doesn't exist
@@ -179,7 +205,7 @@ function ensureDependency(packageName, projectRoot) {
   }
 
   try {
-    const install = spawnSync('npm', ['install', '--prefix', SKILL_DEPS_DIR, packageName], {
+    const install = spawnSync('npm', ['install', '--prefix', SKILL_DEPS_DIR, installSpec], {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 120000,
@@ -267,6 +293,15 @@ async function run() {
   const runLighthouse = args.lighthouse === 'true';
   const summaryMode = args.summary === true || args.summary === 'true';
   const failOn = typeof args['fail-on'] === 'string' ? args['fail-on'] : null;
+  let axeInstallVersion = PINNED_VERSIONS['axe-core'];
+  if (typeof args['axe-version'] === 'string') {
+    try {
+      axeInstallVersion = validateAxeVersion(args['axe-version']);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  }
 
   if (args.sitemap && typeof args.sitemap === 'string') {
     try {
@@ -283,16 +318,18 @@ async function run() {
   }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url>) [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--fail-on errors]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url>) [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true] [--axe-version <x.y.z|latest>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--fail-on errors]');
     process.exit(1);
   }
 
   // Resolve dependencies (skill-local → project → global → auto-install)
-  const axeDep = ensureDependency('axe-core', rootDir);
+  const axeDep = ensureDependency('axe-core', rootDir, axeInstallVersion);
   const browserDep = ensureDependency(browserLib, rootDir);
 
-  console.error(`axe-core: ${axeDep.source}`);
-  console.error(`${browserLib}: ${browserDep.source}`);
+  const axeVersion = readPkgVersion(axeDep.root);
+  const browserVersion = readPkgVersion(browserDep.root);
+  console.error(`axe-core: ${axeDep.source}${axeVersion ? ` (v${axeVersion})` : ''}`);
+  console.error(`${browserLib}: ${browserDep.source}${browserVersion ? ` (v${browserVersion})` : ''}`);
 
   const axeSourcePath = path.join(axeDep.root, 'axe.min.js');
   const axeSource = fs.readFileSync(axeSourcePath, 'utf8');
@@ -330,6 +367,8 @@ async function run() {
     generated_at: new Date().toISOString(),
     root_dir: rootDir,
     browser: browserLib,
+    browser_version: browserVersion,
+    axe_version: axeVersion,
     axe_source: axeSourcePath,
     dependency_sources: {
       'axe-core': axeDep.source,
@@ -361,6 +400,7 @@ if (require.main === module) {
 module.exports = {
   splitCsv,
   validateBrowserLib,
+  validateAxeVersion,
   loadUrlsFromSitemap,
   countViolations,
 };

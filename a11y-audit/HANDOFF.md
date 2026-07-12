@@ -1,12 +1,13 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 14
-version_date: 2026-05-19
-previous_version: 13
+version: 15
+version_date: 2026-07-11
+previous_version: 14
 change_summary: >
-  Recorded executable offline eval validation and the npm run validate
-  CI entrypoint.
+  Recorded the 2026-07-11 durability review: axe-core version pinning
+  and cross-version delta guards implemented, the stale no-CI claims
+  corrected, and the durability/relevance/value roadmap logged.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +18,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: v16, self-contained and executable-eval validated
+## Current State: bundle v20 (release v2.2.0), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -106,9 +107,14 @@ four token-efficiency improvements, all now implemented in v10.
    headless mode. The user may need to provide authenticated session
    cookies or skip those routes.
 
-3. **axe-core version coupling.** Results depend on the installed
-   axe-core version. Different versions may report different violations.
-   The report records the version used.
+3. **axe-core version coupling — now mitigated.** Results depend on the
+   installed axe-core version. As of v2.2.0, auto-install pins a
+   known-good version (`--axe-version` overrides), scan output records
+   the resolved `axe_version`, and report.js flags deltas computed
+   across different axe-core versions instead of presenting rule-set
+   drift as regressions or fixes. Residual coupling: a project-resolved
+   axe-core still wins the lookup, so version can vary per target
+   project (recorded, and flagged on comparison).
 
 4. **Lighthouse variance.** Lighthouse scores vary between runs due to
    rendering timing. The skill runs once per page and reports the result;
@@ -119,9 +125,11 @@ four token-efficiency improvements, all now implemented in v10.
    Lighthouse CLI. The skill now treats this as a normal degraded mode
    and requires the report to state the skip reason explicitly.
 
-6. **No CI integration.** The skill runs on demand via an interactive agent. A
-   separate GitHub Actions workflow would be needed for continuous
-   accessibility monitoring.
+6. **No hosted continuous monitoring.** CI gating exists — the composite
+   action at `.github/actions/scan` (v2.1.0) runs the scanner on push/PR
+   and fails on violations, and `assets/ci/github-actions/` has a
+   workflow starter — but there is no scheduled scanning service,
+   dashboard, or trend store beyond the `markdown+json` artifacts.
 
 7. **Label creation.** Phase 6 assumes GitHub labels already exist. It
    does not create labels. If a label does not exist, `gh issue create`
@@ -159,10 +167,65 @@ All four improvements from the 2026-03-26 audit are now implemented:
    report.js directly; agent no longer reads output-contract.md or
    output-schema.json during normal runs.
 
-## Suggested Next Steps
+## Roadmap (2026-07-11 durability review)
 
-1. Run eval-2 against a real authenticated tracker for full live issue-mode validation
-2. Keep `scripts/scan.js` Puppeteer-first unless a Playwright-native project forces expansion
-3. Use `scripts/plan-issues.js` as the default dry-run step before any live ticket creation
-4. Copy updated skill back to `.claude/skills/a11y-audit/` in target projects
-5. Keep new regression fixes covered by `npm run validate` before updating bundle metadata
+A review of the skill against the current tool/skill landscape found it
+*more* load-bearing than at creation: `audit-orchestrator` dispatches to
+it, `canonical-spec-page` depends on it for its WCAG pass, and
+`gh-notifications` treats the composite action as the canonical fix for
+hand-rolled a11y CI. The moat is deterministic, CI-gateable, selector-
+level evidence (exact ratios, instance counts, template grouping) that a
+model reading source cannot reliably reproduce. The roadmap below keeps
+that moat sharp.
+
+### Done in v2.2.0
+
+- axe-core version pinning + `axe_version` recording (scan.js v6)
+- Cross-version delta guard in report.js v3 (mismatch caution in
+  markdown + `axeVersionMismatch` in JSON)
+- Stale "does not run in CI" claims corrected in SKILL.md and this file
+
+### Next, in priority order
+
+1. **Pluggable standards data (durability + relevance).** report.js
+   hardcodes the 50 WCAG 2.1 AA criteria. Extract criteria matrices to
+   data files (`standards/wcag21-aa.json`, `wcag22-aa.json`,
+   `en301549.json`) selected via `PROJECT_CONTEXT.md`. Keep WCAG 2.1 AA
+   the default — ADA Title II and current EN 301 549 cite it — but add
+   WCAG 2.2 AA (six new A/AA criteria: 2.4.11, 2.5.7, 2.5.8, 3.2.6,
+   3.3.7, 3.3.8) and an EN 301 549 mapping. Regulatory context is the
+   demand engine: EAA enforced since June 2025; ADA Title II deadline
+   for large US public entities passed April 2026 (small entities April
+   2027). Lead positioning (README, skilla11y.dev) with the deadlines.
+2. **SARIF emitter (value, small effort).** One more output format in
+   report.js unlocks GitHub Code Scanning: violations as PR annotations,
+   trend tracking in the Security tab, no dashboard to build. Makes the
+   composite action dramatically stickier.
+3. **CI baseline — `fail-on: new` (adoption unlock).** The action
+   currently fails on any violation, so legacy sites can never enable
+   the gate. Add an accepted-violations baseline file (à la ESLint/
+   Semgrep) so CI fails only on violations not in the baseline.
+4. **First-class Playwright support in scan.js.** Playwright is now the
+   majority choice; the documented "adapt it yourself" path invites the
+   ad hoc scripts the bundled scanner exists to prevent.
+5. **Remediation handoff artifact.** Keep the auditor/fixer boundary,
+   but emit an optional `fix-plan.json` (violation → selector → file
+   hint → remediation recipe, ordered by template-group impact) that a
+   downstream coding agent can consume as a work order.
+6. **Authenticated pages.** Cookie/header injection or a storage-state
+   file for scan.js opens everything behind a login wall — where most
+   real app surface lives (see Known Limitation 2).
+7. **MCP server packaging.** Wrap scan/discover/report as MCP tools
+   (see the portfolio `mcp-server-publish` skill) for a second
+   distribution channel independent of skill-format churn.
+
+### Standing hygiene
+
+- Run eval-2 against a real authenticated tracker for full live
+  issue-mode validation (still pending)
+- Use `scripts/plan-issues.js` as the default dry-run step before any
+  live ticket creation
+- Copy updated skill back to `.claude/skills/a11y-audit/` in target
+  projects
+- Keep new regression fixes covered by `npm run validate` before
+  updating bundle metadata

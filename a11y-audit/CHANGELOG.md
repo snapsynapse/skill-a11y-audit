@@ -1,15 +1,49 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 19
-version_date: 2026-06-04
-previous_version: 18
+version: 20
+version_date: 2026-07-11
+previous_version: 19
 change_summary: >
-  Records v2.1.1: sitemap index recursion so --sitemap works against
-  large sites whose sitemap.xml is an index of per-section files.
+  Records v2.2.0: axe-core version pinning, cross-version delta guards,
+  the continuous-monitoring doc correction, and the durability/relevance
+  roadmap logged in HANDOFF.md.
 ---
 
 # Changelog
+
+## v2.2.0 -- 2026-07-11
+
+- **axe-core version pinning** (`scripts/scan.js` v6): auto-install now
+  pins axe-core to a known-good version (4.12.1) instead of floating on
+  `latest`; `--axe-version <x.y.z|latest>` overrides the pin. axe rule
+  sets change between releases, so an unpinned install made repeat
+  audits drift — the same site could gain "new" violations that were
+  really new rules. Scan output now records the resolved `axe_version`
+  and `browser_version` regardless of which resolution tier (skill-deps,
+  project, global) supplied the package.
+- **Cross-version delta guard** (`scripts/report.js` v3): the audit JSON
+  now carries `axe_version`, and the Delta from Previous Audit section
+  compares it against the previous audit's recorded version. A mismatch
+  renders a caution that rule-set drift can masquerade as regressions or
+  fixes; a previous audit with no recorded version gets a quieter note.
+  `json.delta` exposes `previousAxeVersion`, `currentAxeVersion`, and
+  `axeVersionMismatch`.
+- **Doc correction** (SKILL.md v15): the "What This Skill Does NOT Do"
+  list claimed the skill does not run in CI, contradicting the composite
+  action shipped at `.github/actions/scan` since v2.1.0. The exclusion
+  is now scoped to *hosted* continuous monitoring; CI gating is a
+  supported, documented path.
+- **Eval coverage** (`evals/run-evals.js` v3): eval-11 fixtures now
+  carry mismatched axe versions (4.10.2 → 4.12.1) and assert both the
+  JSON fields and the markdown caution; the scanner hardening regression
+  covers `validateAxeVersion` injection rejection and the pinned
+  install-spec invocation.
+- **Roadmap logged** (HANDOFF.md v15): durability/relevance/value
+  assessment recorded — pluggable standards data (WCAG 2.2, EN 301 549),
+  SARIF output, CI baseline (`fail-on: new`), Playwright support,
+  remediation handoff artifact, authenticated-page scanning, MCP
+  packaging.
 
 ## v2.1.1 -- 2026-06-04
 

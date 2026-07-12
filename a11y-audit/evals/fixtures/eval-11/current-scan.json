@@ -2,6 +2,8 @@
   "generated_at": "2026-04-23T00:00:00.000Z",
   "root_dir": "/tmp/eval-11",
   "browser": "puppeteer",
+  "browser_version": "25.3.0",
+  "axe_version": "4.12.1",
   "axe_source": "/tmp/node_modules/axe-core/axe.min.js",
   "dependency_sources": {
     "axe-core": "fixture",

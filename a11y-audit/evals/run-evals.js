@@ -2,10 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 2
-version_date: 2026-05-31
-previous_version: 1
-change_summary: Added scanner, discovery origin policy, and Markdown escaping hardening regressions.
+version: 3
+version_date: 2026-07-11
+previous_version: 2
+change_summary: >
+  Covers axe-core version pinning (validateAxeVersion, pinned install
+  spec) and the eval-11 cross-version delta guard assertions.
 */
 
 const assert = require('assert');
@@ -279,6 +281,11 @@ function eval11ReportDelta() {
     'https://example.com/blog/post-b',
   ]);
   assert.ok(!json.delta.changed.some((entry) => entry.rule === 'region'), 'region should not be changed');
+  assert.strictEqual(json.axe_version, '4.12.1');
+  assert.strictEqual(json.delta.previousAxeVersion, '4.10.2');
+  assert.strictEqual(json.delta.currentAxeVersion, '4.12.1');
+  assert.strictEqual(json.delta.axeVersionMismatch, true);
+  assert.match(md, /axe-core version changed between audits \(4\.10\.2 → 4\.12\.1\)/);
   assert.match(md, /## Delta from Previous Audit/);
   assert.match(md, /\*\*Changed\*\*:/);
   assert.match(md, /color-contrast:/);
@@ -292,8 +299,15 @@ function scannerBrowserValidation() {
     () => scan.validateBrowserLib('puppeteer; echo injected'),
     /Unsupported browser library/
   );
+  assert.strictEqual(scan.validateAxeVersion('4.12.1'), '4.12.1');
+  assert.strictEqual(scan.validateAxeVersion('latest'), 'latest');
+  assert.throws(
+    () => scan.validateAxeVersion('4.12.1; rm -rf /'),
+    /Invalid --axe-version/
+  );
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
-  assert.match(scanSource, /spawnSync\('npm', \['install', '--prefix', SKILL_DEPS_DIR, packageName\]/);
+  assert.match(scanSource, /spawnSync\('npm', \['install', '--prefix', SKILL_DEPS_DIR, installSpec\]/);
+  assert.match(scanSource, /const PINNED_VERSIONS = \{ 'axe-core':/);
   assert.doesNotMatch(scanSource, /execSync\(`npm install/);
 }
 

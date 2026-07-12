@@ -2,10 +2,14 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 2
-version_date: 2026-05-31
-previous_version: 1
-change_summary: Escapes target-derived Markdown fields and discloses discovery origin policy.
+version: 3
+version_date: 2026-07-11
+previous_version: 2
+change_summary: >
+  Carries the scanner's axe-core version into the audit JSON and guards
+  the delta section: when the previous audit ran a different axe-core
+  version (or recorded none), the report says so instead of presenting
+  rule-set drift as regressions or fixes.
 */
 
 const fs = require('fs');
@@ -299,7 +303,7 @@ function buildSummary(violationMap) {
 // ---------------------------------------------------------------------------
 
 function buildJson(opts) {
-  const { date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl } = opts;
+  const { date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion } = opts;
   const violations = [];
   for (const v of violationMap.values()) {
     const wcag = v.tags.map(axeTagToSC).filter(Boolean);
@@ -322,6 +326,7 @@ function buildJson(opts) {
   };
   if (expectedUrl) json.expected_url = expectedUrl;
   if (runtimeUrl) json.runtime_url = runtimeUrl;
+  if (axeVersion) json.axe_version = axeVersion;
   return json;
 }
 
@@ -329,8 +334,16 @@ function buildJson(opts) {
 // Delta comparison
 // ---------------------------------------------------------------------------
 
-function computeDelta(currentViolationMap, previousJson) {
+function computeDelta(currentViolationMap, previousJson, currentAxeVersion) {
   if (!previousJson || !previousJson.violations) return null;
+
+  // axe-core rule sets change between releases: a rule appearing or
+  // disappearing across versions is not evidence the site changed. Surface
+  // the version pair so the report can qualify cross-version comparisons.
+  const previousAxeVersion = typeof previousJson.axe_version === 'string' ? previousJson.axe_version : null;
+  const axeVersionMismatch = previousAxeVersion && currentAxeVersion
+    ? previousAxeVersion !== currentAxeVersion
+    : null; // unknown — at least one audit did not record its axe version
 
   const prevMap = new Map();
   for (const v of previousJson.violations) {
@@ -392,6 +405,9 @@ function computeDelta(currentViolationMap, previousJson) {
   return {
     previousDate: previousJson.date,
     previousPages: previousJson.pages ? previousJson.pages.length : null,
+    previousAxeVersion,
+    currentAxeVersion: currentAxeVersion || null,
+    axeVersionMismatch,
     fixed,
     newRules,
     changed,
@@ -553,6 +569,13 @@ function buildMarkdown(opts) {
     ln();
     ln(`Compared against audit from ${normalizeCell(delta.previousDate)}${delta.previousPages ? ` (${delta.previousPages} pages)` : ''}.`);
     ln();
+    if (delta.axeVersionMismatch === true) {
+      ln(`> **Caution:** axe-core version changed between audits (${normalizeCell(delta.previousAxeVersion)} → ${normalizeCell(delta.currentAxeVersion)}). Rule-set differences between axe-core releases can appear as new or fixed rules. Treat cross-version deltas as advisory, not as evidence of site regressions or fixes.`);
+      ln();
+    } else if (!delta.previousAxeVersion && delta.currentAxeVersion) {
+      ln(`> **Note:** The previous audit did not record its axe-core version (current run: ${normalizeCell(delta.currentAxeVersion)}). This comparison assumes an unchanged rule set.`);
+      ln();
+    }
     ln(`| Metric | Previous | Current | Change |`);
     ln('|---|---|---|---|');
     const sign = (n) => n > 0 ? `+${n}` : `${n}`;
@@ -710,6 +733,7 @@ function main() {
   const discoverData = discoverPath ? JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8')) : null;
   const previousPath = args.previous || null;
   const previousJson = previousPath ? JSON.parse(fs.readFileSync(path.resolve(previousPath), 'utf8')) : null;
+  const axeVersion = typeof scanData.axe_version === 'string' ? scanData.axe_version : null;
   const date = new Date().toISOString().slice(0, 10);
 
   // Aggregate
@@ -723,12 +747,12 @@ function main() {
   const sharedTemplates = discoverData ? detectSharedTemplates(scanData, discoverData) : [];
 
   // Delta comparison
-  const delta = previousJson ? computeDelta(violationMap, previousJson) : null;
+  const delta = previousJson ? computeDelta(violationMap, previousJson, axeVersion) : null;
 
   // Generate outputs
   const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta };
   const markdown = buildMarkdown(mdOpts);
-  const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl });
+  const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion });
   if (discoverData) {
     json.sampling = {
       source: discoverData.source,
@@ -755,6 +779,9 @@ function main() {
   if (delta) {
     json.delta = {
       previousDate: delta.previousDate,
+      previousAxeVersion: delta.previousAxeVersion,
+      currentAxeVersion: delta.currentAxeVersion,
+      axeVersionMismatch: delta.axeVersionMismatch,
       previousTotal: delta.previousTotal,
       currentTotal: delta.currentTotal,
       netDelta: delta.netDelta,

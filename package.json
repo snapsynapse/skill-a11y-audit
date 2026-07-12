@@ -1,6 +1,6 @@
 {
   "name": "skill-a11y-audit",
-  "version": "2.0.1",
+  "version": "2.2.0",
   "description": "Drop-in accessibility audit for AI coding agents. WCAG 2.1 AA scanning with template-aware sampling, remediation hints, and progress tracking.",
   "keywords": [
     "accessibility",
