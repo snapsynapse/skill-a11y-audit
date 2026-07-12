@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 21
+bundle_version: 22
 bundle_date: 2026-07-11
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -144,14 +144,14 @@ compatibility:
       surface: Desktop
       status: pass
       date: 2026-07-11
-      skill_version: 21
+      skill_version: 22
       notes: >
         External landscape review repositioned the project as a narrow,
-        self-hosted regression gate for large web estates. Implemented stable
-        finding fingerprints, accepted baseline creation, --fail-on new,
-        axe-version comparison guards, composite Action inputs, truthful
-        evidence terminology, and eval-13. Validated via npm run validate
-        (16/16 deterministic checks); no live browser scan was required.
+        self-hosted regression gate for large web estates. The v2.3.1 patch
+        corrects public installation, migrates assistant-guide v0.3.3 to
+        GuideCheck 0.7.0, and adds eval-14 distribution drift coverage.
+        Validated via npm run validate (18/18 deterministic checks) plus the
+        GuideCheck Level 3 reference verifier.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -186,24 +186,23 @@ files:
 
   - path: evals/evals.json
     role: evals
-    version: 10
-    hash: sha256:7b7dd63919d4d6550d93168d1bacb0dba37d90ebb1104cf1a19adc8b3e7ecd33
-    note: 13 eval cases -- eval-13 covers accepted-baseline regression gating
+    version: 11
+    hash: sha256:6f85835ad0250c2ed9b9579618c7e077ed42fe2affe2125aa7f50268790a3562
+    note: 14 eval cases -- eval-14 covers distribution and guide drift
 
   - path: HANDOFF.md
     role: handoff
-    version: 16
-    hash: sha256:bb0b89411e252a44770df0f7490ee41aabd6d467b445c0520516ce0f1c7887ff
+    version: 17
+    hash: sha256:f51066687209961b5d305665c7f04efdb334230c18bccaffbaf74cc8fbf4ddc2
     note: >
-      v16 records the external landscape refresh, narrower large-site
-      regression position, released baseline gate, synchronized user/agent
-      surfaces, revised roadmap, and v2.3 field-validation questions
+      v17 records corrected installation, GuideCheck 0.7.0 enforcement,
+      eval-14, and the v2.3.1 patch release
 
   - path: CHANGELOG.md
     role: reference
-    version: 21
-    hash: sha256:bdae73c1843c4b097b27c19d84e94ac36192306c3866d98bf82247fdfc109be8
-    note: Append-only history -- v21 records v2.3.0 and assistant guide v0.3.2
+    version: 22
+    hash: sha256:24c0b9158f28f19b14720bc6e4813e8ac7dddbc28a41f8235d981c1ed3756395
+    note: Append-only history -- v22 records v2.3.1 and assistant guide v0.3.3
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -213,11 +212,11 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 4
-    hash: sha256:62b9cc2e5bfec636fdb0c8149bf2725cfa6f5e07dcf2a90db5f88da6dd45ef6e
+    version: 5
+    hash: sha256:40d29695fdd658ed3a57710374b7f9ec90169b9c3d649bbe8ff547db2b56a734
     note: >
-      Deterministic offline eval runner -- v4 covers fingerprint and
-      accepted/new/resolved baseline comparison behavior
+      Deterministic offline eval runner -- v5 adds distribution-surface,
+      guide byte-profile, executable-pin, and sidecar-manifest checks
 
   - path: evals/fixtures/eval-9/README.md
     role: evals

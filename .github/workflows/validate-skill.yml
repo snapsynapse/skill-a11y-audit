@@ -18,3 +18,13 @@ jobs:
 
       - name: Validate skill bundle
         run: npm run validate
+
+      - name: Checkout pinned GuideCheck verifier
+        uses: actions/checkout@v4
+        with:
+          repository: snapsynapse/guidecheck
+          ref: 3a5cbb5e880db00e0a8f44b68d89df0a73e53a45
+          path: .guidecheck
+
+      - name: Verify assistant guide against GuideCheck 0.7.0
+        run: python3 .guidecheck/scripts/guidecheck_verify.py assistant-guide.txt --pretty

@@ -2,15 +2,15 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 4
+version: 5
 version_date: 2026-07-11
-previous_version: 3
+previous_version: 4
 change_summary: >
-  Covers stable finding normalization, baseline comparison, new and
-  resolved finding counts, and axe-version baseline protection.
+  Adds distribution-surface and GuideCheck artifact drift regressions.
 */
 
 const assert = require('assert');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
@@ -470,6 +470,72 @@ function dependencyPolicyCheck() {
   assert.match(skill, /ask before invoking scan\.js/);
 }
 
+function installationSurfaceRegression() {
+  const canonical = 'npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit';
+  const surfaces = [
+    'README.md',
+    'docs/index.html',
+    'llms.txt',
+    'docs/llms.txt',
+  ].map((file) => [file, fs.readFileSync(repoPath(file), 'utf8')]);
+
+  for (const [file, text] of surfaces) {
+    const normalized = text.replace(/\\\s*\n\s*/g, ' ').replace(/\s+/g, ' ');
+    assert.ok(normalized.includes(canonical), `${file} must include the canonical install command`);
+    assert.doesNotMatch(text, /~\/Git\/skill-a11y-audit/, `${file} must not assume a local clone`);
+    assert.doesNotMatch(text, /\.codex\/skills/, `${file} must not publish the stale Codex skill path`);
+  }
+  for (const [file, text] of surfaces.slice(0, 2)) {
+    assert.match(text, /\.claude\/skills/, `${file} must identify the Claude Code skill location`);
+    assert.match(text, /\.agents\/skills/, `${file} must identify the Codex skill location`);
+  }
+  assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
+  assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
+}
+
+function assistantGuideArtifactRegression() {
+  const rootGuide = fs.readFileSync(repoPath('assistant-guide.txt'));
+  const hostedGuide = fs.readFileSync(repoPath('docs/.well-known/assistant-guide.txt'));
+  const text = rootGuide.toString('ascii');
+  assert.deepStrictEqual(rootGuide, hostedGuide, 'root and hosted assistant guides must match');
+  assert.ok(rootGuide.length <= 8192, `assistant guide exceeds 8192 bytes: ${rootGuide.length}`);
+  assert.ok([...rootGuide].every((byte) => byte <= 0x7f), 'assistant guide must be ASCII');
+  assert.doesNotMatch(text, /\r|\t/, 'assistant guide must not contain CR or tab bytes');
+  text.split('\n').forEach((line, index) => {
+    assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
+  });
+  assert.match(text, /^profile-version: 0\.7\.0$/m);
+  assert.match(text, /^guide-version: 0\.3\.3$/m);
+  assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
+
+  const scriptHashes = new Map([
+    ['a11y-audit/scripts/discover.js', null],
+    ['a11y-audit/scripts/scan.js', null],
+    ['a11y-audit/scripts/report.js', null],
+  ]);
+  for (const script of scriptHashes.keys()) {
+    const digest = crypto.createHash('sha256').update(fs.readFileSync(repoPath(script))).digest('hex');
+    scriptHashes.set(script, digest);
+  }
+  for (const block of text.matchAll(/\[action\]\n([\s\S]*?)\n\[\/action\]/g)) {
+    const command = block[1].match(/^command: (.+)$/m)?.[1] || '';
+    const localScript = [...scriptHashes.keys()].find((script) => {
+      const installedPath = script.replace(/^a11y-audit\//, 'SKILL_DIR/');
+      return command.includes(installedPath);
+    });
+    if (!localScript) continue;
+    const declared = block[1].match(/^exec-sha256: ([0-9a-f]{64})$/m)?.[1];
+    assert.strictEqual(declared, scriptHashes.get(localScript), `stale exec-sha256 for ${localScript}`);
+  }
+
+  const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
+  const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
+  assert.match(manifest, /^guide-version: 0\.3\.3$/m);
+  assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
+  assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
+  assert.match(manifest, /^profile-version: 0\.7\.0$/m);
+}
+
 resetDir(tmpRoot);
 
 if (validateMode) {
@@ -491,6 +557,8 @@ test('scan.js fingerprints and compares accepted accessibility baselines', scann
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);
 test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingRegression);
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);
+test('public install surfaces stay current and synchronized', installationSurfaceRegression);
+test('assistant guide artifacts stay bounded, pinned, and synchronized', assistantGuideArtifactRegression);
 
 const failed = results.filter((result) => !result.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);

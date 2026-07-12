@@ -28,8 +28,9 @@
 
 ## How to use
 
-Install: copy `a11y-audit/` into `.claude/skills/` (Claude Code) or
-your agent's skills directory.
+Install: `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
+Claude Code project skills live in `.claude/skills/`; Codex project skills
+live in `.agents/skills/`.
 
 Prompt: "Run an accessibility audit on this project."
 

@@ -344,5 +344,32 @@
         "Fixture comparison produces one accepted, one new, and one resolved finding"
       ]
     }
+  },
+  {
+    "id": "eval-14",
+    "prompt": "Validate the public distribution and assistant-guide surfaces before release. The website, README, and discovery text must expose one working GitHub install command, use current Claude Code and Codex skill locations, and never assume a local clone. The root and hosted assistant guides must be identical, fit the GuideCheck byte profile, pin every repository-owned executable, and match their sidecar manifest.",
+    "expectations": {
+      "structural": [
+        "Every public surface contains the canonical npx skills add command",
+        "Claude Code uses .claude/skills and Codex uses .agents/skills",
+        "Root and hosted guide bytes are identical and no larger than 8192 bytes",
+        "Guide version, SHA-256, byte count, and profile version match the sidecar manifest"
+      ],
+      "behavioral": [
+        "No install instruction assumes ~/Git/skill-a11y-audit already exists",
+        "No public surface advertises the stale .codex/skills path",
+        "Every local script action carries a SHA-256 matching the current entry point",
+        "The pinned GuideCheck 0.7.0 reference verifier reports Level 3 with no blockers"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-11",
+      "notes": [
+        "Deterministic distribution and artifact checks run inside npm run validate",
+        "The actual GuideCheck 0.7.0 reference verifier runs as a separate CI release gate",
+        "Guide provenance remains a separate Level 4 publication concern"
+      ]
+    }
   }
 ]

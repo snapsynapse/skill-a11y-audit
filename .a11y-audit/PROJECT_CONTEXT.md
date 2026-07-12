@@ -33,3 +33,5 @@
 - product_boundary: Open self-hosted accessibility regression evidence; not certification, remediation, or enterprise monitoring
 - differentiator: Deterministic template-aware sampling, stable findings, and legacy-friendly CI adoption
 - interoperability: Keep scripts callable by broader agent ecosystems instead of competing on agent breadth
+- distribution: Publish one cross-agent GitHub install command, with current agent-native paths as manual fallbacks
+- release_validation: Require bundle evals plus the pinned GuideCheck reference verifier for assistant-guide changes

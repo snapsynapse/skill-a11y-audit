@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 16
+version: 17
 version_date: 2026-07-11
-previous_version: 15
+previous_version: 16
 change_summary: >
-  Repositions the project after external landscape research and records
-  the accepted-baseline regression gate implemented for the next release.
+  Records the v2.3.1 distribution correction, GuideCheck 0.7.0 migration,
+  and release-surface drift evals.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v21 (release v2.3.0), self-contained and executable-eval validated
+## Current State: bundle v22 (release v2.3.1), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -207,6 +207,18 @@ remediate code, or replace enterprise monitoring.
 - Agent entry points (SKILL description, OpenAI UI metadata, llms surfaces,
   and assistant guide v0.3.2) now use the same regression-gate contract
 
+### Done in v2.3.1
+
+- Public installation now starts from the GitHub repository with
+  `npx skills add`; it no longer assumes a clone already exists
+- Claude Code paths remain `.claude/skills`; current Codex paths are
+  `.agents/skills`, replacing the stale `.codex/skills` instruction
+- Assistant guide v0.3.3 now targets GuideCheck profile 0.7.0, fits the
+  8 KiB and 120-byte-line envelope, and hash-pins local script entry points
+- The pinned GuideCheck 0.7.0 reference verifier is a CI release gate
+- Eval-14 prevents install-surface, hosted-guide, manifest, byte-profile,
+  and executable-hash drift
+
 ### Next, in priority order
 
 1. **Bring template-aware selection into the CI Action.** The Action's
@@ -272,7 +284,7 @@ feature lists of larger agent suites or hosted platforms.
   issue-mode validation (still pending)
 - Use `scripts/plan-issues.js` as the default dry-run step before any
   live ticket creation
-- Copy updated skill back to `.claude/skills/a11y-audit/` in target
-  projects
+- Install or update from GitHub with `npx skills add`; use manual copies only
+  as a documented fallback
 - Keep new regression fixes covered by `npm run validate` before
   updating bundle metadata

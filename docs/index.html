@@ -465,7 +465,7 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Updated <time datetime="2026-07-11">July 11, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.3.0</span>
+      <span class="version">v2.3.1</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
@@ -573,21 +573,42 @@
 <section id="install">
   <div class="container">
     <h2>Install</h2>
-    <p>Copy the skill folder into the skill directory used by Claude Code, Codex, or another Agent Skills-compatible coding agent.</p>
+    <p>Install directly from GitHub with the open Skills CLI. It detects supported agents and lets you choose project or global scope.</p>
 
     <div class="code-grid">
       <div class="code-block">
-        <h3>Claude Code</h3>
-<pre tabindex="0">cp -r ~/Git/skill-a11y-audit/a11y-audit/ \
-  /path/to/project/.claude/skills/a11y-audit/</pre>
-        <p class="annotation">Install per project for a stable, reviewable snapshot.</p>
+        <h3>Interactive install</h3>
+<pre tabindex="0">npx skills add \
+  snapsynapse/skill-a11y-audit \
+  --skill a11y-audit</pre>
+        <p class="annotation">Review the source, then select Claude Code, Codex, or another supported agent.</p>
       </div>
 
       <div class="code-block">
-        <h3>Codex</h3>
-<pre tabindex="0">cp -r ~/Git/skill-a11y-audit/a11y-audit/ \
-  "${CODEX_HOME:-$HOME/.codex}/skills/a11y-audit/"</pre>
-        <p class="annotation">Install into the user skill directory so Codex can discover it.</p>
+        <h3>Choose an agent</h3>
+<pre tabindex="0"># Claude Code, current project
+npx skills add \
+  snapsynapse/skill-a11y-audit \
+  --skill a11y-audit \
+  --agent claude-code \
+  --yes
+
+# Codex, current project
+npx skills add \
+  snapsynapse/skill-a11y-audit \
+  --skill a11y-audit \
+  --agent codex \
+  --yes</pre>
+        <p class="annotation">Add <code>--global</code> to make the skill available across projects.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>Manual fallback</h3>
+<pre tabindex="0">Claude project: .claude/skills/a11y-audit/
+Claude personal: ~/.claude/skills/a11y-audit/
+Codex project: .agents/skills/a11y-audit/
+Codex personal: ~/.agents/skills/a11y-audit/</pre>
+        <p class="annotation">Copy the repository's <code>a11y-audit/</code> folder to one of these supported locations.</p>
       </div>
 
       <div class="code-block">
@@ -597,7 +618,7 @@
       </div>
 
       <div class="code-block">
-        <h3>Run the scripts directly</h3>
+        <h3>Run from a repository clone</h3>
 <pre tabindex="0">node a11y-audit/scripts/discover.js \
   --url http://localhost:3000 \
   --output /tmp/discover.json
@@ -610,7 +631,7 @@ node a11y-audit/scripts/scan.js \
 node a11y-audit/scripts/report.js \
   --input /tmp/scan.json \
   --output-dir ./audits</pre>
-        <p class="annotation">Each script writes a JSON file the next step reads.</p>
+        <p class="annotation">These paths assume the repository is cloned locally. Each script writes JSON the next step reads.</p>
       </div>
     </div>
   </div>
@@ -680,7 +701,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.3.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.3.1 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>

@@ -75,17 +75,26 @@ Output modes:
 
 ## Install
 
-### Claude Code
+Install from GitHub with the open Skills CLI:
 
-Copy the `a11y-audit/` folder into `.claude/skills/` in the target project:
-
-```bash
-cp -r a11y-audit/ /path/to/your-project/.claude/skills/a11y-audit/
+```sh
+npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit
 ```
 
-### Codex
+The interactive flow detects supported agents and lets you choose project or
+global scope. To select an agent non-interactively:
 
-Copy or symlink into your Codex skills directory.
+```sh
+# Claude Code, current project (.claude/skills/)
+npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit --agent claude-code --yes
+
+# Codex, current project (.agents/skills/)
+npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit --agent codex --yes
+```
+
+Add `--global` for a personal install. Manual fallback locations are
+`~/.claude/skills/a11y-audit/` for Claude Code and
+`~/.agents/skills/a11y-audit/` for Codex. Review the skill before installing.
 
 ## Quick Start
 
@@ -154,9 +163,10 @@ assistant use:
 - Web: https://skilla11y.dev/.well-known/assistant-guide.txt
 - Repository copy: [assistant-guide.txt](assistant-guide.txt)
 
-The guide is a plain-text instruction surface for installing the skill,
-running audits, generating reports, and making narrow maintenance edits. It
-does not make audit results a legal conformance certification.
+The guide is a plain-text instruction surface for installing the skill and
+running bounded audits. The GuideCheck 0.7.0 reference verifier currently
+reports Level 3 with no blockers. This form claim does not make the guide safe
+or make audit results a legal conformance certification.
 
 ## How It Works
 

@@ -1,15 +1,35 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 21
+version: 22
 version_date: 2026-07-11
-previous_version: 20
+previous_version: 21
 change_summary: >
-  Records the unreleased legacy-friendly baseline gate and the narrower
-  large-web-estate regression positioning from the July landscape review.
+  Records corrected cross-agent installation and GuideCheck 0.7.0
+  conformance enforcement for v2.3.1.
 ---
 
 # Changelog
+
+## v2.3.1 -- 2026-07-11
+
+- **Install correction:** public surfaces now install directly from GitHub
+  with `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
+  Manual fallbacks use `.claude/skills` for Claude Code and `.agents/skills`
+  for Codex; the stale `.codex/skills` path and assumed local clone are gone.
+- **GuideCheck enforcement:** assistant guide v0.3.3 targets profile 0.7.0,
+  fits the 8 KiB and 120-byte-line limits, and hash-pins repository-owned
+  scripts. The reference verifier reports Level 3 with no blockers.
+- **Release gates:** CI runs the pinned GuideCheck 0.7.0 verifier. Eval-14
+  also guards install surfaces, hosted/root guide equality, byte constraints,
+  executable hashes, and sidecar manifest integrity.
+
+## Assistant guide v0.3.3 -- 2026-07-11
+
+- Narrowed scope to public install and bounded audit execution.
+- Updated the profile and verifier contract to GuideCheck 0.7.0.
+- Reduced the artifact from 9,099 to 7,554 bytes and wrapped all lines.
+- Added SHA-256 pins for discover, scan, and report entry points.
 
 ## v2.3.0 -- 2026-07-11
 
