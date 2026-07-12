@@ -2,10 +2,10 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
+version: 2
 version_date: 2026-03-03
-previous_version: null
-change_summary: Added a helper that creates a workspace-local PROJECT_CONTEXT.md from simple inputs.
+previous_version: 1
+change_summary: Adds optional regression-gate and baseline fields to generated project context.
 */
 
 const fs = require('fs');
@@ -50,6 +50,8 @@ const mode = args.output_mode || 'markdown';
 const reportPath = args.report_path || 'docs/accessibility/audits/audit-YYYY-MM-DD.md';
 const routes = splitCsv(args.routes);
 const priorityRoutes = splitCsv(args.priority_routes);
+const failOn = typeof args.fail_on === 'string' ? args.fail_on : null;
+const baselinePath = args.baseline_path || '.a11y-audit/baseline.json';
 
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -80,6 +82,17 @@ const lines = [
 
 if (mode !== 'markdown') {
   lines.push('- json_path: docs/accessibility/audits/audit-YYYY-MM-DD.json');
+}
+
+if (failOn) {
+  lines.push(
+    '',
+    '## Regression Gate',
+    '',
+    `- fail_on: ${failOn}`,
+    `- baseline_path: ${baselinePath}`,
+    '- baseline_policy: Baseline changes require explicit review; never refresh automatically in CI.'
+  );
 }
 
 lines.push('', '## References', '', '- conformance_docs: docs/accessibility/', '- manual_testing_guide: docs/testing_qa/');

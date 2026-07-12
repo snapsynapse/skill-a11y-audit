@@ -317,5 +317,32 @@
         "Discovery continued with http://base.test/sitemap.xml and selected only same-origin scan targets"
       ]
     }
+  },
+  {
+    "id": "eval-13",
+    "prompt": "Adopt accessibility CI on a legacy site that already has violations. Create a reviewable accepted baseline, scan the same routes again, and fail only when a new rule-route-selector finding appears. Report accepted, new, and resolved finding counts, and do not silently compare baselines created with a different axe-core version.",
+    "expectations": {
+      "structural": [
+        "Baseline JSON records schema version, axe-core version, fingerprint model, and accepted findings",
+        "Current scan output reports accepted, new, and resolved counts",
+        "Each finding has a stable fingerprint derived from rule, normalized route, and normalized axe target"
+      ],
+      "behavioral": [
+        "Equivalent local and preview origins for the same route do not create different fingerprints",
+        "Existing accepted findings do not fail a --fail-on new run",
+        "New findings fail the gate and resolved findings are reported",
+        "An axe-core version mismatch stops comparison unless explicitly overridden"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-11",
+      "notes": [
+        "Validated deterministically in evals/run-evals.js without browser or network dependencies",
+        "Route normalization removes origin, query, fragment, duplicate slashes, and trailing slash drift",
+        "Target normalization collapses whitespace and preserves nested axe target segments",
+        "Fixture comparison produces one accepted, one new, and one resolved finding"
+      ]
+    }
   }
 ]

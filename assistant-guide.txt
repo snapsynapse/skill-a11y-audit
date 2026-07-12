@@ -4,12 +4,12 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.2.0
-guide-version: 0.3.1
+guide-version: 0.3.2
 applies-to: skill-a11y-audit 2.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
-last-reviewed: 2026-06-03
+last-reviewed: 2026-07-11
 reviewed-by: Snap Synapse LLC
 status: active
 recommended-verifier: https://guidecheck.org/verify
@@ -21,7 +21,8 @@ Task scope
 This guide covers assistant use of the skill-a11y-audit repository for
 installing the skill into another workspace, running local accessibility
 audits, generating reports, validating the skill bundle, and making narrow
-maintenance edits to this repository. It does not certify audit results as
+maintenance edits to this repository. It also covers explicit creation and
+use of accepted accessibility baselines for regression-only CI gates. It does not certify audit results as
 legal conformance, does not authorize production deployment, and does not
 permit access to secrets, private customer data, or unrelated repositories.
 
@@ -118,6 +119,28 @@ notes: Runs browser automation and may auto-install axe-core and Puppeteer into 
 [/action]
 
 [action]
+id: write-reviewed-baseline
+class: code-executing, networked, persistence-changing
+approval: required
+command: node a11y-audit/scripts/scan.js --urls URL_LIST --output SCAN_JSON --summary --write-baseline BASELINE_JSON
+runner: argv
+cwd: TARGET_WORKSPACE
+egress: URL_LIST
+notes: Creates or replaces an accepted baseline after human review. Never invoke automatically in CI or describe accepted findings as conformant.
+[/action]
+
+[action]
+id: scan-new-findings
+class: code-executing, networked
+approval: required
+command: node a11y-audit/scripts/scan.js --urls URL_LIST --output SCAN_JSON --summary --baseline BASELINE_JSON --fail-on new
+runner: argv
+cwd: TARGET_WORKSPACE
+egress: URL_LIST
+notes: Fails only for findings outside the reviewed baseline. Stop on an axe-core version mismatch rather than silently refreshing the baseline.
+[/action]
+
+[action]
 id: generate-report
 class: code-executing, persistence-changing
 approval: required
@@ -153,7 +176,8 @@ authenticated pages, browser profiles, or unrelated repositories. Stop before
 installing dependencies, running browser automation, creating issue tracker
 tickets, publishing releases, pushing commits, or changing CI. Stop if the
 target URL is ambiguous, if the scan would cross domains, if the output path is
-outside the approved workspace, or if a verifier reports a blocking finding.
+outside the approved workspace, if a baseline change has not been reviewed, or
+if a verifier reports a blocking finding.
 
 When requesting approval, show the action block or proposed write scope and use:
 I am about to perform a {class} action from assistant-guide.txt:
@@ -165,6 +189,8 @@ Acceptance checklist
 The task is complete when the assistant has used the current SKILL.md, kept
 work inside the approved scope, produced the requested audit/report/change, and
 reported what was run, what files changed, and any skipped checks or blockers.
+If a baseline was created or changed, report its path, accepted finding count,
+axe-core version, and the fact that acceptance is not conformance.
 For repository maintenance, validation should pass or the assistant should
 explain why it could not be run. For audit work, output must state that results
 are automation-assisted and identify manual testing still required.

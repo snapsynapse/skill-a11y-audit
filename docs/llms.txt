@@ -1,8 +1,8 @@
 # a11y-audit
 
-> Drop-in accessibility audit skill for AI coding agents. WCAG 2.1 AA
-> compliance scanning with template-aware page sampling, shared-template
-> detection, remediation hints, and progress tracking.
+> Open, self-hosted accessibility regression evidence for large web estates.
+> Template-aware sampling, stable finding fingerprints, and accepted
+> baselines let CI block new barriers without requiring zero existing debt.
 
 ## What this skill does
 
@@ -11,7 +11,20 @@
 - Classifies pages into template groups and selects representatives
 - Produces structured reports with prioritized findings and fix guidance
 - Tracks progress between audits (delta comparison)
+- Creates reviewable accepted baselines and can fail CI only on new findings
 - Auto-installs its own dependencies (axe-core, Puppeteer)
+
+## Where it fits
+
+- Use Storybook or authored Playwright tests for component and interaction coverage.
+- Use this project for repository-native evidence across large route and template sets.
+- Use an enterprise platform for hosted monitoring, program dashboards, and managed manual testing.
+
+## Boundaries
+
+- Automated evidence does not certify WCAG or legal conformance.
+- The skill reports findings and guidance; it does not modify application source.
+- It does not provide hosted monitoring, VPAT generation, or screen-reader simulation.
 
 ## How to use
 
@@ -24,6 +37,7 @@ Or run scripts directly:
 
 - `scripts/discover.js --url <base-url>`: discover pages and select representatives
 - `scripts/scan.js --urls <url-list>`: scan pages with axe-core
+- `scripts/scan.js --urls <url-list> --baseline <file> --fail-on new`: run a regression gate
 - `scripts/report.js --input <scan.json>`: generate markdown + JSON report
 
 ## Key files
@@ -43,7 +57,7 @@ Or run scripts directly:
 2. Findings by Rule (violation details, WCAG mapping)
 3. Quick Fixes (one-liner remediation per rule)
 4. Color Contrast Details (exact ratios and selectors)
-5. WCAG 2.1 AA Compliance Matrix (50 success criteria)
+5. WCAG 2.1 AA Automated Evidence Matrix (50 success criteria; not certification)
 6. Delta from Previous Audit (fixed, new, changed)
 7. Remediation Priority (ranked by severity)
 8. Sampling Strategy (template groups and coverage)
@@ -58,5 +72,5 @@ Or run scripts directly:
 ## Compatibility
 
 - Claude Code (tested, primary target)
-- OpenAI Codex (tested, partial)
+- OpenAI Codex (tested)
 - Any agent that reads markdown skill files

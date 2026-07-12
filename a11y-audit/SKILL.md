@@ -1,26 +1,18 @@
 ---
 name: a11y-audit
 description: >
-  Run accessibility audits on web projects combining automated scanning
-  (axe-core, Lighthouse) with WCAG 2.1 AA compliance mapping, manual check
-  guidance, and structured reporting. Output is configurable: markdown
-  report only, markdown plus machine-readable JSON, or markdown plus issue
-  tracker integration. Use this skill whenever the user mentions
+  Run deterministic accessibility audits and regression gates on web
+  projects, especially large sites with many routes and shared templates.
+  Combines axe-core and optional Lighthouse with template-aware sampling,
+  stable finding fingerprints, accepted baselines, WCAG 2.1 AA evidence
+  mapping, manual check guidance, and structured reporting. Output is
+  configurable: markdown report only, markdown plus machine-readable JSON,
+  or markdown plus issue tracker integration. Use this skill whenever the user mentions
   "accessibility audit", "a11y audit", "WCAG audit", "accessibility check",
-  "compliance scan", or asks to check a web project for accessibility
-  issues. Also trigger when the user wants to verify WCAG conformance or
-  map findings to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
-metadata:
-  skill_bundle: a11y-audit
-  file_role: skill
-  version: 15
-  version_date: 2026-07-11
-  previous_version: 14
-  change_summary: >
-    Documented axe-core version pinning and cross-version delta guards.
-    Corrected the continuous-monitoring exclusion: CI gating via the
-    bundled composite action is supported; hosted scheduled monitoring
-    is not.
+  "compliance scan", "accessibility baseline", "new accessibility
+  regressions", or asks to check a web project for accessibility issues.
+  Also trigger when the user wants evidence for WCAG conformance review or
+  mapping to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
 ---
 
 # Accessibility Audit
@@ -52,7 +44,7 @@ Prefer bundled helpers over ad hoc generation when they fit:
   Lighthouse execution intent. Use `--summary` to reduce output size
   (keeps full violation detail, strips node data from passes/inapplicable).
 - `scripts/report.js` generates the markdown report and JSON data file
-  from scan.js output. Handles WCAG compliance matrix, violation
+  from scan.js output. Handles the WCAG evidence matrix, violation
   aggregation, and color-contrast detail extraction deterministically.
 - `scripts/discover.js` identifies template groups on large sites and
   selects representative pages for scanning. Reads sitemap.xml first,
@@ -133,12 +125,36 @@ simple generated file is sufficient.
 
 The `markdown+json` mode writes a companion file alongside the report:
 `audit-YYYY-MM-DD.json` containing the raw axe-core results, Lighthouse
-scores, and the compliance matrix as structured data. This file is
+scores, and the evidence matrix as structured data. This file is
 machine-readable and can be consumed by CI pipelines, dashboards, or
 trend-tracking tools.
 
 The `markdown+issues` mode requires additional configuration in the
 context file (see Phase 6).
+
+### Regression Gate
+
+For an established site with existing accessibility debt, prefer an
+accepted baseline over an all-or-nothing gate:
+
+```bash
+# Create a baseline only after reviewing the current findings.
+node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --write-baseline .a11y-audit/baseline.json
+
+# Fail only when the current scan introduces a finding outside it.
+node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --baseline .a11y-audit/baseline.json \
+  --fail-on new
+```
+
+The scanner fingerprints each finding from its axe rule, normalized
+route, and normalized axe target. Baselines record the axe-core version;
+version mismatches stop comparison unless deliberately overridden. Never
+refresh a baseline automatically in CI. Review and commit baseline
+changes as an explicit acceptance decision.
 
 ---
 
@@ -278,12 +294,12 @@ For each page, collect:
 - `lighthouseScore`: 0-100 (if available)
 - `lighthouseAudits`: failed audit details (if available)
 
-### Phase 3 -- Compliance Mapping
+### Phase 3 -- Standards Evidence Mapping
 
 **Purpose:** Map automated findings to WCAG 2.1 AA success criteria and
 any project-specific standards.
 
-`scripts/report.js` handles the compliance matrix deterministically. It
+`scripts/report.js` handles the evidence matrix deterministically. It
 hardcodes all 50 WCAG 2.1 Level A and AA criteria, maps axe tags to
 success criteria, and produces the matrix as part of its markdown and
 JSON output. You do not need to build the matrix manually.
@@ -434,7 +450,8 @@ After completing an audit, verify these quality checks:
 - **Hosted continuous monitoring**: no scheduled scanning service or
   dashboard. CI gating *is* supported: the repo ships a composite
   GitHub Action (`.github/actions/scan`) that runs the scanner on
-  push/PR and fails on violations, plus a workflow starter at
+  push/PR and can fail on all violations or only findings outside an
+  accepted baseline, plus a workflow starter at
   `assets/ci/github-actions/accessibility-audit.yml`. The
   `markdown+json` output mode provides structured data for building
   further integrations.

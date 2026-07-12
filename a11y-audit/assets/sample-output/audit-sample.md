@@ -60,11 +60,11 @@ Lighthouse was skipped: Lighthouse disabled for this run.
 - **landmark-one-main** (moderate, 2 instances): Wrap the primary content area in a `<main>` element. This also resolves most `region` violations.
 - **heading-order** (moderate, 2 instances): Heading levels should increase by one (h1 → h2 → h3). Do not skip levels.
 
-## WCAG 2.1 AA Compliance Matrix
+## WCAG 2.1 AA Automated Evidence Matrix
 
-> This is an automation-assisted status view, not a conformance certification.
+> This records automated evidence only. A pass means the configured automated checks found no failure; it does not establish conformance.
 
-| SC | Name | Level | Status |
+| SC | Name | Level | Automated status |
 |---|---|---|---|
 | **Perceivable** | | | |
 | SC 1.1.1 | Non-text Content | A | Pass |

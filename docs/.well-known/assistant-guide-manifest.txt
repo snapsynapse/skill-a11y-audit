@@ -1,11 +1,11 @@
 guide-path: /.well-known/assistant-guide.txt
-guide-version: 0.3.1
-guide-sha256: b9a128d6663ae1023a5a62e573cbec491b2fd395179a35240833983452573d65
-guide-bytes: 7949
-immutable-release-url: https://github.com/snapsynapse/skill-a11y-audit/releases/tag/assistant-guide-v0.3.1
+guide-version: 0.3.2
+guide-sha256: 0ea7428328e430aed312fbbb39fbd4d45e4d3e26b56b31d0fcf349238bd4b6d8
+guide-bytes: 9099
+immutable-release-url: https://github.com/snapsynapse/skill-a11y-audit/releases/tag/assistant-guide-v0.3.2
 profile: human-verifiable-assistant-guide
 profile-version: 0.2.0
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
-released-at: 2026-06-03T00:00:00Z
+released-at: 2026-07-11T00:00:00Z
 changelog-url: https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/CHANGELOG.md

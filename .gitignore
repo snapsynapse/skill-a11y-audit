@@ -3,7 +3,9 @@
 node_modules/
 .codex/
 .claude/
-.a11y-audit/
+.a11y-audit/*
+!.a11y-audit/PROJECT_CONTEXT.md
+!.a11y-audit/baseline.json
 dist/
 coverage/
 tmp/

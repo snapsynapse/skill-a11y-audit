@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
+version: 2
 version_date: 2026-03-03
-previous_version: null
+previous_version: 1
 change_summary: >
-  Added a dedicated reference for markdown and JSON output requirements,
-  including degraded Lighthouse behavior and report section rules.
+  Renames the compliance matrix as an automated evidence matrix and
+  requires explicit language that automated passes do not prove conformance.
 ---
 
 # Output Contract
@@ -20,7 +20,7 @@ Write a markdown report with these sections in order:
 1. Header
 2. Executive Summary
 3. Automated Scan Results
-4. WCAG 2.1 AA Compliance Matrix
+4. WCAG 2.1 AA Automated Evidence Matrix
 5. Delta from Previous Audit
 6. Project-Specific Standard
 7. Manual Testing Recommendations

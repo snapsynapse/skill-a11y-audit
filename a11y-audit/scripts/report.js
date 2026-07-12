@@ -2,14 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 3
+version: 4
 version_date: 2026-07-11
-previous_version: 2
+previous_version: 3
 change_summary: >
-  Carries the scanner's axe-core version into the audit JSON and guards
-  the delta section: when the previous audit ran a different axe-core
-  version (or recorded none), the report says so instead of presenting
-  rule-set drift as regressions or fixes.
+  Renames the WCAG compliance matrix as an automated evidence matrix and
+  clarifies that automated passes do not establish conformance.
 */
 
 const fs = require('fs');
@@ -204,7 +202,7 @@ function detectSharedTemplates(scanData, discoverData) {
 }
 
 // ---------------------------------------------------------------------------
-// WCAG compliance matrix
+// WCAG automation evidence matrix
 // ---------------------------------------------------------------------------
 
 function buildMatrix(passTags, failTags, inapplicableTags) {
@@ -544,13 +542,13 @@ function buildMarkdown(opts) {
     ln();
   }
 
-  // 4. WCAG 2.1 AA Compliance Matrix
-  ln('## WCAG 2.1 AA Compliance Matrix');
+  // 4. WCAG 2.1 AA Automated Evidence Matrix
+  ln('## WCAG 2.1 AA Automated Evidence Matrix');
   ln();
-  ln('> This is an automation-assisted status view, not a conformance certification.');
+  ln('> This records automated evidence only. A pass means the configured automated checks found no failure; it does not establish conformance.');
   ln();
   let currentPrinciple = '';
-  ln('| SC | Name | Level | Status |');
+  ln('| SC | Name | Level | Automated status |');
   ln('|---|---|---|---|');
   for (const c of WCAG_CRITERIA) {
     if (c.principle !== currentPrinciple) {

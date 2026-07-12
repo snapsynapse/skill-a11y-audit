@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 3
+version: 4
 version_date: 2026-07-11
-previous_version: 2
+previous_version: 3
 change_summary: >
-  Covers axe-core version pinning (validateAxeVersion, pinned install
-  spec) and the eval-11 cross-version delta guard assertions.
+  Covers stable finding normalization, baseline comparison, new and
+  resolved finding counts, and axe-version baseline protection.
 */
 
 const assert = require('assert');
@@ -149,6 +149,7 @@ function validateYamlFiles() {
     'a11y-audit/references/issue-trackers.md',
     'a11y-audit/agents/openai.yaml',
     'a11y-audit/assets/ci/github-actions/accessibility-audit.yml',
+    '.github/actions/scan/action.yml',
   ];
   const code = [
     'require "yaml"',
@@ -174,12 +175,17 @@ function validateBootstrapSmoke() {
     '--routes', '/,/about',
     '--priority_routes', '/',
     '--output_mode', 'markdown',
+    '--fail_on', 'new',
+    '--baseline_path', '.a11y-audit/baseline.json',
   ]);
   const outputPath = run.stdout.trim();
   assert.strictEqual(outputPath, path.join(dir, '.a11y-audit', 'PROJECT_CONTEXT.md'));
   const context = fs.readFileSync(outputPath, 'utf8');
   assert.match(context, /- name: Demo/);
   assert.match(context, /- output_mode: markdown/);
+  assert.match(context, /## Regression Gate/);
+  assert.match(context, /- fail_on: new/);
+  assert.match(context, /- baseline_path: \.a11y-audit\/baseline\.json/);
 }
 
 function runDiscoverFixture(id) {
@@ -311,6 +317,65 @@ function scannerBrowserValidation() {
   assert.doesNotMatch(scanSource, /execSync\(`npm install/);
 }
 
+function scannerBaselineRegression() {
+  const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  const previousResults = [
+    {
+      url: 'http://127.0.0.1:3000/about/?preview=1#team',
+      axe: {
+        violations: [
+          {
+            id: 'color-contrast',
+            impact: 'serious',
+            nodes: [{ target: ['main   .card', '.label'] }],
+          },
+          {
+            id: 'region',
+            impact: 'moderate',
+            nodes: [{ target: ['body > div'] }],
+          },
+        ],
+      },
+    },
+  ];
+  const currentResults = [
+    {
+      url: 'https://preview.example.com/about',
+      axe: {
+        violations: [
+          {
+            id: 'color-contrast',
+            impact: 'serious',
+            nodes: [{ target: ['main .card', '.label'] }],
+          },
+          {
+            id: 'button-name',
+            impact: 'critical',
+            nodes: [{ target: ['button.icon'] }],
+          },
+        ],
+      },
+    },
+  ];
+  const previous = scan.collectFindings(previousResults);
+  const current = scan.collectFindings(currentResults);
+  assert.strictEqual(scan.normalizeRoute(previousResults[0].url), '/about');
+  assert.strictEqual(scan.normalizeTarget(['main   .card', '.label']), 'main .card >> .label');
+  const baseline = scan.buildBaseline(previous, '4.12.1');
+  const comparison = scan.compareBaseline(current, baseline);
+  assert.strictEqual(comparison.baseline_count, 2);
+  assert.strictEqual(comparison.current_count, 2);
+  assert.strictEqual(comparison.existing_count, 1);
+  assert.strictEqual(comparison.new_count, 1);
+  assert.strictEqual(comparison.resolved_count, 1);
+  assert.strictEqual(comparison.new_findings[0].rule, 'button-name');
+  assert.strictEqual(baseline.schema_version, 1);
+  assert.strictEqual(baseline.axe_version, '4.12.1');
+  const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
+  assert.match(scanSource, /--fail-on new requires --baseline/);
+  assert.match(scanSource, /Baseline axe-core version mismatch/);
+}
+
 function markdownEscapingRegression() {
   const dir = tmpPath('markdown-escaping');
   resetDir(dir);
@@ -422,6 +487,7 @@ test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);
 test('eval-11 reports page-aware delta movement', eval11ReportDelta);
 test('scan.js rejects unsupported browser package names before install', scannerBrowserValidation);
+test('scan.js fingerprints and compares accepted accessibility baselines', scannerBaselineRegression);
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);
 test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingRegression);
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);

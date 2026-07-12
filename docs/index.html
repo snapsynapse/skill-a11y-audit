@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>skill-a11y-audit &mdash; Zero-setup WCAG audits for AI agents</title>
-  <meta name="description" content="skill-a11y-audit is a drop-in WCAG 2.1 AA auditor for AI coding agents. Template-aware page sampling, zero-config dependency resolution, and actionable remediation hints &mdash; no setup required in your target project.">
+  <title>skill-a11y-audit &mdash; Accessibility regression gates for large web estates</title>
+  <meta name="description" content="Open, self-hosted accessibility regression evidence for large web estates. Template-aware sampling and baseline-friendly CI prevent newly introduced barriers without requiring zero existing violations.">
   <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
   <meta name="author" content="Sam Rogers">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
@@ -20,8 +20,8 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="skill-a11y-audit">
-  <meta property="og:title" content="skill-a11y-audit">
-  <meta property="og:description" content="Zero-setup WCAG audits for AI agents. Drop-in, template-aware, actionable.">
+  <meta property="og:title" content="skill-a11y-audit — Accessibility regression gates for large sites">
+  <meta property="og:description" content="Template-aware accessibility evidence and legacy-friendly CI for large web estates.">
   <meta property="og:image" content="https://skilla11y.dev/imgs/og.png">
   <meta property="og:image:alt" content="skill-a11y-audit — Zero-setup WCAG audits for AI agents">
   <meta property="og:image:width" content="1200">
@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-04-09T00:00:00Z">
+  <meta property="article:modified_time" content="2026-07-11T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -41,8 +41,8 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="skill-a11y-audit">
-  <meta name="twitter:description" content="Zero-setup WCAG audits for AI agents. Drop-in, template-aware, actionable.">
+  <meta name="twitter:title" content="skill-a11y-audit — Accessibility regression gates for large sites">
+  <meta name="twitter:description" content="Template-aware accessibility evidence and legacy-friendly CI for large web estates.">
   <meta name="twitter:image" content="https://skilla11y.dev/imgs/og.png">
   <meta name="twitter:creator" content="@snapsynapse">
 
@@ -53,12 +53,12 @@
     "@type": "TechArticle",
     "headline": "skill-a11y-audit",
     "alternativeHeadline": "Zero-setup WCAG audits for AI agents",
-    "description": "skill-a11y-audit is a drop-in accessibility auditor for AI coding agents. It discovers site structure automatically via template-aware sampling, runs axe-core scans with zero configuration, and produces actionable WCAG 2.1 AA compliance reports with remediation hints and delta tracking.",
+    "description": "skill-a11y-audit is an open, self-hosted accessibility regression gate for large web estates. It discovers representative templates, records selector-level axe evidence, and can fail CI only on newly introduced findings.",
     "inLanguage": "en",
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-04-09",
+    "dateModified": "2026-07-11",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -322,6 +322,14 @@
     .pillar h3 { color: var(--accent); font-size: 1rem; }
     .pillar p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0; }
 
+    /* Comparison tables */
+    .table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.85rem 1rem; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--code-bg); color: var(--text); font-weight: 700; }
+    td { background: var(--bg); }
+    .fit-note { max-width: 760px; color: var(--text-muted); }
+
     /* Buttons */
     .cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn {
@@ -349,7 +357,7 @@
       gap: 1.5rem;
       margin-top: 1.5rem;
     }
-    .code-block { text-align: left; }
+    .code-block { text-align: left; min-width: 0; }
     .code-block h3 { font-size: 0.95rem; margin-bottom: 0.75rem; }
     .code-block .annotation {
       font-size: 0.85rem;
@@ -406,8 +414,9 @@
       .pipeline { font-size: 0.85rem; }
       .pillars { grid-template-columns: 1fr; }
       .code-grid { grid-template-columns: 1fr; }
+      nav .container { flex-wrap: wrap; justify-content: center; }
       nav .links { display: none; }
-      nav .links.mobile-compact { display: flex; gap: 0.75rem; }
+      nav .links.mobile-compact { display: flex; width: 100%; justify-content: center; gap: 0.75rem; flex-wrap: wrap; }
       .footer-grid { flex-direction: column; }
       pre { font-size: 0.75rem; }
     }
@@ -429,7 +438,8 @@
       <span>skill-a11y-audit</span>
     </a>
     <div class="links mobile-compact">
-      <a href="#why">Why</a>
+      <a href="#fit">Fit</a>
+      <a href="#baseline">Baseline</a>
       <a href="#install">Install</a>
       <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Skill</a>
       <a href="https://github.com/snapsynapse/skill-a11y-audit" class="gh-star" target="_blank" rel="noopener" aria-label="Star snapsynapse/skill-a11y-audit on GitHub">
@@ -446,20 +456,20 @@
 
 <section class="hero">
   <div class="container">
-    <h1>Zero-setup WCAG audits for AI agents.</h1>
-    <p class="subtitle">Drop-in accessibility audit for AI coding agents. Template-aware scanning, actionable remediation hints, zero-config dependency resolution.</p>
+    <h1>Prevent new accessibility barriers across large web estates.</h1>
+    <p class="subtitle">Open, self-hosted regression evidence for maintainers and coding agents. Template-aware sampling, stable findings, and legacy-friendly CI.</p>
     <p class="byline">
       By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-04-09">April 9, 2026</time>
+      Updated <time datetime="2026-07-11">July 11, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.0.0</span>
+      <span class="version">v2.3.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
-    <p class="hook">Most accessibility tools require manual setup, produce raw violation dumps, and leave you to figure out what to fix first. skill-a11y-audit discovers your site structure automatically, groups violations by shared template, and tells you exactly what to fix and where &mdash; in one command.</p>
+    <p class="hook">Strict accessibility gates are hard to adopt when a site already has debt. skill-a11y-audit discovers representative templates, preserves selector-level evidence, and can block only newly introduced findings instead of demanding a perfect first run.</p>
 
     <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1200" height="630">
 
@@ -481,7 +491,7 @@
 <section class="alt" id="why">
   <div class="container">
     <h2>Why skill-a11y-audit?</h2>
-    <p>Most accessibility tools scan one page at a time, return raw rule IDs, and require manual setup in every project they touch. That model doesn&rsquo;t scale to real sites or AI agents. skill-a11y-audit is built around three different assumptions.</p>
+    <p>Framework tests cover components and enterprise platforms cover full programs. skill-a11y-audit occupies the repository-native middle: deterministic evidence across large public sites without a hosted dashboard or a zero-violation prerequisite.</p>
 
     <div class="pillars">
       <div class="pillar">
@@ -489,8 +499,8 @@
         <p>Large sites have hundreds of pages but only a handful of distinct templates. The skill identifies your templates, scans representatives from each group, and maps every violation to the template it affects. Fix one component; resolve issues across hundreds of pages.</p>
       </div>
       <div class="pillar">
-        <h3>Tells you what to fix</h3>
-        <p>Every violation includes a one-liner remediation hint &mdash; not just the rule ID. Findings are ranked by severity and grouped by template so you know which fix has the highest impact before you open a single file.</p>
+        <h3>Legacy-friendly regression gates</h3>
+        <p>Review and commit the current findings as an accepted baseline, then fail CI only when a change introduces a new rule, route, and selector fingerprint. Existing debt stays visible without blocking adoption.</p>
       </div>
       <div class="pillar">
         <h3>Zero configuration</h3>
@@ -500,28 +510,88 @@
   </div>
 </section>
 
+<section id="fit">
+  <div class="container">
+    <h2>Where it fits</h2>
+    <p class="fit-note">This is deliberately narrower than an accessibility-agent suite and lighter than an enterprise monitoring platform. It handles the repository-native regression layer between them.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Accessibility tool landscape comparison">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Layer</th>
+            <th scope="col">Best for</th>
+            <th scope="col">What this project adds</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Storybook, Playwright, axe</th>
+            <td>Components, states, and authored test journeys</td>
+            <td>Site-wide route discovery and deterministic template representatives</td>
+          </tr>
+          <tr>
+            <th scope="row">Accessibility agent suites</th>
+            <td>Guidance, remediation, standards research, and broad orchestration</td>
+            <td>A small executable evidence pipeline they can invoke without recreating scan logic</td>
+          </tr>
+          <tr>
+            <th scope="row">Enterprise platforms</th>
+            <td>Hosted monitoring, dashboards, manual programs, and organizational reporting</td>
+            <td>Open, self-hosted artifacts and CI policy stored with the repository</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="canonical-note"><strong>Best fit:</strong> public sites, documentation systems, government information services, static generators, and content estates with many URLs generated by shared templates.</p>
+  </div>
+</section>
+
+<section class="alt" id="baseline">
+  <div class="container">
+    <h2>Adopt the gate without fixing everything first</h2>
+    <p class="fit-note">A baseline is an explicit record of accepted findings—not a claim that they are harmless. Review it, commit it, and let CI reject only newly introduced rule, route, and selector fingerprints.</p>
+    <div class="code-grid">
+      <div class="code-block">
+        <h3>1. Create a reviewed baseline</h3>
+<pre tabindex="0">node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --write-baseline .a11y-audit/baseline.json</pre>
+        <p class="annotation">Create or update this file only after reviewing the current findings.</p>
+      </div>
+      <div class="code-block">
+        <h3>2. Block new barriers</h3>
+<pre tabindex="0">node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --baseline .a11y-audit/baseline.json \
+  --fail-on new</pre>
+        <p class="annotation">The scan reports accepted, new, and resolved findings and guards axe-core version drift.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="install">
   <div class="container">
     <h2>Install</h2>
-    <p>Copy or symlink the skill folder into any project&rsquo;s <code>.claude/skills/</code> directory. Then ask your AI agent to run an audit.</p>
+    <p>Copy the skill folder into the skill directory used by Claude Code, Codex, or another Agent Skills-compatible coding agent.</p>
 
     <div class="code-grid">
       <div class="code-block">
-        <h3>Copy (one-time snapshot)</h3>
+        <h3>Claude Code</h3>
 <pre tabindex="0">cp -r ~/Git/skill-a11y-audit/a11y-audit/ \
   /path/to/project/.claude/skills/a11y-audit/</pre>
-        <p class="annotation">Stable snapshot of the skill at install time.</p>
+        <p class="annotation">Install per project for a stable, reviewable snapshot.</p>
       </div>
 
       <div class="code-block">
-        <h3>Symlink (always latest)</h3>
-<pre tabindex="0">ln -s ~/Git/skill-a11y-audit/a11y-audit \
-  /path/to/project/.claude/skills/a11y-audit</pre>
-        <p class="annotation">Always uses the latest version of the skill.</p>
+        <h3>Codex</h3>
+<pre tabindex="0">cp -r ~/Git/skill-a11y-audit/a11y-audit/ \
+  "${CODEX_HOME:-$HOME/.codex}/skills/a11y-audit/"</pre>
+        <p class="annotation">Install into the user skill directory so Codex can discover it.</p>
       </div>
 
       <div class="code-block">
-        <h3>Invoke via Claude Code</h3>
+        <h3>Ask your coding agent</h3>
 <pre>Run an accessibility audit on this project.</pre>
         <p class="annotation">The skill runs discover &rarr; scan &rarr; report automatically.</p>
       </div>
@@ -533,6 +603,7 @@
   --output /tmp/discover.json
 
 node a11y-audit/scripts/scan.js \
+  --urls http://localhost:3000/ \
   --root . --summary \
   --output /tmp/scan.json
 
@@ -553,6 +624,7 @@ node a11y-audit/scripts/report.js \
 <pre tabindex="0">## Executive Summary
 Pages scanned: 22 of 746  ·  Template groups: 16
 Violations: 3  ·  Severity: 1 critical, 1 serious, 1 moderate
+Baseline: 27 accepted  ·  1 new  ·  2 resolved
 
 ## Findings by Rule
 
@@ -576,9 +648,29 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-04-09">2026-04-09</time>.
+      Last substantive revision: <time datetime="2026-07-11">2026-07-11</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
+  </div>
+</section>
+
+<section id="limits">
+  <div class="container">
+    <h2>What it does not claim</h2>
+    <div class="pillars">
+      <div class="pillar">
+        <h3>Not certification</h3>
+        <p>Automated evidence does not prove WCAG or legal conformance. Reports identify manual checks that still require people and assistive technology.</p>
+      </div>
+      <div class="pillar">
+        <h3>Not an automatic fixer</h3>
+        <p>The project preserves an auditor/fixer boundary. It reports evidence and remediation guidance but does not modify application source.</p>
+      </div>
+      <div class="pillar">
+        <h3>Not hosted monitoring</h3>
+        <p>Artifacts and policy stay in your repository. Use an enterprise platform when you need dashboards, organizational workflows, or managed manual testing.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -588,7 +680,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.0.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.3.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>
@@ -596,7 +688,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
         <a href="https://github.com/snapsynapse/skill-a11y-audit" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Skill</a>
         <a href="/.well-known/assistant-guide.txt">assistant-guide.txt</a>
-        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
         <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revisions</a>
         <a href="https://github.com/sponsors/snapsynapse" target="_blank" rel="noopener">Sponsor</a>
       </div>

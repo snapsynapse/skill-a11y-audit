@@ -1,9 +1,8 @@
 name: 'a11y scan'
 description: >
   Run the skill-a11y-audit scanner (axe-core via Puppeteer) against a
-  local sitemap or explicit URL list, fail the job on any WCAG violation,
-  and upload the raw JSON results as an artifact. Replaces hand-rolled
-  pa11y-ci steps in consumer repos.
+  local sitemap or explicit URL list, fail on all or only newly introduced
+  violations, and upload the raw JSON results as an artifact.
 
 inputs:
   serve-path:
@@ -39,9 +38,13 @@ inputs:
     required: false
     default: ''
   fail-on:
-    description: '`errors` to fail the job on any axe violation, or `none` to report only.'
+    description: '`errors` for any violation, `new` for findings outside the accepted baseline, or `none`.'
     required: false
     default: 'errors'
+  baseline:
+    description: Path to an accepted accessibility baseline JSON file. Required when fail-on is `new`.
+    required: false
+    default: ''
   output:
     description: Path to write the scan results JSON.
     required: false
@@ -91,6 +94,7 @@ runs:
         SITEMAP_EXCLUDE: ${{ inputs.sitemap-exclude }}
         URLS: ${{ inputs.urls }}
         FAIL_ON: ${{ inputs.fail-on }}
+        BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
         SUMMARY: ${{ inputs.summary }}
       run: |
@@ -101,6 +105,7 @@ runs:
         [ -n "$SITEMAP_EXCLUDE" ] && ARGS+=(--sitemap-exclude "$SITEMAP_EXCLUDE")
         [ -n "$URLS" ]            && ARGS+=(--urls "$URLS")
         [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
+        [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
         ARGS+=(--output "$OUTPUT")
         node "${{ github.action_path }}/../../../a11y-audit/scripts/scan.js" "${ARGS[@]}"

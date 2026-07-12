@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
+version: 2
 version_date: 2026-03-03
-previous_version: null
+previous_version: 1
 change_summary: >
-  Added a canonical workspace-local PROJECT_CONTEXT template with
-  minimal and issue-tracker examples for audit configuration.
+  Adds accepted-baseline paths, fail-on policy, and explicit baseline
+  review guidance for legacy-friendly CI adoption.
 ---
 
 # Project Context Template
@@ -60,6 +60,12 @@ Use this file as the canonical shape for
 - report_path: docs/accessibility/audits/audit-YYYY-MM-DD.md
 - json_path: docs/accessibility/audits/audit-YYYY-MM-DD.json
 
+## Regression Gate
+
+- fail_on: new
+- baseline_path: .a11y-audit/baseline.json
+- baseline_policy: Changes require explicit review and commit
+
 ## Issue Tracker
 
 - issue_tracker: github
@@ -90,6 +96,9 @@ Use this file as the canonical shape for
 - `output_mode`: `markdown`, `markdown+json`, or `markdown+issues`.
 - `report_path`: Workspace-relative markdown report path.
 - `json_path`: Workspace-relative JSON output path when JSON is enabled.
+- `fail_on`: `errors`, `new`, or `none`. Prefer `new` for established sites with accepted debt.
+- `baseline_path`: Workspace-relative accepted-finding baseline used when `fail_on` is `new`.
+- `baseline_policy`: Human-readable rule for reviewing and updating the accepted baseline.
 - `issue_tracker`: `github`, `gitlab`, `linear`, or `jira`.
 - `issue_severity_threshold`: Lowest priority that should create tickets.
 - `issue_labels_priority`: Priority labels in P0-P3 order.
@@ -124,6 +133,12 @@ Use this when the project only needs a straightforward markdown audit.
 
 - output_mode: markdown
 - report_path: docs/accessibility/audits/audit-YYYY-MM-DD.md
+
+## Regression Gate
+
+- fail_on: new
+- baseline_path: .a11y-audit/baseline.json
+- baseline_policy: Only update after reviewing every newly accepted finding
 ```
 
 ## `markdown+issues` Example

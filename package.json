@@ -1,13 +1,16 @@
 {
   "name": "skill-a11y-audit",
-  "version": "2.2.0",
-  "description": "Drop-in accessibility audit for AI coding agents. WCAG 2.1 AA scanning with template-aware sampling, remediation hints, and progress tracking.",
+  "version": "2.3.0",
+  "description": "Open accessibility regression evidence for large web estates, with template-aware sampling and legacy-friendly CI baselines.",
   "keywords": [
     "accessibility",
     "a11y",
     "wcag",
     "axe-core",
     "audit",
+    "accessibility-regression",
+    "accessibility-baseline",
+    "ci",
     "agent-skill",
     "claude-code",
     "puppeteer",

@@ -1,10 +1,11 @@
 bundle: a11y-audit
-bundle_version: 20
+bundle_version: 21
 bundle_date: 2026-07-11
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
-  AA compliance mapping, manual check guidance, and configurable output:
+  AA evidence mapping, manual check guidance, accepted accessibility
+  baselines, and configurable output:
   markdown report only, markdown plus JSON for CI, or markdown plus issue
   tracker tickets (GitHub, GitLab, Linear, Jira). Generic for any web
   project; project-specific standards and output preferences configured via
@@ -138,6 +139,19 @@ compatibility:
         corrected. Validated via npm run validate (15/15, including new
         eval-11 mismatch assertions and validateAxeVersion hardening
         regressions). Roadmap logged in HANDOFF.md.
+    - platform: OpenAI Codex
+      model: GPT-5
+      surface: Desktop
+      status: pass
+      date: 2026-07-11
+      skill_version: 21
+      notes: >
+        External landscape review repositioned the project as a narrow,
+        self-hosted regression gate for large web estates. Implemented stable
+        finding fingerprints, accepted baseline creation, --fail-on new,
+        axe-version comparison guards, composite Action inputs, truthful
+        evidence terminology, and eval-13. Validated via npm run validate
+        (16/16 deterministic checks); no live browser scan was required.
   spec_version: agentskills.io/1.0
   frontmatter_mode: minimal
 
@@ -163,33 +177,33 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 15
-    hash: sha256:f37b8b5dc6320ff9859f9859a501e3af0edc4d2a33a8f24e24e292e1df22f17c
+    version: 16
+    hash: sha256:b4f61ca25fcb479edc7c03f5fdd11872c5c85ef81759b72cedf414ed0587ee07
     note: >
-      v15 -- documents axe-core version pinning and cross-version delta
-      guards; corrects the continuous-monitoring exclusion (CI gating
-      via the composite action is supported)
+      v16 -- documents accepted-baseline regression gating, uses truthful
+      automated-evidence language, restores minimal Codex frontmatter, and
+      triggers for large-site and new-regression workflows
 
   - path: evals/evals.json
     role: evals
-    version: 9
-    hash: sha256:ce5cb6df6c4468b109fd41ccd33ed5c24d75d7262de66d2b72450f962499462e
-    note: 12 eval cases -- eval-12 covers same-origin discovery defaults
+    version: 10
+    hash: sha256:7b7dd63919d4d6550d93168d1bacb0dba37d90ebb1104cf1a19adc8b3e7ecd33
+    note: 13 eval cases -- eval-13 covers accepted-baseline regression gating
 
   - path: HANDOFF.md
     role: handoff
-    version: 15
-    hash: sha256:0ac0923168ed6e2e77d30ccda72e95dc9648e386452470b89fec799153f386e2
+    version: 16
+    hash: sha256:bb0b89411e252a44770df0f7490ee41aabd6d467b445c0520516ce0f1c7887ff
     note: >
-      v15 records the 2026-07-11 durability review and the prioritized
-      roadmap (pluggable standards, SARIF, CI baseline, Playwright,
-      fix-plan artifact, authenticated pages, MCP packaging)
+      v16 records the external landscape refresh, narrower large-site
+      regression position, released baseline gate, synchronized user/agent
+      surfaces, revised roadmap, and v2.3 field-validation questions
 
   - path: CHANGELOG.md
     role: reference
-    version: 20
-    hash: sha256:31f53dba2283bf4642b1e982f5c579e60649b8e939e71408a74cf88e61073ce9
-    note: Append-only change history -- v20 records v2.2.0 version pinning and delta guards
+    version: 21
+    hash: sha256:bdae73c1843c4b097b27c19d84e94ac36192306c3866d98bf82247fdfc109be8
+    note: Append-only history -- v21 records v2.3.0 and assistant guide v0.3.2
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -199,11 +213,11 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 3
-    hash: sha256:04d71e82acc957fbd167bf15d1373415003d4a5d8144e4b2e87b07c644bcd1e9
+    version: 4
+    hash: sha256:62b9cc2e5bfec636fdb0c8149bf2725cfa6f5e07dcf2a90db5f88da6dd45ef6e
     note: >
-      Deterministic offline eval runner -- v3 adds axe version pinning
-      and cross-version delta guard regressions
+      Deterministic offline eval runner -- v4 covers fingerprint and
+      accepted/new/resolved baseline comparison behavior
 
   - path: evals/fixtures/eval-9/README.md
     role: evals
@@ -345,15 +359,15 @@ files:
 
   - path: references/project-context-template.md
     role: reference
-    version: 1
-    hash: sha256:4624a92a3d0081ff49e9892eacecb963798456352caa3053fa1f6d057f03d40b
-    note: Canonical schema and examples for workspace-local audit context
+    version: 2
+    hash: sha256:546b58c338afded19fe85d993e5e6e8661d3a75af84581035c9d1a23fee7f627
+    note: Canonical audit context schema with accepted-baseline policy
 
   - path: references/output-contract.md
     role: reference
-    version: 1
-    hash: sha256:2b550f14cf59a788c8355d027dcee4f1d668f76cfbac6b4ad817513eb5a27d05
-    note: Markdown and JSON output requirements plus degraded-mode rules
+    version: 2
+    hash: sha256:47d243f7ffd78c5b7a93efa878a8355160a0057e6f7cae58be5237e2df185b63
+    note: Output requirements with explicit automated-evidence terminology
 
   - path: references/issue-trackers.md
     role: reference
@@ -369,17 +383,17 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 6
-    hash: sha256:0650e6d504d174911819bb2041ffa27a80c16ff0c545a9017105c2566e5bed2e
+    version: 7
+    hash: sha256:1f892375e906cc15322742ab66b8a2c68b10c46300865aeb6f2574ebff40fc99
     note: >
-      v6 pins axe-core auto-install (--axe-version override) and records
-      resolved axe/browser versions in scan output
+      v7 adds stable finding fingerprints, baseline creation, and
+      --fail-on new with axe-version protection
 
   - path: scripts/bootstrap-context.js
     role: script
-    version: 1
-    hash: sha256:606c21c02a2c76e9be4e714563e58ee32bdb67f9bd22d82e7e6d8a3a7e2f2108
-    note: Helper for creating workspace-local PROJECT_CONTEXT.md
+    version: 2
+    hash: sha256:6cb6dd1413335c13ac9189605212cefbd072cf7498e54f12f461bbd636c66410
+    note: Context bootstrap helper with optional regression-gate fields
 
   - path: scripts/plan-issues.js
     role: script
@@ -389,11 +403,11 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 3
-    hash: sha256:137f9ca0861365eb0722d390738e131652c478ce5bda5f95a0f1809973db658d
+    version: 4
+    hash: sha256:ecf3223835c5f56299d15708910c91812ca2e008f6d7c9ec84e1bab320ea243f
     note: >
-      v3 carries axe_version into audit JSON and guards delta sections
-      against cross-version axe-core comparisons
+      v4 labels the WCAG table as automated evidence and clarifies that
+      passes do not establish conformance
 
   - path: scripts/discover.js
     role: script
@@ -409,14 +423,14 @@ files:
 
   - path: assets/sample-output/audit-sample.md
     role: asset
-    version: 1
-    hash: sha256:6235e4ce670672f6f6e187dacea081632907419be6ba31c3b88cc84d5677196b
-    note: Sample markdown output artifact
+    version: 2
+    hash: sha256:e798b04be87285a2d9aa2f9e2e7cff748aebc3a5487043937e70c1a718ba0806
+    note: Sample markdown output with automated-evidence terminology
 
   - path: assets/sample-output/audit-sample.json
     role: asset
     version: 1
-    hash: sha256:14883940462cd5e849f199235fff351d834ffeb3fe862d3f4574db6389ba823a
+    hash: sha256:ebfdecd342d4241d73a7aec73f26f05ce8d0bccd598c2a090a70049af7a4a56d
     note: Sample JSON output artifact
 
   - path: assets/sample-output/issue-plan-sample.md
@@ -433,9 +447,9 @@ files:
 
   - path: agents/openai.yaml
     role: agents
-    version: 1
-    hash: sha256:cd232a03228c4e26f28ea5fde5dcdddc011f7a90c29fcc4b9f8e1bfd4771b041
-    note: Codex UI metadata for skill lists and prompt insertion
+    version: 2
+    hash: sha256:29bb6c70c2539c249e29fd9529e3c1904ba1190f911ca850ad83f010a10f1a0b
+    note: Codex UI metadata focused on template discovery and regression gating
 
   - path: MANIFEST.yaml
     role: reference

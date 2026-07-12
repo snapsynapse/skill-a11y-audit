@@ -1,16 +1,56 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 20
+version: 21
 version_date: 2026-07-11
-previous_version: 19
+previous_version: 20
 change_summary: >
-  Records v2.2.0: axe-core version pinning, cross-version delta guards,
-  the continuous-monitoring doc correction, and the durability/relevance
-  roadmap logged in HANDOFF.md.
+  Records the unreleased legacy-friendly baseline gate and the narrower
+  large-web-estate regression positioning from the July landscape review.
 ---
 
 # Changelog
+
+## v2.3.0 -- 2026-07-11
+
+- **Accepted accessibility baselines** (`scripts/scan.js` v7): findings
+  receive stable SHA-256 fingerprints from axe rule, normalized route, and
+  normalized axe target. `--write-baseline <path>` creates a reviewable
+  baseline artifact; `--baseline <path> --fail-on new` fails only for
+  findings outside it and reports accepted, new, and resolved counts.
+- **Delta integrity:** baseline files record the axe-core version. A version
+  mismatch stops comparison unless the caller deliberately passes
+  `--allow-axe-version-mismatch`, preventing ruleset drift from silently
+  appearing as a site regression.
+- **Composite Action:** `.github/actions/scan` now accepts a `baseline`
+  input, and `fail-on` supports `errors`, `new`, or `none`. Baseline creation
+  remains an explicit local CLI operation rather than a CI input.
+- **Project context:** the canonical context template supports regression
+  gate policy, and this repository now carries a self-audit context at
+  `.a11y-audit/PROJECT_CONTEXT.md`.
+- **Truthful output language:** generated reports call the WCAG table an
+  automated evidence matrix and state that an automated pass does not prove
+  conformance.
+- **Positioning:** README, site copy, and HANDOFF now focus the project on
+  open, self-hosted accessibility regression evidence for large web estates.
+  Broad agent suites, generic MCP wrapping, remediation, VPAT generation,
+  certification, and hosted monitoring are explicit non-goals.
+- **Skill compatibility:** removed non-minimal metadata from SKILL.md
+  frontmatter so it again contains only `name` and `description`.
+- **Validation:** deterministic coverage now exercises route/target
+  normalization, fingerprint stability, and accepted/new/resolved baseline
+  comparison. The suite contains 16 checks. Full manifest verification also
+  corrected a stale hash for the sample JSON artifact.
+
+## Assistant guide v0.3.2 -- 2026-07-11
+
+- Added separately approved actions for writing a reviewed baseline and
+  scanning only for findings outside that baseline.
+- Made baseline acceptance rules explicit: never refresh automatically in
+  CI, stop on axe-core version drift, and never describe acceptance as
+  conformance.
+- Synchronized the repository and hosted guide copies and refreshed the
+  published hash manifest.
 
 ## v2.2.0 -- 2026-07-11
 

@@ -4,18 +4,29 @@
 [![GitHub release](https://img.shields.io/github/release/snapsynapse/skill-a11y-audit.svg)](https://github.com/snapsynapse/skill-a11y-audit/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Drop-in accessibility audit for AI coding agents. Point it at any web
-project and get a WCAG 2.1 AA compliance report with prioritized
-findings, actionable fix suggestions, and progress tracking — without
-the target project needing any accessibility tooling installed.
+Open, self-hosted accessibility regression evidence for large web
+estates. Discover representative templates, preserve selector-level
+findings, and prevent AI-generated changes from introducing new barriers
+without requiring a legacy site to reach zero violations first.
 
 ## Who this is for
 
-Developers and AI coding agents who need a WCAG 2.1 AA audit of any web project without installing accessibility tooling into it.
+Maintainers and coding agents working on public, documentation, government, and content-heavy sites with many URLs and a smaller set of shared templates.
 
 ## What problem it solves
 
-Most accessibility tools require manual setup and produce raw violation dumps with no prioritization. Skill A11y Audit is a drop-in WCAG 2.1 AA audit that runs against any web project and returns prioritized, actionable fixes.
+Most scanners operate one URL at a time, while strict CI gates are impractical on sites with existing debt. Skill A11y Audit samples large sites by template, produces deterministic evidence, and can fail CI only on newly introduced findings.
+
+## Where it fits
+
+| Layer | Best for | What this project adds |
+|---|---|---|
+| Storybook, Playwright, axe | Components, states, and authored journeys | Site-wide discovery and deterministic template representatives |
+| Accessibility agent suites | Guidance, remediation, and broad orchestration | A small executable evidence pipeline agents can invoke |
+| Enterprise platforms | Hosted monitoring, dashboards, and managed programs | Open, self-hosted artifacts and CI policy stored with the repository |
+
+This project does not certify conformance, modify application source,
+generate VPATs, simulate screen readers, or provide a hosted dashboard.
 
 ## Canonical URL
 
@@ -48,7 +59,7 @@ A structured report with:
 | Findings by Rule | Each violation with impact, instance count, affected pages, WCAG mapping |
 | Quick Fixes | One-liner remediation guidance for each detected rule |
 | Color Contrast Details | Exact selectors, ratios, and expected thresholds |
-| WCAG 2.1 AA Matrix | Pass/fail/manual status for all 50 success criteria |
+| WCAG 2.1 AA Evidence Matrix | Automated pass/fail/manual evidence for all 50 success criteria; not certification |
 | Delta from Previous | Fixed, new, changed, and unchanged rules since last audit |
 | Remediation Priority | Violations ranked by severity |
 | Sampling Strategy | Template groups, page counts, selection rationale |
@@ -112,6 +123,28 @@ node a11y-audit/scripts/report.js \
 
 No prior setup needed. scan.js auto-installs axe-core and Puppeteer on
 first run if they aren't already available.
+
+### Adopt on a site with existing accessibility debt
+
+Create an accepted baseline after reviewing the current findings:
+
+```bash
+node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --write-baseline .a11y-audit/baseline.json
+```
+
+Then fail only on newly introduced findings:
+
+```bash
+node a11y-audit/scripts/scan.js \
+  --urls http://127.0.0.1:3000/ \
+  --baseline .a11y-audit/baseline.json \
+  --fail-on new
+```
+
+Baseline changes are explicit acceptance decisions. Review and commit
+them; never refresh the baseline automatically in CI.
 
 ## Assistant Guide
 
