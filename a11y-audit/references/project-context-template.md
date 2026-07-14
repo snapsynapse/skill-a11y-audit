@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
-version_date: 2026-03-03
-previous_version: 1
+version: 3
+version_date: 2026-07-13
+previous_version: 2
 change_summary: >
-  Adds accepted-baseline paths, fail-on policy, and explicit baseline
-  review guidance for legacy-friendly CI adoption.
+  Documents the bundled standards ids (wcag21-aa, wcag22-aa, en301549)
+  and how the standards field maps to report.js --standard.
 ---
 
 # Project Context Template
@@ -88,6 +88,9 @@ Use this file as the canonical shape for
 - `repo_root`: Workspace-relative root when the audited app is in a monorepo.
 - `app_root`: Workspace-relative app directory containing frontend dependencies.
 - `standards`: Primary compliance target. Default to `WCAG 2.1 AA`.
+  Values with bundled criteria data (pass the id to `report.js
+  --standard`): `WCAG 2.1 AA` → `wcag21-aa`, `WCAG 2.2 AA` →
+  `wcag22-aa`, `EN 301 549` → `en301549`.
 - `additional_standards`: Optional secondary standards to map in the report.
 - `scan_mode`: Suggested values are `quick`, `full`, or `issues`.
 - `include_routes`: Explicit routes to scan.

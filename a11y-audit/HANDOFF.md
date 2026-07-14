@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 17
-version_date: 2026-07-11
-previous_version: 16
+version: 18
+version_date: 2026-07-13
+previous_version: 17
 change_summary: >
-  Records the v2.3.1 distribution correction, GuideCheck 0.7.0 migration,
-  and release-surface drift evals.
+  Records v2.4.0 pluggable standards data (wcag21-aa default, wcag22-aa,
+  en301549) and reprioritizes the roadmap accordingly.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v22 (release v2.3.1), self-contained and executable-eval validated
+## Current State: bundle v23 (release v2.4.0), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -219,6 +219,24 @@ remediate code, or replace enterprise monitoring.
 - Eval-14 prevents install-surface, hosted-guide, manifest, byte-profile,
   and executable-hash drift
 
+### Done in v2.4.0
+
+- Criteria matrices extracted from report.js into
+  `references/standards/*.json`, selected via `--standard <id>` with
+  strict id validation
+- `wcag21-aa` remains the default (behavior-identical); `wcag22-aa`
+  adds the six new A/AA criteria and removes 4.1.1 Parsing; `en301549`
+  renders V3.2.1 clause-9 numbers over the one-to-one WCAG 2.1 mapping
+- Report header, matrix heading, and audit JSON record the configured
+  standard; matrix keys stay WCAG SC identifiers across standards
+- Eval-15 covers default compatibility, the 2.2 add/remove set, clause
+  rendering, and invalid-id rejection
+- WCAG 2.2 is offered as data, not presented as the legally incorporated
+  target where WCAG 2.1 remains controlling (ADA Title II deadlines were
+  extended in April 2026 to April 26, 2027 for entities serving 50,000+
+  people and April 26, 2028 for smaller entities and special districts)
+- Assistant guide v0.3.4 re-pins report.js; sidecar manifest synced
+
 ### Next, in priority order
 
 1. **Bring template-aware selection into the CI Action.** The Action's
@@ -228,28 +246,17 @@ remediate code, or replace enterprise monitoring.
 2. **Changed-surface auditing.** Map a PR's changed files to affected route
    or template groups, then prioritize their representative pages. Keep a
    conservative full-sample fallback when ownership cannot be inferred.
-3. **Pluggable standards data (necessary table stakes).** report.js
-   hardcodes the 50 WCAG 2.1 AA criteria. Extract criteria matrices to
-   data files (`standards/wcag21-aa.json`, `wcag22-aa.json`,
-   `en301549.json`) selected via `PROJECT_CONTEXT.md`. Keep WCAG 2.1 AA
-   available — ADA Title II and current EN 301 549 cite it — but add
-   WCAG 2.2 AA (six new A/AA criteria: 2.4.11, 2.5.7, 2.5.8, 3.2.6,
-   3.3.7, 3.3.8) and an EN 301 549 mapping. Do not present WCAG 2.2 as
-   the legally incorporated target where WCAG 2.1 remains controlling.
-   Current US Title II deadlines were extended in April 2026 to April 26,
-   2027 for entities serving 50,000 or more people and April 26, 2028 for
-   smaller entities and special districts.
-4. **Interoperability adapter.** Make discover/scan/report easy to invoke
+3. **Interoperability adapter.** Make discover/scan/report easy to invoke
    from broader ecosystems, including a Community Access extension if its
    contract remains stable. Prefer this over a competing general-purpose
    agent suite.
-5. **Authenticated deterministic journeys.** Accept a Playwright storage
+4. **Authenticated deterministic journeys.** Accept a Playwright storage
    state or bounded journey file as a scan input. Do not expand into an
    unconstrained browser agent.
-6. **SARIF emitter.** Useful for public repositories and organizations
+5. **SARIF emitter.** Useful for public repositories and organizations
    with GitHub Code Security, but secondary to baseline and template-aware
    adoption. Preserve repository-native JSON for universal CI use.
-7. **First-class Playwright execution.** Add only where it improves
+6. **First-class Playwright execution.** Add only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
 ### v2.3 field validation

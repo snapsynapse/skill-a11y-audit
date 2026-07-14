@@ -48,6 +48,9 @@ dumps, and leave you to figure out what to fix first. This skill:
   resolved automatically. No `npm install` required in your project.
 - **Tracks progress over time** — pass a previous audit and the report
   shows what's fixed, what's new, and what changed.
+- **Maps evidence to the standard you answer to** — WCAG 2.1 AA by
+  default (cited by ADA Title II and EN 301 549), with WCAG 2.2 AA and
+  EN 301 549 clause-9 matrices selectable via `--standard`.
 
 ## What You Get
 
@@ -59,7 +62,7 @@ A structured report with:
 | Findings by Rule | Each violation with impact, instance count, affected pages, WCAG mapping |
 | Quick Fixes | One-liner remediation guidance for each detected rule |
 | Color Contrast Details | Exact selectors, ratios, and expected thresholds |
-| WCAG 2.1 AA Evidence Matrix | Automated pass/fail/manual evidence for all 50 success criteria; not certification |
+| Standards Evidence Matrix | Automated pass/fail/manual evidence per criterion; WCAG 2.1 AA (50 criteria, default), WCAG 2.2 AA (55 criteria), or EN 301 549 clause 9 via `--standard`; not certification |
 | Delta from Previous | Fixed, new, changed, and unchanged rules since last audit |
 | Remediation Priority | Violations ranked by severity |
 | Sampling Strategy | Template groups, page counts, selection rationale |
@@ -75,7 +78,22 @@ Output modes:
 
 ## Install
 
-Install from GitHub with the open Skills CLI:
+Options in order of end-user simplicity.
+
+**1. Reviewed assistant install (recommended).** Paste this into any coding
+agent:
+
+```text
+Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
+with GuideCheck (https://guidecheck.org/verify), report the achieved
+level and SHA-256, then follow its install action with my approval.
+```
+
+The guide is a GuideCheck Level 3 plain-text instruction surface: the text
+you review is the text the assistant executes, every action requires your
+approval, and each bundled script it runs is SHA-256 pinned.
+
+**2. Skills CLI.** Install from GitHub with the open Skills CLI:
 
 ```sh
 npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit
@@ -131,7 +149,9 @@ node a11y-audit/scripts/report.js \
 ```
 
 No prior setup needed. scan.js auto-installs axe-core and Puppeteer on
-first run if they aren't already available.
+first run if they aren't already available. Add `--standard wcag22-aa`
+or `--standard en301549` to the report step to switch the evidence
+matrix (default: `wcag21-aa`).
 
 ### Adopt on a site with existing accessibility debt
 

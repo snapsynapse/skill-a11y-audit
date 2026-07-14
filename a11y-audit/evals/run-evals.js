@@ -2,11 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 5
-version_date: 2026-07-11
-previous_version: 4
+version: 6
+version_date: 2026-07-13
+previous_version: 5
 change_summary: >
-  Adds distribution-surface and GuideCheck artifact drift regressions.
+  Adds eval-15 pluggable standards matrix coverage (wcag21-aa default,
+  wcag22-aa, en301549, invalid-id rejection).
 */
 
 const assert = require('assert');
@@ -298,6 +299,66 @@ function eval11ReportDelta() {
   assert.match(md, /\*\*Unchanged\*\*: region/);
 }
 
+function eval15PluggableStandards() {
+  const input = 'a11y-audit/evals/fixtures/eval-4/current-scan.json';
+  const runStandard = (standard) => {
+    const dir = tmpPath(`eval-15-${standard || 'default'}`);
+    resetDir(dir);
+    const cmd = [
+      'a11y-audit/scripts/report.js',
+      '--input', input,
+      '--project-name', 'Eval 15 Standards Fixture',
+      '--output-dir', dir,
+    ];
+    if (standard) cmd.push('--standard', standard);
+    runNode(cmd);
+    return {
+      md: fs.readFileSync(findGeneratedFile(dir, '.md'), 'utf8'),
+      json: readJson(findGeneratedFile(dir, '.json')),
+    };
+  };
+
+  // Default is behavior-identical WCAG 2.1 AA
+  const dflt = runStandard(null);
+  assertAuditJsonShape(dflt.json);
+  assert.strictEqual(dflt.json.standard.id, 'wcag21-aa');
+  assert.strictEqual(Object.keys(dflt.json.matrix).length, 50);
+  assert.ok('4.1.1' in dflt.json.matrix, '2.1 keeps 4.1.1 Parsing');
+  assert.match(dflt.md, /## WCAG 2\.1 AA Automated Evidence Matrix/);
+
+  // WCAG 2.2 AA: 55 criteria, 4.1.1 removed, six new criteria present
+  const w22 = runStandard('wcag22-aa');
+  assertAuditJsonShape(w22.json);
+  assert.strictEqual(w22.json.standard.id, 'wcag22-aa');
+  assert.strictEqual(Object.keys(w22.json.matrix).length, 55);
+  assert.ok(!('4.1.1' in w22.json.matrix), '2.2 removes 4.1.1 Parsing');
+  for (const sc of ['2.4.11', '2.5.7', '2.5.8', '3.2.6', '3.3.7', '3.3.8']) {
+    assert.ok(sc in w22.json.matrix, `2.2 adds ${sc}`);
+  }
+  assert.match(w22.md, /## WCAG 2\.2 AA Automated Evidence Matrix/);
+
+  // EN 301 549: WCAG 2.1 mapping with clause-9 numbers rendered
+  const en = runStandard('en301549');
+  assertAuditJsonShape(en.json);
+  assert.strictEqual(en.json.standard.id, 'en301549');
+  assert.strictEqual(Object.keys(en.json.matrix).length, 50);
+  assert.match(en.md, /EN 301 549/);
+  assert.match(en.md, /\| Clause \| SC \|/);
+  assert.match(en.md, /\| 9\.1\.4\.3 \| SC 1\.4\.3 \|/);
+
+  // Unknown and traversal-shaped ids are rejected before any file read
+  for (const bad of ['../evil', 'nope']) {
+    const run = spawnSync(process.execPath, [
+      'a11y-audit/scripts/report.js',
+      '--input', input,
+      '--standard', bad,
+      '--output-dir', tmpPath('eval-15-bad'),
+    ], { cwd: repoRoot, encoding: 'utf8' });
+    assert.notStrictEqual(run.status, 0, `standard ${bad} must be rejected`);
+    assert.match(run.stderr, /standard/i);
+  }
+}
+
 function scannerBrowserValidation() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
   assert.strictEqual(scan.validateBrowserLib('puppeteer'), 'puppeteer');
@@ -505,7 +566,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.3$/m);
+  assert.match(text, /^guide-version: 0\.3\.4$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -530,7 +591,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.3$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.4$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -552,6 +613,7 @@ test('eval-2 plans issues with labels and deduplication', eval2IssuePlanning);
 test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);
 test('eval-11 reports page-aware delta movement', eval11ReportDelta);
+test('eval-15 renders matrices from pluggable standards data', eval15PluggableStandards);
 test('scan.js rejects unsupported browser package names before install', scannerBrowserValidation);
 test('scan.js fingerprints and compares accepted accessibility baselines', scannerBaselineRegression);
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);

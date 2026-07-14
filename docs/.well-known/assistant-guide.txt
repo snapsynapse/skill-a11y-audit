@@ -4,12 +4,12 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.3
+guide-version: 0.3.4
 applies-to: skill-a11y-audit 2.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
-last-reviewed: 2026-07-11
+last-reviewed: 2026-07-13
 reviewed-by: Snap Synapse LLC
 status: active
 recommended-verifier: https://guidecheck.org/verify
@@ -128,7 +128,7 @@ approval: required
 command: node SKILL_DIR/scripts/report.js --input SCAN_JSON --output-dir OUTPUT_DIR
 runner: argv
 cwd: TARGET_WORKSPACE
-exec-sha256: ecf3223835c5f56299d15708910c91812ca2e008f6d7c9ec84e1bab320ea243f
+exec-sha256: 266a92085933ccdb9208d8d34903a75c7c571d6e7dc5b3a131a738c985841792
 notes: Writes the audit report only under the approved output directory.
 [/action]
 

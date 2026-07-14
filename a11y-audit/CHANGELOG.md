@@ -1,15 +1,50 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 22
-version_date: 2026-07-11
-previous_version: 21
+version: 23
+version_date: 2026-07-13
+previous_version: 22
 change_summary: >
-  Records corrected cross-agent installation and GuideCheck 0.7.0
-  conformance enforcement for v2.3.1.
+  Records v2.4.0: pluggable standards data (wcag21-aa, wcag22-aa,
+  en301549) with the criteria matrix moved from code to data files.
 ---
 
 # Changelog
+
+## v2.4.0 -- 2026-07-13
+
+- **Pluggable standards data** (`scripts/report.js` v5): the criteria
+  matrix is no longer hardcoded. `--standard <id>` loads
+  `references/standards/<id>.json`; ids are validated against a strict
+  pattern before any file read. Bundled standards:
+  - `wcag21-aa` (default, behavior-identical to prior releases): all 50
+    WCAG 2.1 Level A/AA criteria. Remains the default because the ADA
+    Title II final rule and EN 301 549 V3.2.1 cite WCAG 2.1 AA.
+  - `wcag22-aa`: all 55 WCAG 2.2 Level A/AA criteria — 4.1.1 Parsing
+    removed per WCAG 2.2; 2.4.11 Focus Not Obscured (Minimum), 2.5.7
+    Dragging Movements, 2.5.8 Target Size (Minimum), 3.2.6 Consistent
+    Help, 3.3.7 Redundant Entry, and 3.3.8 Accessible Authentication
+    (Minimum) added. axe tag mapping handles the new SC tags natively.
+  - `en301549`: EN 301 549 V3.2.1 clause 9 (Web) — the harmonised
+    standard under the European Accessibility Act — rendered with
+    clause numbers alongside the one-to-one WCAG 2.1 criteria mapping.
+- The report header's Standards row, the evidence-matrix heading, and
+  the audit JSON (`standard: {id, name}`) all record which standard was
+  used. Matrix keys remain WCAG SC identifiers across standards so
+  downstream tooling stays stable.
+- **Eval coverage** (`evals/run-evals.js` v6, eval-15): default-run
+  compatibility, WCAG 2.2 add/remove set, EN 301 549 clause rendering,
+  and rejection of unknown or traversal-shaped standard ids.
+- SKILL.md v17 documents standard selection in Phase 3 and maps
+  `PROJECT_CONTEXT.md` `standards` values to standard ids;
+  project-context-template v3 lists the bundled ids.
+- Assistant guide v0.3.4: re-pins the report.js `exec-sha256` after the
+  standards refactor; sidecar manifest updated to match.
+
+## Assistant guide v0.3.4 -- 2026-07-13
+
+- Re-pins `generate-report` `exec-sha256` to report.js v5 (pluggable
+  standards). No behavioral change to the guide's action contract.
 
 ## v2.3.1 -- 2026-07-11
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>skill-a11y-audit &mdash; Accessibility regression gates for large web estates</title>
   <meta name="description" content="Open, self-hosted accessibility regression evidence for large web estates. Template-aware sampling and baseline-friendly CI prevent newly introduced barriers without requiring zero existing violations.">
-  <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
+  <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, wcag 2.2 aa, en 301 549, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
   <meta name="author" content="Sam Rogers">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="theme-color" content="#15803d">
@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-07-11T00:00:00Z">
+  <meta property="article:modified_time" content="2026-07-13T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -58,7 +58,7 @@
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-07-11",
+    "dateModified": "2026-07-13",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -72,7 +72,7 @@
       "logo": { "@type": "ImageObject", "url": "https://snapsynapse.com/logo.png" }
     },
     "image": "https://skilla11y.dev/imgs/og.png",
-    "keywords": ["skill-a11y-audit", "accessibility audit", "a11y", "wcag 2.1 aa", "axe-core", "ai agent skill", "claude code"],
+    "keywords": ["skill-a11y-audit", "accessibility audit", "a11y", "wcag 2.1 aa", "wcag 2.2 aa", "en 301 549", "axe-core", "ai agent skill", "claude code"],
     "isPartOf": { "@type": "CreativeWork", "name": "Snap Synapse Open Standards" },
     "license": "https://opensource.org/licenses/MIT",
     "copyrightHolder": { "@type": "Organization", "name": "Snap Synapse LLC" },
@@ -93,7 +93,7 @@
     "@type": "DefinedTerm",
     "name": "skill-a11y-audit",
     "alternateName": ["a11y-audit", "skill:a11y-audit", "accessibility audit skill"],
-    "description": "A Claude Code skill that performs WCAG 2.1 AA accessibility audits on web projects using axe-core, with template-aware page sampling, zero-configuration dependency resolution, and actionable remediation hints. Invoked by asking an AI agent to run an accessibility audit.",
+    "description": "A Claude Code skill that performs accessibility audits on web projects using axe-core, with evidence matrices for WCAG 2.1 AA (default), WCAG 2.2 AA, and EN 301 549, template-aware page sampling, zero-configuration dependency resolution, and actionable remediation hints. Invoked by asking an AI agent to run an accessibility audit.",
     "url": "https://skilla11y.dev/",
     "inDefinedTermSet": {
       "@type": "DefinedTermSet",
@@ -365,6 +365,9 @@
       margin-top: 0.75rem;
       font-style: italic;
     }
+    /* Links inside muted annotation text cannot rely on color alone
+       (WCAG 1.4.1 / axe link-in-text-block) */
+    .code-block .annotation a { text-decoration: underline; }
     pre {
       background: var(--code-bg);
       color: var(--code-text);
@@ -463,9 +466,9 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-07-11">July 11, 2026</time>
+      Updated <time datetime="2026-07-13">July 13, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.3.1</span>
+      <span class="version">v2.4.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
@@ -573,19 +576,29 @@
 <section id="install">
   <div class="container">
     <h2>Install</h2>
-    <p>Install directly from GitHub with the open Skills CLI. It detects supported agents and lets you choose project or global scope.</p>
+    <p>Options are listed from simplest to most manual. The recommended path is the reviewed assistant install: a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs.</p>
 
     <div class="code-grid">
       <div class="code-block">
-        <h3>Interactive install</h3>
-<pre tabindex="0">npx skills add \
-  snapsynapse/skill-a11y-audit \
-  --skill a11y-audit</pre>
-        <p class="annotation">Review the source, then select Claude Code, Codex, or another supported agent.</p>
+        <h3>1. Reviewed assistant install (recommended)</h3>
+<pre tabindex="0">Fetch and verify
+https://skilla11y.dev/.well-known/assistant-guide.txt
+with GuideCheck (https://guidecheck.org/verify),
+report the achieved level and SHA-256,
+then follow its install action with my approval.</pre>
+        <p class="annotation">Paste into any coding agent. The guide is GuideCheck Level 3: the text you review is the text the assistant executes, every action needs your approval, and each script it runs is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first &mdash; it fits on one page.</p>
       </div>
 
       <div class="code-block">
-        <h3>Choose an agent</h3>
+        <h3>2. Interactive install</h3>
+<pre tabindex="0">npx skills add \
+  snapsynapse/skill-a11y-audit \
+  --skill a11y-audit</pre>
+        <p class="annotation">The open Skills CLI detects supported agents and lets you choose project or global scope. Review the source, then select Claude Code, Codex, or another supported agent.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>3. Choose an agent</h3>
 <pre tabindex="0"># Claude Code, current project
 npx skills add \
   snapsynapse/skill-a11y-audit \
@@ -603,7 +616,7 @@ npx skills add \
       </div>
 
       <div class="code-block">
-        <h3>Manual fallback</h3>
+        <h3>4. Manual fallback</h3>
 <pre tabindex="0">Claude project: .claude/skills/a11y-audit/
 Claude personal: ~/.claude/skills/a11y-audit/
 Codex project: .agents/skills/a11y-audit/
@@ -612,13 +625,13 @@ Codex personal: ~/.agents/skills/a11y-audit/</pre>
       </div>
 
       <div class="code-block">
-        <h3>Ask your coding agent</h3>
+        <h3>Then: ask your coding agent</h3>
 <pre>Run an accessibility audit on this project.</pre>
         <p class="annotation">The skill runs discover &rarr; scan &rarr; report automatically.</p>
       </div>
 
       <div class="code-block">
-        <h3>Run from a repository clone</h3>
+        <h3>5. Run from a repository clone</h3>
 <pre tabindex="0">node a11y-audit/scripts/discover.js \
   --url http://localhost:3000 \
   --output /tmp/discover.json
@@ -669,7 +682,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-07-11">2026-07-11</time>.
+      Last substantive revision: <time datetime="2026-07-13">2026-07-13</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
   </div>
@@ -701,7 +714,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.3.1 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.4.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>

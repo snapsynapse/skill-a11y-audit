@@ -371,5 +371,30 @@
         "Guide provenance remains a separate Level 4 publication concern"
       ]
     }
+  },
+  {
+    "id": "eval-15",
+    "prompt": "Generate audit reports against each bundled standard. The default run must remain byte-compatible WCAG 2.1 AA (50 criteria including 4.1.1). A wcag22-aa run must render all 55 WCAG 2.2 A/AA criteria with 4.1.1 removed and the six new criteria present. An en301549 run must render clause-9 numbers alongside the WCAG 2.1 mapping. Unknown or traversal-shaped standard ids must be rejected.",
+    "expectations": {
+      "structural": [
+        "Default run reports standard wcag21-aa with a 50-criterion matrix including 4.1.1",
+        "wcag22-aa run reports a 55-criterion matrix without 4.1.1 and with 2.4.11, 2.5.7, 2.5.8, 3.2.6, 3.3.7, 3.3.8",
+        "en301549 run renders a Clause column with 9.x numbers next to each SC",
+        "Audit JSON records the configured standard id and name"
+      ],
+      "behavioral": [
+        "Criteria matrices load from references/standards data files, not hardcoded script tables",
+        "Unknown and path-traversal standard ids exit non-zero before any file read",
+        "Matrix keys remain WCAG SC identifiers so cross-standard tooling stays stable"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-13",
+      "notes": [
+        "Deterministic run in npm run validate against the eval-4 scan fixture",
+        "wcag21-aa remains the default; ADA Title II and EN 301 549 V3.2.1 cite WCAG 2.1 AA"
+      ]
+    }
   }
 ]

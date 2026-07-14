@@ -6,7 +6,7 @@
 
 ## What this skill does
 
-- Scans web projects for WCAG 2.1 AA accessibility violations using axe-core
+- Scans web projects for accessibility violations using axe-core, with evidence matrices for WCAG 2.1 AA (default), WCAG 2.2 AA, and EN 301 549 clause 9
 - Discovers site structure via sitemap.xml (or HTML crawl fallback)
 - Classifies pages into template groups and selects representatives
 - Produces structured reports with prioritized findings and fix guidance
@@ -28,7 +28,7 @@
 
 ## How to use
 
-Install: `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
+Install (simplest first): (1) have your assistant fetch, GuideCheck-verify, and follow https://skilla11y.dev/.well-known/assistant-guide.txt with per-action approval; or (2) `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
 Claude Code project skills live in `.claude/skills/`; Codex project skills
 live in `.agents/skills/`.
 
@@ -40,6 +40,7 @@ Or run scripts directly:
 - `scripts/scan.js --urls <url-list>` — scan pages with axe-core
 - `scripts/scan.js --urls <url-list> --baseline <file> --fail-on new` — run a regression gate
 - `scripts/report.js --input <scan.json>` — generate markdown + JSON report
+- `scripts/report.js --input <scan.json> --standard wcag22-aa` — switch the evidence matrix (wcag21-aa, wcag22-aa, en301549)
 
 ## Key files
 
@@ -58,7 +59,7 @@ Or run scripts directly:
 2. Findings by Rule (violation details, WCAG mapping)
 3. Quick Fixes (one-liner remediation per rule)
 4. Color Contrast Details (exact ratios and selectors)
-5. WCAG 2.1 AA Automated Evidence Matrix (50 success criteria; not certification)
+5. Standards Automated Evidence Matrix (WCAG 2.1 AA default, WCAG 2.2 AA, or EN 301 549 via --standard; not certification)
 6. Delta from Previous Audit (fixed, new, changed)
 7. Remediation Priority (ranked by severity)
 8. Sampling Strategy (template groups and coverage)

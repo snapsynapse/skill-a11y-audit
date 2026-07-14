@@ -4,15 +4,17 @@ description: >
   Run deterministic accessibility audits and regression gates on web
   projects, especially large sites with many routes and shared templates.
   Combines axe-core and optional Lighthouse with template-aware sampling,
-  stable finding fingerprints, accepted baselines, WCAG 2.1 AA evidence
-  mapping, manual check guidance, and structured reporting. Output is
+  stable finding fingerprints, accepted baselines, standards evidence
+  mapping (WCAG 2.1 AA default, WCAG 2.2 AA, EN 301 549), manual check
+  guidance, and structured reporting. Output is
   configurable: markdown report only, markdown plus machine-readable JSON,
   or markdown plus issue tracker integration. Use this skill whenever the user mentions
   "accessibility audit", "a11y audit", "WCAG audit", "accessibility check",
   "compliance scan", "accessibility baseline", "new accessibility
   regressions", or asks to check a web project for accessibility issues.
   Also trigger when the user wants evidence for WCAG conformance review or
-  mapping to a specific standard (CAN-ASC-6.2, EN 301 549, ADA/AODA).
+  mapping to a specific standard (WCAG 2.2, EN 301 549 / European
+  Accessibility Act, CAN-ASC-6.2, ADA/AODA).
 ---
 
 # Accessibility Audit
@@ -296,16 +298,30 @@ For each page, collect:
 
 ### Phase 3 -- Standards Evidence Mapping
 
-**Purpose:** Map automated findings to WCAG 2.1 AA success criteria and
-any project-specific standards.
+**Purpose:** Map automated findings to the configured standard's
+success criteria and any project-specific standards.
 
-`scripts/report.js` handles the evidence matrix deterministically. It
-hardcodes all 50 WCAG 2.1 Level A and AA criteria, maps axe tags to
-success criteria, and produces the matrix as part of its markdown and
-JSON output. You do not need to build the matrix manually.
+`scripts/report.js` handles the evidence matrix deterministically.
+Criteria matrices are data files in `references/standards/`, selected
+with `--standard <id>`:
+
+- `wcag21-aa` (default): all 50 WCAG 2.1 Level A and AA criteria.
+  Cited by the ADA Title II final rule and EN 301 549 V3.2.1.
+- `wcag22-aa`: all 55 WCAG 2.2 Level A and AA criteria (4.1.1 Parsing
+  removed; 2.4.11, 2.5.7, 2.5.8, 3.2.6, 3.3.7, 3.3.8 added).
+- `en301549`: EN 301 549 V3.2.1 clause 9 (Web), the harmonised standard
+  under the European Accessibility Act; renders clause numbers alongside
+  the one-to-one WCAG 2.1 criteria mapping.
+
+Map the `standards` value in `.a11y-audit/PROJECT_CONTEXT.md` to the
+matching id (e.g., `WCAG 2.2 AA` → `wcag22-aa`; `EN 301 549` as primary
+→ `en301549`) and pass it via `--standard`. The script maps axe tags to
+success criteria and produces the matrix in its markdown and JSON
+output; the JSON records which standard was used. You do not need to
+build the matrix manually.
 
 If `.a11y-audit/PROJECT_CONTEXT.md` specifies additional standards
-(e.g., CAN-ASC-6.2), build a secondary mapping. Cross-reference
+beyond these (e.g., CAN-ASC-6.2), build a secondary mapping. Cross-reference
 automated findings where the standard maps to WCAG criteria. For
 requirements that go beyond WCAG (equity, organizational processes,
 transparency), note them as manual review items referencing the
