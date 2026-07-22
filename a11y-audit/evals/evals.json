@@ -467,7 +467,7 @@
       "date": "2026-07-21",
       "notes": [
         "Deterministic supply-chain assertions run in npm run validate",
-        "Pinned actionlint 1.7.12 and zizmor 1.28.0 pass locally; the consumer Action path is exercised in GitHub Actions"
+        "Pinned actionlint 1.7.12 and patched zizmor 1.28.0 pass locally; the consumer Action path exercises crawl fallback in GitHub Actions"
       ]
     }
   }

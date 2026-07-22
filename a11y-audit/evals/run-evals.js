@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 8
+version: 9
 version_date: 2026-07-21
-previous_version: 7
+previous_version: 8
 change_summary: >
-  Adds locked scanner-dependency, immutable Action reference, consumer smoke,
-  actionlint, and zizmor release-gate regression coverage.
+  Requires the consumer smoke test to exercise sitemap-free crawl fallback.
 */
 
 const assert = require('assert');
@@ -636,7 +635,7 @@ function reusableActionRegression() {
     repoPath('a11y-audit/assets/ci/github-actions/accessibility-audit.yml'),
     'utf8'
   );
-  for (const input of ['discover-url', 'discover-output', 'discover-max-per-group', 'baseline', 'fail-on']) {
+  for (const input of ['discover-url', 'discover-output', 'discover-max-per-group', 'discover-no-sitemap', 'baseline', 'fail-on']) {
     assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
   }
   assert.match(action, /http-server@14\.1\.1/);
@@ -662,9 +661,11 @@ function workflowSecurityRegression() {
   assert.doesNotMatch(action, /"\$\{\{ inputs\.(serve-path|port) \}\}"/);
   assert.match(validate, /^permissions:\n  contents: read$/m);
   assert.match(validate, /^  action-consumer:$/m);
+  assert.match(validate, /discover-no-sitemap: true/);
   assert.match(validate, /^  workflow-audit:$/m);
   assert.match(validate, /actionlint\/cmd\/actionlint@v1\.7\.12/);
-  assert.match(validate, /zizmorcore\/zizmor-action@[0-9a-f]{40}/);
+  assert.match(validate, /astral-sh\/setup-uv@[0-9a-f]{40}/);
+  assert.match(validate, /uvx zizmor==1\.28\.0 --offline --min-severity low \./);
   assert.match(validate, /npm ci --prefix a11y-audit\/deps/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {

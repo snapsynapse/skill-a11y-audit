@@ -100,7 +100,9 @@ recorded the same way.
   `markdown+issues`.
 - If the user wants to operationalize recurring audits in CI, start from
   `assets/ci/github-actions/accessibility-audit.yml`. The upstream Action
-  is exercised as a real consumer and checked with actionlint and zizmor;
+  is exercised as a real consumer and checked with actionlint and zizmor.
+  Discovery is sitemap-first; set `discover-no-sitemap: true` in the Action
+  when a served build must be crawled from `discover-url` instead, then
   adapt the inputs without copying its implementation into the target repo.
 - Prefer `scripts/plan-issues.js` before live ticket creation when you
   need a safe review and deduplication pass.

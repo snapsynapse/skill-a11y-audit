@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 20
+version: 21
 version_date: 2026-07-21
-previous_version: 19
+previous_version: 20
 change_summary: >
-  Records v2.5.1 consumer Action evidence, immutable workflow references,
-  locked scanner dependencies, actionlint, and zizmor release gates.
+  Records the verified sitemap-free consumer path and patched pinned
+  zizmor runner for v2.5.1.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -258,11 +258,12 @@ remediate code, or replace enterprise monitoring.
 ### Done in v2.5.1
 
 - End-to-end composite Action consumer smoke test with retained evidence
+- Explicit `discover-no-sitemap` Action input for served builds without sitemaps
 - Full-SHA pinning for every remote Action reference
 - Environment-mediated Action inputs instead of direct shell interpolation
 - Read-only workflow permissions and disabled checkout credential persistence
 - Committed scanner dependency package and lock manifests with clean audit
-- Blocking actionlint 1.7.12 and zizmor 1.28.0 workflow gates
+- Blocking actionlint 1.7.12 and patched zizmor 1.28.0 workflow gates
 - Dependabot coverage for Actions and both npm dependency graphs
 - Public and agent-facing adoption surfaces synchronized to the stronger gate
 

@@ -202,6 +202,10 @@ Adapt `serve-path` to the repository's build output. Pin the Action to the
 full release commit SHA where organizational policy requires immutable Action
 references.
 
+Discovery reads the site's sitemap by default. Add `discover-no-sitemap: true`
+when the served build has no sitemap and should be crawled from
+`discover-url` instead.
+
 The repository tests this exact consumer path against a served fixture. CI
 also runs actionlint for workflow semantics and zizmor for GitHub Actions
 security regressions before a release is published. Dependabot keeps the

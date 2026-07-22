@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 25
+bundle_version: 26
 bundle_date: 2026-07-21
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -190,31 +190,31 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 19
-    hash: sha256:2f7e8b8b64487dc632d283ffe03cfe8ea736f1aee7a12dde96f7ba97345dcf0d
+    version: 20
+    hash: sha256:6b2201cfbfd3fba7a3082387b830a1239ba7bb37facd4fe25d350416cbfe6d76
     note: >
-      v19 documents consumer-path and workflow-security release evidence
+      v20 documents sitemap-first discovery and explicit Action crawl fallback
 
   - path: evals/evals.json
     role: evals
-    version: 14
-    hash: sha256:8c2c838361793cf8785989d4dfa92f863488c3b494c74088857838fa2c7de346
+    version: 15
+    hash: sha256:962173169c78909c1a9fe3a7ef77e044b57750e631c1fc67e231e7f1d1149265
     note: >
       18 eval cases including consumer Action and workflow security gates
 
   - path: HANDOFF.md
     role: handoff
-    version: 20
-    hash: sha256:d017a594452579ab42c422144ae06f2a3d8af23aa545262a1741e15c5cb18367
+    version: 21
+    hash: sha256:4ab412111a316c0e2449226e29fc6b7cf8409dedb7786d9764f70aa6810a6513
     note: >
-      v20 records v2.5.1 consumer-path and workflow hardening
+      v21 records the verified sitemap-free v2.5.1 consumer path
 
   - path: CHANGELOG.md
     role: reference
-    version: 25
-    hash: sha256:782496d5a0fcc3ac4d57decf8f5ffef559cab4fa77adaf4a5895c0215ee8e76d
+    version: 26
+    hash: sha256:2b1fa149594cc9d8ae68ad86a134738b39193c2f395d95407b08780ee06a1b07
     note: >
-      Append-only history -- v25 records v2.5.1
+      Append-only history -- v26 records the v2.5.1 CI integration correction
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -224,10 +224,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 8
-    hash: sha256:4996400eb36c10de7e9ff131641ba3b660c8e3b87fb7dcc107cf06f9ff096635
+    version: 9
+    hash: sha256:62a65671887ec3604ea59566c11f0e6104d7ad8132a3c7ba0a30fd2be197ff65
     note: >
-      v8 adds locked dependency and workflow supply-chain regression checks
+      v9 requires sitemap-free crawl fallback in the consumer Action test
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -529,6 +529,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 20
+    version: 21
     hash: null
     note: This file -- self-referential hash omitted

@@ -57,6 +57,10 @@ inputs:
     description: Maximum representative pages selected per template group.
     required: false
     default: '2'
+  discover-no-sitemap:
+    description: '`true` to crawl from discover-url instead of reading a sitemap.'
+    required: false
+    default: 'false'
   allow-cross-origin-sitemaps:
     description: '`true` to allow discover.js to follow sitemap documents on other origins.'
     required: false
@@ -119,10 +123,12 @@ runs:
         DISCOVER_URL: ${{ inputs.discover-url }}
         DISCOVER_OUTPUT: ${{ inputs.discover-output }}
         DISCOVER_MAX_PER_GROUP: ${{ inputs.discover-max-per-group }}
+        DISCOVER_NO_SITEMAP: ${{ inputs.discover-no-sitemap }}
         ALLOW_CROSS_ORIGIN_SITEMAPS: ${{ inputs.allow-cross-origin-sitemaps }}
       run: |
         ARGS=(--url "$DISCOVER_URL" --output "$DISCOVER_OUTPUT")
         [ -n "$DISCOVER_MAX_PER_GROUP" ] && ARGS+=(--max-per-group "$DISCOVER_MAX_PER_GROUP")
+        [ "$DISCOVER_NO_SITEMAP" = "true" ] && ARGS+=(--no-sitemap)
         [ "$ALLOW_CROSS_ORIGIN_SITEMAPS" = "true" ] && ARGS+=(--allow-cross-origin-sitemaps)
         node "${{ github.action_path }}/../../../a11y-audit/scripts/discover.js" "${ARGS[@]}"
 

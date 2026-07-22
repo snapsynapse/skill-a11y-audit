@@ -88,6 +88,7 @@ jobs:
           serve-path: a11y-audit/evals/fixtures/eval-3
           port: '8088'
           discover-url: http://127.0.0.1:8088/
+          discover-no-sitemap: true
           fail-on: none
           output: artifacts/action-scan.json
           discover-output: artifacts/action-discover.json
@@ -111,11 +112,10 @@ jobs:
       - name: Run actionlint 1.7.12
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
-      - name: Run zizmor 1.28.0
-        uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02 # v0.6.0
+      - name: Set up uv 0.11.31
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: 1.28.0
-          advanced-security: false
-          online-audits: false
-          annotations: true
-          min-severity: low
+          version: 0.11.31
+
+      - name: Run zizmor 1.28.0
+        run: uvx zizmor==1.28.0 --offline --min-severity low .

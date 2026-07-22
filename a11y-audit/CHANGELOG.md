@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 25
+version: 26
 version_date: 2026-07-21
-previous_version: 24
+previous_version: 25
 change_summary: >
-  Records v2.5.1: consumer Action execution, immutable Action references,
-  locked scanner dependencies, actionlint, and zizmor release gates.
+  Records the v2.5.1 live-CI integration correction for sitemap-free
+  consumer discovery and the patched zizmor runner.
 ---
 
 # Changelog
@@ -17,6 +17,8 @@ change_summary: >
   its public inputs against the served eval fixture, then verifies retained
   discovery and scan JSON. This closes the gap between testing scanner helpers
   and testing the Action consumers actually adopt.
+- **Sitemap-free adoption:** the Action exposes `discover-no-sitemap` so static
+  builds without a sitemap can opt into bounded crawl discovery explicitly.
 - **Workflow supply-chain hardening:** all remote Action references are pinned
   to full commit SHAs with release comments. Checkout credentials are not
   persisted, and validation defaults to read-only repository permissions.
@@ -27,7 +29,7 @@ change_summary: >
   including patched transitive dependencies, now have committed package and
   lock manifests. Browser CI installs them with `npm ci`.
 - **Blocking workflow analysis:** pinned actionlint 1.7.12 checks workflow
-  semantics and pinned zizmor 1.28.0 checks workflow and composite-Action
+  semantics and patched, pinned zizmor 1.28.0 checks workflow and composite-Action
   security. The hardened tree reports no low-or-higher zizmor findings.
 - Dependabot covers GitHub Actions plus the root and scanner npm lockfiles so
   immutable pins remain maintainable through reviewed update pull requests.
