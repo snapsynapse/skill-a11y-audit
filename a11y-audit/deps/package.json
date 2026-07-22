@@ -5,6 +5,6 @@
   "description": "Auto-managed dependencies for a11y-audit skill scripts",
   "dependencies": {
     "axe-core": "4.12.1",
-    "puppeteer": "24.40.0"
+    "puppeteer": "25.3.0"
   }
 }
