@@ -2,11 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 9
+version: 10
 version_date: 2026-07-21
-previous_version: 8
+previous_version: 9
 change_summary: >
-  Requires the consumer smoke test to exercise sitemap-free crawl fallback.
+  Requires sitemap-free discovery to retain its entry page and the consumer
+  smoke test to exercise that fallback.
 */
 
 const assert = require('assert');
@@ -649,6 +650,7 @@ function reusableActionRegression() {
 
 function workflowSecurityRegression() {
   const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
+  const discover = fs.readFileSync(repoPath('a11y-audit/scripts/discover.js'), 'utf8');
   const validate = fs.readFileSync(repoPath('.github/workflows/validate-skill.yml'), 'utf8');
   const pages = fs.readFileSync(repoPath('.github/workflows/pages.yml'), 'utf8');
   const combined = `${action}\n${validate}\n${pages}`;
@@ -662,6 +664,7 @@ function workflowSecurityRegression() {
   assert.match(validate, /^permissions:\n  contents: read$/m);
   assert.match(validate, /^  action-consumer:$/m);
   assert.match(validate, /discover-no-sitemap: true/);
+  assert.match(discover, /new Set\(\[new URL\(runtimeUrl\)\.href, \.\.\.extractLinks/);
   assert.match(validate, /^  workflow-audit:$/m);
   assert.match(validate, /actionlint\/cmd\/actionlint@v1\.7\.12/);
   assert.match(validate, /astral-sh\/setup-uv@[0-9a-f]{40}/);
@@ -686,7 +689,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.5$/m);
+  assert.match(text, /^guide-version: 0\.3\.6$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -711,7 +714,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.5$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.6$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);

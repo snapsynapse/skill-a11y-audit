@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 26
+version: 27
 version_date: 2026-07-21
-previous_version: 25
+previous_version: 26
 change_summary: >
-  Records the v2.5.1 live-CI integration correction for sitemap-free
-  consumer discovery and the patched zizmor runner.
+  Records the v2.5.1 single-page crawl correction and assistant-guide v0.3.6.
 ---
 
 # Changelog
@@ -18,7 +17,8 @@ change_summary: >
   discovery and scan JSON. This closes the gap between testing scanner helpers
   and testing the Action consumers actually adopt.
 - **Sitemap-free adoption:** the Action exposes `discover-no-sitemap` so static
-  builds without a sitemap can opt into bounded crawl discovery explicitly.
+  builds without a sitemap can opt into bounded crawl discovery explicitly;
+  crawl mode now retains the entry URL so link-free single-page sites work.
 - **Workflow supply-chain hardening:** all remote Action references are pinned
   to full commit SHAs with release comments. Checkout credentials are not
   persisted, and validation defaults to read-only repository permissions.
@@ -36,8 +36,13 @@ change_summary: >
 - README, website, llms surfaces, SKILL.md, workflow starter, eval-18, manifest,
   and handoff now describe and enforce the same v2.5.1 adoption contract.
 
-Assistant guide v0.3.5 remains current because no guide action command or
-repository-owned executable changed.
+Assistant guide v0.3.6 re-pins `discover.js` after crawl fallback began
+including the entry page. No guide command or authority boundary changed.
+
+## Assistant guide v0.3.6 -- 2026-07-21
+
+- Re-pins `discover-site` to the corrected `discover.js` executable hash.
+- Keeps the command, approvals, scope, and GuideCheck 0.7.0 profile unchanged.
 
 ## v2.5.0 -- 2026-07-21
 

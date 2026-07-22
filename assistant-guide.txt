@@ -4,7 +4,7 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.5
+guide-version: 0.3.6
 applies-to: skill-a11y-audit 2.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
@@ -81,7 +81,7 @@ command: node SKILL_DIR/scripts/discover.js --url TARGET_URL --output DISCOVER_J
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: TARGET_URL
-exec-sha256: 3c15baed0cbd8a52553b99a24671f3dc9353764fe06be4e9786f6753a64cfbf8
+exec-sha256: 96a9e4f3002e399b45fea5fd5cf7fcd6cc1211f95901579ffd5e52c8b615168e
 notes: Discovers public pages and writes a representative scan plan.
 [/action]
 

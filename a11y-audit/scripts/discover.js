@@ -395,7 +395,7 @@ async function discover(runtimeUrl, opts = {}) {
   if (allUrls.length === 0) {
     const html = await httpFetch(runtimeUrl, fetchOpts);
     if (html) {
-      allUrls = extractLinks(html, runtimeUrl);
+      allUrls = [...new Set([new URL(runtimeUrl).href, ...extractLinks(html, runtimeUrl)])];
       source = 'html-crawl (depth 1)';
 
       const hubUrls = [...allUrls];

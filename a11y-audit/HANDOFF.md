@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 21
+version: 22
 version_date: 2026-07-21
-previous_version: 20
+previous_version: 21
 change_summary: >
-  Records the verified sitemap-free consumer path and patched pinned
-  zizmor runner for v2.5.1.
+  Records the single-page crawl correction and assistant-guide v0.3.6.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -259,6 +258,7 @@ remediate code, or replace enterprise monitoring.
 
 - End-to-end composite Action consumer smoke test with retained evidence
 - Explicit `discover-no-sitemap` Action input for served builds without sitemaps
+- Crawl fallback retains the entry URL so valid single-page sites are auditable
 - Full-SHA pinning for every remote Action reference
 - Environment-mediated Action inputs instead of direct shell interpolation
 - Read-only workflow permissions and disabled checkout credential persistence
@@ -266,6 +266,7 @@ remediate code, or replace enterprise monitoring.
 - Blocking actionlint 1.7.12 and patched zizmor 1.28.0 workflow gates
 - Dependabot coverage for Actions and both npm dependency graphs
 - Public and agent-facing adoption surfaces synchronized to the stronger gate
+- Assistant guide v0.3.6 re-pinned to the corrected discover executable
 
 ### Next, in priority order
 
