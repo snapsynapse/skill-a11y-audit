@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
-version_date: 2026-03-03
-previous_version: 1
+version: 3
+version_date: 2026-07-21
+previous_version: 2
 change_summary: >
-  Renames the compliance matrix as an automated evidence matrix and
-  requires explicit language that automated passes do not prove conformance.
+  Makes the evidence-matrix heading standard-neutral and aligns the JSON
+  contract with the public versioned schema and report.js v6 provenance.
 ---
 
 # Output Contract
@@ -20,7 +20,7 @@ Write a markdown report with these sections in order:
 1. Header
 2. Executive Summary
 3. Automated Scan Results
-4. WCAG 2.1 AA Automated Evidence Matrix
+4. Configured Standard Automated Evidence Matrix
 5. Delta from Previous Audit
 6. Project-Specific Standard
 7. Manual Testing Recommendations
@@ -41,8 +41,9 @@ Rules:
 ## JSON Output
 
 When `output_mode` is `markdown+json` or `markdown+issues`, write a JSON
-file alongside the markdown report. Use the schema in
-`references/output-schema.json`.
+file alongside the markdown report. Use the versioned schema in
+`references/output-schema.json`, whose canonical id is
+`https://skilla11y.dev/schema/audit-v1.json`.
 
 ## Delta Section
 

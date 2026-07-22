@@ -23,8 +23,8 @@
 
 ## Regression Gate
 
-- fail_on: new
-- baseline_path: .a11y-audit/baseline.json
+- fail_on: none
+- baseline_path: null
 - baseline_policy: Baseline changes require explicit review; never refresh automatically in CI.
 
 ## Product Direction

@@ -396,5 +396,53 @@
         "wcag21-aa remains the default; ADA Title II and EN 301 549 V3.2.1 cite WCAG 2.1 AA"
       ]
     }
+  },
+  {
+    "id": "eval-16",
+    "prompt": "Adopt the reusable GitHub Action on a large existing site. Discover representative templates, scan that plan, preserve an accepted baseline, publish both discovery and scan artifacts, and fail only for new findings.",
+    "expectations": {
+      "structural": [
+        "The Action exposes discovery, baseline, failure-policy, and artifact-path inputs",
+        "The workflow starter consumes the tagged remote Action rather than copying scanner internals",
+        "Both discovery and scan outputs are available as Action outputs and uploaded artifacts"
+      ],
+      "behavioral": [
+        "Representative discovery feeds scan.js through --discover without shell-expanded URL lists",
+        "The local fixture server uses a pinned package version",
+        "Accepted baselines are never refreshed automatically"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-21",
+      "notes": [
+        "Deterministic Action-contract coverage runs in npm run validate",
+        "The packaged workflow starter uses the v2.5.0 Action surface with template discovery and fail-on-new gating"
+      ]
+    }
+  },
+  {
+    "id": "eval-17",
+    "prompt": "Validate release integrity and the real scanner path. Every bundled file must be listed with a current SHA-256, report JSON must satisfy the published versioned schema, and a live local-browser fixture must produce a real axe finding followed by a clean accepted-baseline rescan.",
+    "expectations": {
+      "structural": [
+        "The bundle manifest covers every shipped file and contains no pending or stale hashes",
+        "Sample and generated audit JSON validate against the published audit-v1 schema",
+        "The real browser output records resolved axe-core and Puppeteer versions"
+      ],
+      "behavioral": [
+        "The browser eval detects the fixture button-name violation using axe-core",
+        "A second run against the reviewed baseline reports zero new findings",
+        "Schema and manifest regressions fail CI"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-21",
+      "notes": [
+        "Schema and manifest checks run in npm run validate",
+        "The real browser eval runs separately in CI and locally through npm run eval:browser"
+      ]
+    }
   }
 ]

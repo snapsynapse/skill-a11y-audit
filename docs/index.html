@@ -466,9 +466,9 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-07-13">July 13, 2026</time>
+      Updated <time datetime="2026-07-21">July 21, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.4.0</span>
+      <span class="version">v2.5.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
@@ -507,7 +507,7 @@
       </div>
       <div class="pillar">
         <h3>Zero configuration</h3>
-        <p>Drop the <code>a11y-audit/</code> folder into <code>.claude/skills/</code>. axe-core and Puppeteer resolve automatically from skill-local deps, project <code>node_modules</code>, global install, or auto-install. No prior setup required.</p>
+        <p>Install once with the cross-agent Skills CLI, or use it temporarily without a persistent install. Validated axe-core and Puppeteer versions resolve automatically without changing the target project's dependencies.</p>
       </div>
     </div>
   </div>
@@ -569,6 +569,16 @@
   --fail-on new</pre>
         <p class="annotation">The scan reports accepted, new, and resolved findings and guards axe-core version drift.</p>
       </div>
+      <div class="code-block">
+        <h3>3. Reuse the GitHub Action</h3>
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.0
+  with:
+    serve-path: dist
+    discover-url: http://127.0.0.1:8088/
+    baseline: .a11y-audit/baseline.json
+    fail-on: new</pre>
+        <p class="annotation">The Action retains both the representative discovery plan and scan evidence as workflow artifacts.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -595,6 +605,14 @@ then follow its install action with my approval.</pre>
   snapsynapse/skill-a11y-audit \
   --skill a11y-audit</pre>
         <p class="annotation">The open Skills CLI detects supported agents and lets you choose project or global scope. Review the source, then select Claude Code, Codex, or another supported agent.</p>
+      </div>
+
+      <div class="code-block">
+        <h3>Try without installing</h3>
+<pre tabindex="0">npx skills use \
+  snapsynapse/skill-a11y-audit \
+  --skill a11y-audit</pre>
+        <p class="annotation">The CLI prepares a temporary skill invocation and leaves no persistent project installation.</p>
       </div>
 
       <div class="code-block">
@@ -637,7 +655,7 @@ Codex personal: ~/.agents/skills/a11y-audit/</pre>
   --output /tmp/discover.json
 
 node a11y-audit/scripts/scan.js \
-  --urls http://localhost:3000/ \
+  --discover /tmp/discover.json \
   --root . --summary \
   --output /tmp/scan.json
 
@@ -654,7 +672,7 @@ node a11y-audit/scripts/report.js \
   <div class="container">
     <div class="report-block">
       <h2>Sample output</h2>
-      <p>A structured markdown report. Pass <code>--output-mode markdown+json</code> for machine-readable data, or <code>markdown+issues</code> to generate GitHub, Linear, or Jira tickets.</p>
+      <p>A structured markdown report plus versioned JSON. Configure <code>output_mode</code> in <code>.a11y-audit/PROJECT_CONTEXT.md</code>; direct <code>report.js</code> runs write both files.</p>
 <pre tabindex="0">## Executive Summary
 Pages scanned: 22 of 746  ·  Template groups: 16
 Violations: 3  ·  Severity: 1 critical, 1 serious, 1 moderate
@@ -714,7 +732,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.4.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.5.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>

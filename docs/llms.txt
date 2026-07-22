@@ -28,7 +28,9 @@
 
 ## How to use
 
-Install (simplest first): (1) have your assistant fetch, GuideCheck-verify, and follow https://skilla11y.dev/.well-known/assistant-guide.txt with per-action approval; or (2) `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
+Try without installing: `npx skills use snapsynapse/skill-a11y-audit --skill a11y-audit`.
+Install: `npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit`.
+For bounded assistant execution, fetch and GuideCheck-verify https://skilla11y.dev/.well-known/assistant-guide.txt before following it with per-action approval.
 Claude Code project skills live in `.claude/skills/`; Codex project skills
 live in `.agents/skills/`.
 
@@ -37,7 +39,7 @@ Prompt: "Run an accessibility audit on this project."
 Or run scripts directly:
 
 - `scripts/discover.js --url <base-url>`: discover pages and select representatives
-- `scripts/scan.js --urls <url-list>`: scan pages with axe-core
+- `scripts/scan.js --discover <discover.json>`: scan the representative discovery plan with axe-core
 - `scripts/scan.js --urls <url-list> --baseline <file> --fail-on new`: run a regression gate
 - `scripts/report.js --input <scan.json>`: generate markdown + JSON report
 - `scripts/report.js --input <scan.json> --standard wcag22-aa`: switch the evidence matrix (wcag21-aa, wcag22-aa, en301549)
@@ -48,7 +50,8 @@ Or run scripts directly:
 - [SKILL.md](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md): core skill instructions
 - [scripts](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/scripts): discover.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
 - [output contract](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-contract.md): report format specification
-- [output schema](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-schema.json): JSON output schema
+- [output schema](https://skilla11y.dev/schema/audit-v1.json): versioned JSON output schema
+- [reusable GitHub Action](https://github.com/snapsynapse/skill-a11y-audit/tree/main/.github/actions/scan): template-aware discovery, scanning, and accepted-baseline gating
 - [sample output](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/assets/sample-output): example report from a real site audit
 - [CHANGELOG](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/CHANGELOG.md): version history
 - [MANIFEST](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/MANIFEST.yaml): bundle inventory

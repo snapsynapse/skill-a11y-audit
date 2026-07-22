@@ -2,14 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 5
-version_date: 2026-07-13
-previous_version: 4
+version: 6
+version_date: 2026-07-21
+previous_version: 5
 change_summary: >
-  Criteria matrices are now data: --standard <id> loads
-  references/standards/<id>.json (wcag21-aa default, wcag22-aa,
-  en301549 with clause numbers). Matrix heading, methodology standards
-  row, and audit JSON record the configured standard.
+  Aligns generated JSON provenance with report.js v6 and adds an explicit
+  schema version while preserving the pluggable standards contract.
 */
 
 const fs = require('fs');
@@ -42,6 +40,8 @@ function parseArgs(argv) {
 // Title II final rule and EN 301 549 V3.2.1 both cite WCAG 2.1 AA.
 const STANDARDS_DIR = path.join(__dirname, '..', 'references', 'standards');
 const DEFAULT_STANDARD = 'wcag21-aa';
+const REPORT_VERSION = 6;
+const OUTPUT_SCHEMA_VERSION = 1;
 
 function listStandards() {
   try {
@@ -283,7 +283,7 @@ function buildSummary(violationMap) {
 // ---------------------------------------------------------------------------
 
 function buildJson(opts) {
-  const { date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard } = opts;
+  const { date, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard } = opts;
   const violations = [];
   for (const v of violationMap.values()) {
     const wcag = v.tags.map(axeTagToSC).filter(Boolean);
@@ -296,8 +296,9 @@ function buildJson(opts) {
     });
   }
   const json = {
+    schema_version: OUTPUT_SCHEMA_VERSION,
     date,
-    tool: `a11y-audit report.js v1`,
+    tool: `a11y-audit report.js v${REPORT_VERSION}`,
     standard: standard ? { id: standard.id, name: standard.name } : undefined,
     pages: pageUrls,
     lighthouse: lighthouse || { status: 'skipped', reason: 'Not run by report.js' },
@@ -749,7 +750,7 @@ function main() {
   // Generate outputs
   const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta, standard };
   const markdown = buildMarkdown(mdOpts);
-  const json = buildJson({ date, projectName, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard });
+  const json = buildJson({ date, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard });
   if (discoverData) {
     json.sampling = {
       source: discoverData.source,

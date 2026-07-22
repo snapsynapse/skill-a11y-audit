@@ -1,6 +1,11 @@
 {
+  "schema_version": 1,
   "date": "2026-03-26",
-  "tool": "a11y-audit report.js v1",
+  "tool": "a11y-audit report.js v6",
+  "standard": {
+    "id": "wcag21-aa",
+    "name": "WCAG 2.1 Level A and AA"
+  },
   "pages": [
     "https://sam-rogers.com/about/",
     "https://sam-rogers.com/archive/",

@@ -75,9 +75,10 @@ provide `axe-core` and the chosen browser automation package.
 The bundled scanner supports Puppeteer only. Treat `--browser` as a
 fixed option, not a user-controlled package installer.
 
-**Version pinning and delta integrity.** axe-core rule sets change
-between releases, so scan.js pins its axe-core auto-install to a
-known-good version (`--axe-version <x.y.z|latest>` overrides it). Every
+**Version pinning and delta integrity.** axe-core rule sets and browser
+behavior change between releases, so scan.js pins both axe-core and
+Puppeteer auto-installs to validated versions (`--axe-version
+<x.y.z|latest>` overrides axe-core deliberately). Every
 scan records the resolved `axe_version` and `browser_version` in its
 output JSON, report.js carries `axe_version` into the audit JSON, and
 the Delta from Previous Audit section flags comparisons where the two
@@ -227,7 +228,7 @@ Example invocation:
 ```bash
 node a11y-audit/scripts/scan.js \
   --root . \
-  --urls http://127.0.0.1:3000/,http://127.0.0.1:3000/about \
+  --discover /tmp/a11y-discover.json \
   --output /tmp/a11y-scan.json \
   --summary
 ```
@@ -276,7 +277,7 @@ occurred. axe-core results alone are sufficient for a valid audit.
 #### Scope Control
 
 - Default: scan routes discovered in Phase 1
-- If a discover.js scan plan exists, use its `scanList` for `--urls`.
+- If a discover.js scan plan exists, pass the plan with `--discover`.
   The report methodology will record the sampling strategy.
 - If more than 10 routes exist and no discover plan is available, ask
   the user which to scan or whether to scan all
@@ -425,8 +426,9 @@ After completing an audit, verify these quality checks:
    DevTools Lighthouse run when Lighthouse was actually executed. Should
    be within 5 points.
 
-3. **WCAG matrix complete**: All 50 AA criteria appear in the compliance
-   matrix. No criterion is missing.
+3. **Standards matrix complete**: The configured evidence matrix contains
+   the expected criteria count: 50 for `wcag21-aa`, 55 for `wcag22-aa`,
+   or 50 clause-mapped criteria for `en301549`. No criterion is missing.
 
    Treat the matrix as evidence-oriented status reporting. Do not frame
    it as proof of full conformance, because many WCAG criteria remain

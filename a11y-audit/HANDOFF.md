@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 18
-version_date: 2026-07-13
-previous_version: 17
+version: 19
+version_date: 2026-07-21
+previous_version: 18
 change_summary: >
-  Records v2.4.0 pluggable standards data (wcag21-aa default, wcag22-aa,
-  en301549) and reprioritizes the roadmap accordingly.
+  Records v2.5.0 template-aware Action adoption, schema and manifest gates,
+  a real-browser eval, scanner reliability, and repository cleanup.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v23 (release v2.4.0), self-contained and executable-eval validated
+## Current State: bundle v24 (release v2.5.0), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -27,6 +27,9 @@ for Lighthouse-unavailable, runtime URL reconciliation, first-run
 context creation, and missing-browser-automation handling have been
 validated. The repo now has a deterministic offline eval runner wired to
 `npm run validate`, which is also the GitHub Actions validation command.
+The reusable Action now runs template discovery before scanning, and a
+separate browser eval exercises real Puppeteer, axe-core, and accepted
+baseline behavior against a loopback fixture.
 
 The three most recent correctness issues are now resolved:
 
@@ -61,8 +64,9 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 11 eval cases with passing results recorded for eval-1 through eval-11 where deterministic or prior runtime validation exists |
-| evals/run-evals.js | Offline executable eval and validation runner |
+| evals/evals.json | 17 eval cases with passing or explicitly partial results |
+| evals/run-evals.js | Offline executable eval, schema, manifest, and Action validation runner |
+| evals/run-browser-eval.js | Real Puppeteer + axe-core fixture and baseline rescan |
 | references/claude-code.md | Claude-specific launch and Preview notes |
 | references/codex.md | Codex-specific execution notes |
 | references/output-contract.md | Markdown/JSON output rules |
@@ -90,7 +94,7 @@ four token-efficiency improvements, all now implemented in v10.
 | Dependency | Required? | Check |
 |------------|-----------|-------|
 | `axe-core` (npm) | Yes | `ls node_modules/axe-core` |
-| `puppeteer` or `playwright` (npm) | Yes | `ls node_modules/puppeteer` or `ls node_modules/playwright` |
+| `puppeteer` (npm) | Yes for bundled scanner | `ls node_modules/puppeteer` |
 | `lighthouse` (npm/CLI) | Recommended | `npx lighthouse --version` |
 | issue tracker CLI | Phase 6 only | `gh --version`, `glab --version`, or tracker equivalent |
 
@@ -125,8 +129,8 @@ four token-efficiency improvements, all now implemented in v10.
    and requires the report to state the skip reason explicitly.
 
 6. **No hosted continuous monitoring.** CI gating exists — the composite
-   action at `.github/actions/scan` (v2.1.0) runs the scanner on push/PR
-   and fails on violations, and `assets/ci/github-actions/` has a
+   action at `.github/actions/scan` (v2.5.0) runs discovery and scanning on
+   push/PR and supports accepted-baseline gating. `assets/ci/github-actions/` has a
    workflow starter — but there is no scheduled scanning service,
    dashboard, or trend store beyond the `markdown+json` artifacts.
 
@@ -237,26 +241,33 @@ remediate code, or replace enterprise monitoring.
   people and April 26, 2028 for smaller entities and special districts)
 - Assistant guide v0.3.4 re-pins report.js; sidecar manifest synced
 
+### Done in v2.5.0
+
+- Template-aware discovery inside the reusable composite Action
+- Direct `--discover` scanner input with HTTP(S) validation and deduplication
+- Published, versioned audit JSON schema with executable Ajv validation
+- Full bundle manifest coverage and hash validation in `npm run validate`
+- Real-browser axe and accepted-baseline eval in local scripts and CI
+- No-install trial and remote Action examples across public adoption surfaces
+- Node 18, 20, and 22 validation matrix without duplicate tag-triggered runs
+- Removal of two unreferenced archive artifacts
+
 ### Next, in priority order
 
-1. **Bring template-aware selection into the CI Action.** The Action's
-   sitemap path currently scans every URL, bypassing the project's strongest
-   capability. Add a deterministic discover → scan mode and retain the scan
-   plan as an artifact.
-2. **Changed-surface auditing.** Map a PR's changed files to affected route
+1. **Changed-surface auditing.** Map a PR's changed files to affected route
    or template groups, then prioritize their representative pages. Keep a
    conservative full-sample fallback when ownership cannot be inferred.
-3. **Interoperability adapter.** Make discover/scan/report easy to invoke
+2. **Interoperability adapter.** Make discover/scan/report easy to invoke
    from broader ecosystems, including a Community Access extension if its
    contract remains stable. Prefer this over a competing general-purpose
    agent suite.
-4. **Authenticated deterministic journeys.** Accept a Playwright storage
+3. **Authenticated deterministic journeys.** Accept a Playwright storage
    state or bounded journey file as a scan input. Do not expand into an
    unconstrained browser agent.
-5. **SARIF emitter.** Useful for public repositories and organizations
+4. **SARIF emitter.** Useful for public repositories and organizations
    with GitHub Code Security, but secondary to baseline and template-aware
    adoption. Preserve repository-native JSON for universal CI use.
-6. **First-class Playwright execution.** Add only where it improves
+5. **First-class Playwright execution.** Add only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
 ### v2.3 field validation

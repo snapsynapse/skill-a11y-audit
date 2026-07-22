@@ -1,10 +1,10 @@
 bundle: a11y-audit
-bundle_version: 23
-bundle_date: 2026-07-13
+bundle_version: 24
+bundle_date: 2026-07-21
 description: >
   Skill for running accessibility audits on web projects. Combines automated
-  scanning (axe-core via Puppeteer or Playwright, Lighthouse) with WCAG 2.1
-  AA evidence mapping, manual check guidance, accepted accessibility
+  scanning (axe-core via Puppeteer) with configurable standards evidence,
+  template-aware discovery, manual check guidance, accepted accessibility
   baselines, and configurable output:
   markdown report only, markdown plus JSON for CI, or markdown plus issue
   tracker tickets (GitHub, GitLab, Linear, Jira). Generic for any web
@@ -174,11 +174,10 @@ dependencies:
     note: >
       Injected into Puppeteer/Playwright pages for WCAG violation
       detection via axe.run(). Install via: npm install axe-core
-  - name: npm:puppeteer OR npm:playwright
+  - name: npm:puppeteer
     note: >
-      Browser automation for loading pages and injecting axe-core.
-      Use whichever the project already has. Install via:
-      npm install puppeteer OR npm install playwright
+      Browser automation for loading pages and injecting axe-core in the
+      bundled scanner. Auto-install uses a pinned release.
   - name: lighthouse
     note: >
       CLI for accessibility scoring per page. Optional but recommended.
@@ -191,32 +190,32 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 17
-    hash: sha256:3b0163f582925dd356defbd6bab97a2733a680a50cebbee98a60c7f91918cbc8
+    version: 18
+    hash: sha256:2f9a8656f8965e0f082fdd7d320575efa6765f92e2748e8d3345889999005ea6
     note: >
-      v17 -- Phase 3 selects criteria matrices from references/standards
-      data (wcag21-aa default, wcag22-aa, en301549)
+      v18 documents direct discovery-plan scanning and pinned scanner
+      dependency behavior
 
   - path: evals/evals.json
     role: evals
-    version: 12
-    hash: sha256:9bd8d00955c01df65450941be380b84c5f6a0c1d5a9659d2e0a4650530e956f8
+    version: 13
+    hash: sha256:4685203fe32d13bb9b1c08572a012cf2dc53ae12be93f40955b2d0d3daef9b1a
     note: >
-      15 eval cases -- eval-15 covers pluggable standards matrices
+      17 eval cases including Action adoption and real-browser release integrity
 
   - path: HANDOFF.md
     role: handoff
-    version: 18
-    hash: sha256:72f7561dc9870e39bd5dc428a242f0e1abd4059f0515c2f112f702dd4036b31f
+    version: 19
+    hash: sha256:d07b31a5104ab2c1c64262a7f620bbf9afbbb9617b18e9f5087ad4684dbcfed6
     note: >
-      v18 records v2.4.0 pluggable standards and the reprioritized roadmap
+      v19 records v2.5.0 adoption, validation, and cleanup work
 
   - path: CHANGELOG.md
     role: reference
-    version: 23
-    hash: sha256:1567ee3b3114ab6b8a59accfe9edb1c3817923b616bc0eae97f463b8862fd435
+    version: 24
+    hash: sha256:72a74bc544d836040334c57a38a0f56a5452fff2f6f294978fe74247c93ca834
     note: >
-      Append-only history -- v23 records v2.4.0 pluggable standards data
+      Append-only history -- v24 records v2.5.0
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -226,10 +225,40 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 6
-    hash: sha256:76cbeaa18ce2002696923cf21fe267a2caa810f7197bec570223a5c39bc2c47f
+    version: 7
+    hash: sha256:3fa71e9059a89864d4f80f15f85513085bc33c9d603131269ad46b8c62909fcb
     note: >
-      v6 adds eval-15 pluggable standards coverage
+      v7 adds schema, manifest, discover-plan, Action, and adoption checks
+
+  - path: evals/run-browser-eval.js
+    role: evals
+    version: 1
+    hash: sha256:f47b024ea7725365a890027da77fac101712a734b9457d11bd5780beb4050bb7
+    note: Real Puppeteer and axe fixture scan with accepted-baseline rescan
+
+  - path: evals/fixtures/eval-11/README.md
+    role: evals
+    version: 1
+    hash: sha256:5163b1a59a5d0741bbe3665d5fb5fe08ed52b3fba5d8624901b5f7debbc9062e
+    note: Fixture documentation for page-aware delta reporting
+
+  - path: evals/fixtures/eval-11/current-scan.json
+    role: evals
+    version: 1
+    hash: sha256:fd5bed84d09aeaac41a94e2e5683044339db554b8d75da4be666409f3ec206c1
+    note: Current scan fixture for page-aware delta reporting
+
+  - path: evals/fixtures/eval-11/discover.json
+    role: evals
+    version: 1
+    hash: sha256:0da80d764c527342fe562dedad4fab0a523d7688cf549651c1e4aa65d7742b07
+    note: Discovery grouping fixture for page-aware delta reporting
+
+  - path: evals/fixtures/eval-11/previous-audit.json
+    role: evals
+    version: 1
+    hash: sha256:587ec63046ce891751e04789d0523a2194cc1d15f585c44cf5438925f0635c77
+    note: Prior audit fixture for page-aware delta reporting
 
   - path: evals/fixtures/eval-9/README.md
     role: evals
@@ -378,9 +407,9 @@ files:
 
   - path: references/output-contract.md
     role: reference
-    version: 2
-    hash: sha256:47d243f7ffd78c5b7a93efa878a8355160a0057e6f7cae58be5237e2df185b63
-    note: Output requirements with explicit automated-evidence terminology
+    version: 3
+    hash: sha256:552e115fbcba4f7ae205449ed8d1c7c795da6c54ad73de3182409c3309cf204f
+    note: Output requirements with versioned JSON Schema identity
 
   - path: references/issue-trackers.md
     role: reference
@@ -390,17 +419,17 @@ files:
 
   - path: references/output-schema.json
     role: reference
-    version: 1
-    hash: sha256:facffb22ceb2221fda0ce354cac1dc83b67f0229ebe7616d2f1cb800be664710
-    note: Stable machine-readable schema for markdown+json output
+    version: 2
+    hash: sha256:b219b4374fa745dfc5e821010b147dd788864d90d8f778d22b8e7b6387c1fa09
+    note: Published Draft 2020-12 schema for audit JSON v1
 
   - path: scripts/scan.js
     role: script
-    version: 7
-    hash: sha256:1f892375e906cc15322742ab66b8a2c68b10c46300865aeb6f2574ebff40fc99
+    version: 8
+    hash: sha256:886bcb309aea06de77556875bd570999584c09adb3a8309ea0b0ee94993d023d
     note: >
-      v7 adds stable finding fingerprints, baseline creation, and
-      --fail-on new with axe-version protection
+      v8 adds discover-plan input, URL validation, pinned Puppeteer,
+      reliable cleanup, and nonzero partial-failure behavior
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -416,11 +445,10 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 5
-    hash: sha256:266a92085933ccdb9208d8d34903a75c7c571d6e7dc5b3a131a738c985841792
+    version: 6
+    hash: sha256:ea848df65a3bce9ed721937667626ddc33668e4d4a39080bec57ae7ebfe46f63
     note: >
-      v5 loads criteria matrices from references/standards via --standard;
-      audit JSON records the standard
+      v6 emits schema_version 1 under the published audit JSON contract
 
   - path: scripts/discover.js
     role: script
@@ -431,7 +459,7 @@ files:
   - path: .gitignore
     role: config
     version: 1
-    hash: pending
+    hash: sha256:b14334a65f6992514d8c5a01cc20eb899b03c597223fbe94c9991e906d993746
     note: Excludes deps/ (auto-installed scan.js dependencies)
 
   - path: assets/sample-output/audit-sample.md
@@ -442,9 +470,9 @@ files:
 
   - path: assets/sample-output/audit-sample.json
     role: asset
-    version: 1
-    hash: sha256:ebfdecd342d4241d73a7aec73f26f05ce8d0bccd598c2a090a70049af7a4a56d
-    note: Sample JSON output artifact
+    version: 2
+    hash: sha256:0b55f603d86df74475a49d2606512dd41d4f8d68ab3ff0a6a5b88fbb5a93c0cf
+    note: Schema-valid sample audit JSON v1 artifact
 
   - path: assets/sample-output/issue-plan-sample.md
     role: asset
@@ -454,9 +482,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 1
-    hash: sha256:1d9b1f85fc3d89ec3fc5eacf129ce086bcff676b17d35e07dd51c7d3a8e5b2de
-    note: GitHub Actions starter for scheduled or on-demand audits
+    version: 2
+    hash: sha256:76b4651d89c6a10c891f884649bb21817ec5096222ce70b21e202264c77e1173
+    note: Template-aware remote Action starter with accepted-baseline gating
 
   - path: agents/openai.yaml
     role: agents
@@ -490,6 +518,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 18
+    version: 19
     hash: null
     note: This file -- self-referential hash omitted

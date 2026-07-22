@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 6
-version_date: 2026-07-13
-previous_version: 5
+version: 7
+version_date: 2026-07-21
+previous_version: 6
 change_summary: >
-  Adds eval-15 pluggable standards matrix coverage (wcag21-aa default,
-  wcag22-aa, en301549, invalid-id rejection).
+  Adds executable JSON Schema, manifest-integrity, discover-plan, reusable
+  Action, and public-adoption surface regression coverage.
 */
 
 const assert = require('assert');
@@ -15,11 +15,21 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const Ajv2020 = require('ajv/dist/2020');
+const addFormats = require('ajv-formats');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const tmpRoot = '/tmp/a11y-audit-evals';
 const validateMode = process.argv.includes('--validate');
 const results = [];
+const auditSchema = readJsonFromRoot('a11y-audit/references/output-schema.json');
+const ajv = new Ajv2020({ allErrors: true });
+addFormats(ajv);
+const validateAuditOutput = ajv.compile(auditSchema);
+
+function readJsonFromRoot(file) {
+  return JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', file), 'utf8'));
+}
 
 function repoPath(...parts) {
   return path.join(repoRoot, ...parts);
@@ -78,7 +88,7 @@ function findGeneratedFile(dir, ext) {
 }
 
 function assertAuditJsonShape(json) {
-  for (const key of ['date', 'tool', 'pages', 'summary', 'violations', 'matrix', 'lighthouse']) {
+  for (const key of ['schema_version', 'date', 'tool', 'standard', 'pages', 'summary', 'violations', 'matrix', 'lighthouse']) {
     assert.ok(Object.prototype.hasOwnProperty.call(json, key), `audit JSON missing ${key}`);
   }
   assert.match(json.date, /^\d{4}-\d{2}-\d{2}$/);
@@ -89,6 +99,7 @@ function assertAuditJsonShape(json) {
   }
   assert.strictEqual(typeof json.matrix, 'object', 'matrix must be an object');
   assert.strictEqual(typeof json.lighthouse, 'object', 'lighthouse must be an object');
+  assert.ok(validateAuditOutput(json), ajv.errorsText(validateAuditOutput.errors, { separator: '\n' }));
 }
 
 function summarizeImpacts(scan) {
@@ -135,6 +146,39 @@ function validateJsonFiles() {
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
+}
+
+function validateManifestIntegrity() {
+  const ruby = [
+    'require "yaml"',
+    'require "json"',
+    'require "date"',
+    'puts JSON.generate(YAML.safe_load(File.read("a11y-audit/MANIFEST.yaml"), permitted_classes:[Date]))',
+  ].join('; ');
+  const manifest = JSON.parse(runCommand('ruby', ['-e', ruby]).stdout);
+  const listed = new Set();
+  for (const entry of manifest.files || []) {
+    listed.add(entry.path);
+    const file = repoPath('a11y-audit', entry.path);
+    assert.ok(fs.existsSync(file), `manifest path does not exist: ${entry.path}`);
+    if (entry.path === 'MANIFEST.yaml') continue;
+    assert.match(entry.hash || '', /^sha256:[0-9a-f]{64}$/, `invalid manifest hash: ${entry.path}`);
+    const digest = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    assert.strictEqual(entry.hash, `sha256:${digest}`, `stale manifest hash: ${entry.path}`);
+  }
+  const walk = (dir, prefix = '') => {
+    const files = [];
+    for (const name of fs.readdirSync(dir).sort()) {
+      if (name === 'deps' || name === '.DS_Store') continue;
+      const absolute = path.join(dir, name);
+      const relative = path.posix.join(prefix, name);
+      if (fs.statSync(absolute).isDirectory()) files.push(...walk(absolute, relative));
+      else files.push(relative);
+    }
+    return files;
+  };
+  const unlisted = walk(repoPath('a11y-audit')).filter((file) => !listed.has(file));
+  assert.deepStrictEqual(unlisted, [], `bundle files missing from manifest: ${unlisted.join(', ')}`);
 }
 
 function validateYamlFiles() {
@@ -374,8 +418,33 @@ function scannerBrowserValidation() {
   );
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
   assert.match(scanSource, /spawnSync\('npm', \['install', '--prefix', SKILL_DEPS_DIR, installSpec\]/);
-  assert.match(scanSource, /const PINNED_VERSIONS = \{ 'axe-core':/);
+  assert.match(scanSource, /const PINNED_VERSIONS = \{[\s\S]*'axe-core': '4\.12\.1'/);
   assert.doesNotMatch(scanSource, /execSync\(`npm install/);
+}
+
+function scannerDiscoverPlanRegression() {
+  const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  const dir = tmpPath('discover-plan');
+  resetDir(dir);
+  const planPath = path.join(dir, 'discover.json');
+  fs.writeFileSync(planPath, JSON.stringify({
+    scanList: [
+      'https://example.com/',
+      'https://example.com/',
+      'https://example.com/docs',
+    ],
+  }));
+  assert.deepStrictEqual(scan.loadUrlsFromDiscoverPlan(planPath), [
+    'https://example.com/',
+    'https://example.com/docs',
+  ]);
+  assert.deepStrictEqual(scan.normalizeScanUrls([
+    'https://example.com',
+    'https://example.com/',
+  ]), ['https://example.com/']);
+  assert.throws(() => scan.validateScanUrl('file:///etc/passwd'), /Unsupported scan URL protocol/);
+  fs.writeFileSync(planPath, JSON.stringify({ scanList: [] }));
+  assert.throws(() => scan.loadUrlsFromDiscoverPlan(planPath), /non-empty scanList/);
 }
 
 function scannerBaselineRegression() {
@@ -550,8 +619,31 @@ function installationSurfaceRegression() {
     assert.match(text, /\.claude\/skills/, `${file} must identify the Claude Code skill location`);
     assert.match(text, /\.agents\/skills/, `${file} must identify the Codex skill location`);
   }
+  for (const [file, text] of surfaces) {
+    assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
+  }
+  assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.0/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
+}
+
+function reusableActionRegression() {
+  const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
+  const starter = fs.readFileSync(
+    repoPath('a11y-audit/assets/ci/github-actions/accessibility-audit.yml'),
+    'utf8'
+  );
+  for (const input of ['discover-url', 'discover-output', 'discover-max-per-group', 'baseline', 'fail-on']) {
+    assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
+  }
+  assert.match(action, /http-server@14\.1\.1/);
+  assert.match(action, /scripts\/discover\.js/);
+  assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
+  assert.match(action, /^outputs:/m);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.0/);
+  assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
+  assert.doesNotMatch(starter, /curl .*sitemap/);
 }
 
 function assistantGuideArtifactRegression() {
@@ -566,7 +658,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.4$/m);
+  assert.match(text, /^guide-version: 0\.3\.5$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -591,7 +683,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.4$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.5$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -603,6 +695,7 @@ if (validateMode) {
   test('syntax checks cover bundled scripts and eval harnesses', validateSyntax);
   test('JSON files parse and sample output matches audit shape', validateJsonFiles);
   test('YAML and frontmatter files parse', validateYamlFiles);
+  test('manifest paths and hashes cover the complete bundle', validateManifestIntegrity);
   test('bootstrap-context smoke test creates workspace context', validateBootstrapSmoke);
 }
 
@@ -615,11 +708,13 @@ test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedL
 test('eval-11 reports page-aware delta movement', eval11ReportDelta);
 test('eval-15 renders matrices from pluggable standards data', eval15PluggableStandards);
 test('scan.js rejects unsupported browser package names before install', scannerBrowserValidation);
+test('scan.js consumes validated, deduplicated discover plans', scannerDiscoverPlanRegression);
 test('scan.js fingerprints and compares accepted accessibility baselines', scannerBaselineRegression);
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);
 test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingRegression);
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);
 test('public install surfaces stay current and synchronized', installationSurfaceRegression);
+test('reusable Action and workflow starter stay template-aware', reusableActionRegression);
 test('assistant guide artifacts stay bounded, pinned, and synchronized', assistantGuideArtifactRegression);
 
 const failed = results.filter((result) => !result.ok);

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'a11y-audit/references/output-schema.json'
   workflow_dispatch:
 
 permissions:
@@ -25,8 +26,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Stage Pages artifact
+        run: |
+          mkdir -p _site/schema
+          cp -R docs/. _site/
+          cp a11y-audit/references/output-schema.json _site/schema/audit-v1.json
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

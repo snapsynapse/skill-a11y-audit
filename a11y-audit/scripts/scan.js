@@ -2,12 +2,13 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 7
-version_date: 2026-07-11
-previous_version: 6
+version: 8
+version_date: 2026-07-21
+previous_version: 7
 change_summary: >
-  Adds stable finding fingerprints, explicit baseline creation, and a
-  legacy-friendly --fail-on new gate with axe-version mismatch protection.
+  Adds discover-plan input, URL validation and deduplication, pinned
+  Puppeteer installation, bounded per-page failure reporting, and reliable
+  browser cleanup. Removes the non-executing Lighthouse command placeholder.
 */
 
 const fs = require('fs');
@@ -42,6 +43,39 @@ function splitCsv(value) {
   return value.split(',').map((entry) => entry.trim()).filter(Boolean);
 }
 
+function validateScanUrl(value) {
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Invalid scan URL: ${value}`);
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error(`Unsupported scan URL protocol: ${parsed.protocol} (${value})`);
+  }
+  return parsed.href;
+}
+
+function normalizeScanUrls(values) {
+  return [...new Set((values || []).map(validateScanUrl))];
+}
+
+function loadUrlsFromDiscoverPlan(discoverPath) {
+  let plan;
+  try {
+    plan = JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8'));
+  } catch (err) {
+    throw new Error(`Unable to read discover plan ${discoverPath}: ${err.message}`);
+  }
+  if (!Array.isArray(plan.scanList) || plan.scanList.length === 0) {
+    throw new Error(`Discover plan ${discoverPath} must contain a non-empty scanList array.`);
+  }
+  if (!plan.scanList.every((value) => typeof value === 'string')) {
+    throw new Error(`Discover plan ${discoverPath} scanList must contain only URL strings.`);
+  }
+  return normalizeScanUrls(plan.scanList);
+}
+
 function validateBrowserLib(browserLib) {
   if (browserLib === 'puppeteer') return browserLib;
   throw new Error(`Unsupported browser library: ${browserLib}. This bundled script supports puppeteer only.`);
@@ -54,7 +88,10 @@ function validateBrowserLib(browserLib) {
 // a newer rule set is deliberately wanted. A project- or global-resolved
 // axe-core still wins over auto-install; the resolved version is recorded in
 // the output JSON either way so report.js can flag cross-version deltas.
-const PINNED_VERSIONS = { 'axe-core': '4.12.1' };
+const PINNED_VERSIONS = {
+  'axe-core': '4.12.1',
+  puppeteer: '24.40.0',
+};
 
 function validateAxeVersion(value) {
   if (value === 'latest' || /^\d+\.\d+\.\d+(-[\w.]+)?$/.test(value)) return value;
@@ -335,20 +372,6 @@ async function loadPuppeteer(packageRoot) {
 }
 
 // ---------------------------------------------------------------------------
-// Lighthouse (optional)
-// ---------------------------------------------------------------------------
-
-function buildLighthouseCommand(url) {
-  return [
-    'npx', 'lighthouse', url,
-    '--output=json', '--output-path=stdout',
-    '--only-categories=accessibility',
-    '--chrome-flags=--headless --no-sandbox',
-    '--quiet',
-  ].join(' ');
-}
-
-// ---------------------------------------------------------------------------
 // axe summary mode
 // ---------------------------------------------------------------------------
 
@@ -375,7 +398,7 @@ function summarizeAxe(axe) {
 async function run() {
   const args = parseArgs(process.argv.slice(2));
   const rootDir = path.resolve(args.root || process.cwd());
-  const urls = splitCsv(args.urls);
+  let urls = splitCsv(args.urls);
   const outputPath = path.resolve(args.output || path.join(process.cwd(), 'a11y-scan-results.json'));
   let browserLib;
   try {
@@ -384,12 +407,20 @@ async function run() {
     console.error(err.message);
     process.exit(1);
   }
-  const runLighthouse = args.lighthouse === 'true';
   const summaryMode = args.summary === true || args.summary === 'true';
   const failOn = typeof args['fail-on'] === 'string' ? args['fail-on'] : null;
   if (failOn && !['errors', 'new', 'none'].includes(failOn)) {
     console.error(`Invalid --fail-on value: ${failOn}. Use errors, new, or none.`);
     process.exit(1);
+  }
+
+  if (typeof args.discover === 'string') {
+    try {
+      urls.push(...loadUrlsFromDiscoverPlan(args.discover));
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
   }
   if (failOn === 'new' && typeof args.baseline !== 'string') {
     console.error('--fail-on new requires --baseline <path>.');
@@ -419,14 +450,21 @@ async function run() {
     }
   }
 
+  try {
+    urls = normalizeScanUrls(urls);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url>) [--root <project-dir>] [--output <path>] [--summary] [--lighthouse true] [--axe-version <x.y.z|latest>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|new|none]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|new|none]');
     process.exit(1);
   }
 
   // Resolve dependencies (skill-local → project → global → auto-install)
   const axeDep = ensureDependency('axe-core', rootDir, axeInstallVersion);
-  const browserDep = ensureDependency(browserLib, rootDir);
+  const browserDep = ensureDependency(browserLib, rootDir, PINNED_VERSIONS[browserLib]);
 
   const axeVersion = readPkgVersion(axeDep.root);
   const browserVersion = readPkgVersion(browserDep.root);
@@ -438,34 +476,67 @@ async function run() {
 
   const browserModule = await loadPuppeteer(browserDep.root);
 
-  const browser = await browserModule.default.launch({
-    headless: true,
-    args: ['--no-sandbox'],
-  });
-
   const results = [];
-  for (const url of urls) {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 800 });
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
-    await page.evaluate(axeSource);
-    const axe = await page.evaluate(async () => {
-      return axe.run(document, {
-        resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
-      });
+  const errors = [];
+  let browser;
+  try {
+    browser = await browserModule.default.launch({
+      headless: true,
+      args: ['--no-sandbox'],
     });
-    results.push({
-      url,
-      axe: summaryMode ? summarizeAxe(axe) : axe,
-      lighthouse: runLighthouse
-        ? { status: 'not-run-by-script', command: buildLighthouseCommand(url) }
-        : { status: 'skipped', reason: 'Lighthouse disabled for this run' },
-    });
-    await page.close();
+    for (const url of urls) {
+      let page;
+      try {
+        page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+        await page.evaluate(axeSource);
+        const axe = await page.evaluate(async () => {
+          return axe.run(document, {
+            resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
+          });
+        });
+        results.push({
+          url,
+          axe: summaryMode ? summarizeAxe(axe) : axe,
+          lighthouse: { status: 'skipped', reason: 'Lighthouse is a separate optional audit step' },
+        });
+      } catch (err) {
+        const failure = { url, error: err.message };
+        errors.push(failure);
+        console.error(`Scan failed for ${url}: ${err.message}`);
+      } finally {
+        if (page) await page.close().catch(() => {});
+      }
+    }
+  } finally {
+    if (browser) await browser.close().catch(() => {});
   }
 
-  await browser.close();
   const findings = collectFindings(results);
+  const basePayload = {
+    generated_at: new Date().toISOString(),
+    root_dir: rootDir,
+    browser: browserLib,
+    browser_version: browserVersion,
+    axe_version: axeVersion,
+    axe_source: axeSourcePath,
+    dependency_sources: {
+      'axe-core': axeDep.source,
+      [browserLib]: browserDep.source,
+    },
+    urls,
+    results,
+    findings,
+    errors,
+  };
+
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  if (errors.length > 0) {
+    fs.writeFileSync(outputPath, JSON.stringify({ ...basePayload, baseline: null }, null, 2));
+    console.error(`a11y scan: ${errors.length} page(s) failed; partial results written to ${outputPath}`);
+    process.exit(1);
+  }
   let baselineComparison = null;
   if (typeof args.baseline === 'string') {
     try {
@@ -494,19 +565,7 @@ async function run() {
   }
 
   const payload = {
-    generated_at: new Date().toISOString(),
-    root_dir: rootDir,
-    browser: browserLib,
-    browser_version: browserVersion,
-    axe_version: axeVersion,
-    axe_source: axeSourcePath,
-    dependency_sources: {
-      'axe-core': axeDep.source,
-      [browserLib]: browserDep.source,
-    },
-    urls,
-    results,
-    findings,
+    ...basePayload,
     baseline: baselineComparison,
   };
   fs.writeFileSync(outputPath, JSON.stringify(payload, null, 2));
@@ -551,6 +610,9 @@ if (require.main === module) {
 
 module.exports = {
   splitCsv,
+  validateScanUrl,
+  normalizeScanUrls,
+  loadUrlsFromDiscoverPlan,
   validateBrowserLib,
   validateAxeVersion,
   loadUrlsFromSitemap,

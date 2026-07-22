@@ -1,8 +1,16 @@
 name: 'a11y scan'
 description: >
-  Run the skill-a11y-audit scanner (axe-core via Puppeteer) against a
-  local sitemap or explicit URL list, fail on all or only newly introduced
-  violations, and upload the raw JSON results as an artifact.
+  Discover representative templates when requested, run axe-core via
+  Puppeteer, fail on all or only newly introduced violations, and retain
+  scan and discovery evidence as artifacts.
+
+outputs:
+  results-path:
+    description: Path to the scan results JSON.
+    value: ${{ inputs.output }}
+  discovery-path:
+    description: Path to the discovery plan JSON when discover-url is set.
+    value: ${{ inputs.discover-output }}
 
 inputs:
   serve-path:
@@ -37,6 +45,22 @@ inputs:
     description: Comma-separated explicit URLs to scan, on top of any sitemap discovery.
     required: false
     default: ''
+  discover-url:
+    description: Base URL for deterministic template-aware representative selection.
+    required: false
+    default: ''
+  discover-output:
+    description: Path to retain the template-aware discovery plan JSON.
+    required: false
+    default: 'a11y-discover-plan.json'
+  discover-max-per-group:
+    description: Maximum representative pages selected per template group.
+    required: false
+    default: '2'
+  allow-cross-origin-sitemaps:
+    description: '`true` to allow discover.js to follow sitemap documents on other origins.'
+    required: false
+    default: 'false'
   fail-on:
     description: '`errors` for any violation, `new` for findings outside the accepted baseline, or `none`.'
     required: false
@@ -78,12 +102,26 @@ runs:
       if: inputs.serve-path != ''
       shell: bash
       run: |
-        npx --yes http-server "${{ inputs.serve-path }}" -p "${{ inputs.port }}" -c-1 > /tmp/a11y-http.log 2>&1 &
+        npx --yes http-server@14.1.1 "${{ inputs.serve-path }}" -p "${{ inputs.port }}" -c-1 > /tmp/a11y-http.log 2>&1 &
         echo $! > /tmp/a11y-http.pid
         for i in $(seq 1 30); do
           curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null && break || sleep 0.5
         done
         curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null || (cat /tmp/a11y-http.log; exit 1)
+
+    - name: Discover representative templates
+      if: inputs.discover-url != ''
+      shell: bash
+      env:
+        DISCOVER_URL: ${{ inputs.discover-url }}
+        DISCOVER_OUTPUT: ${{ inputs.discover-output }}
+        DISCOVER_MAX_PER_GROUP: ${{ inputs.discover-max-per-group }}
+        ALLOW_CROSS_ORIGIN_SITEMAPS: ${{ inputs.allow-cross-origin-sitemaps }}
+      run: |
+        ARGS=(--url "$DISCOVER_URL" --output "$DISCOVER_OUTPUT")
+        [ -n "$DISCOVER_MAX_PER_GROUP" ] && ARGS+=(--max-per-group "$DISCOVER_MAX_PER_GROUP")
+        [ "$ALLOW_CROSS_ORIGIN_SITEMAPS" = "true" ] && ARGS+=(--allow-cross-origin-sitemaps)
+        node "${{ github.action_path }}/../../../a11y-audit/scripts/discover.js" "${ARGS[@]}"
 
     - name: Run a11y scan
       shell: bash
@@ -93,6 +131,8 @@ runs:
         SITEMAP_REPLACE: ${{ inputs.sitemap-replace }}
         SITEMAP_EXCLUDE: ${{ inputs.sitemap-exclude }}
         URLS: ${{ inputs.urls }}
+        DISCOVER_URL: ${{ inputs.discover-url }}
+        DISCOVER_OUTPUT: ${{ inputs.discover-output }}
         FAIL_ON: ${{ inputs.fail-on }}
         BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
@@ -104,6 +144,7 @@ runs:
         [ -n "$SITEMAP_REPLACE" ] && ARGS+=(--sitemap-replace "$SITEMAP_REPLACE")
         [ -n "$SITEMAP_EXCLUDE" ] && ARGS+=(--sitemap-exclude "$SITEMAP_EXCLUDE")
         [ -n "$URLS" ]            && ARGS+=(--urls "$URLS")
+        [ -n "$DISCOVER_URL" ]    && ARGS+=(--discover "$DISCOVER_OUTPUT")
         [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
         [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
@@ -121,5 +162,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifact-name }}
-        path: ${{ inputs.output }}
+        path: |
+          ${{ inputs.output }}
+          ${{ inputs.discover-output }}
         if-no-files-found: ignore

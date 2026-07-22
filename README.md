@@ -1,7 +1,8 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![GitHub release](https://img.shields.io/github/release/snapsynapse/skill-a11y-audit.svg)](https://github.com/snapsynapse/skill-a11y-audit/releases/latest)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.5.0)
+[![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Open, self-hosted accessibility regression evidence for large web
@@ -99,6 +100,12 @@ approval, and each bundled script it runs is SHA-256 pinned.
 npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit
 ```
 
+To try the skill without a persistent install:
+
+```sh
+npx skills use snapsynapse/skill-a11y-audit --skill a11y-audit
+```
+
 The interactive flow detects supported agents and lets you choose project or
 global scope. To select an agent non-interactively:
 
@@ -136,7 +143,7 @@ node a11y-audit/scripts/discover.js \
 
 # 2. Scan the selected pages
 node a11y-audit/scripts/scan.js \
-  --urls $(node -e "const d=require('/tmp/discover.json'); console.log(d.scanList.join(','))") \
+  --discover /tmp/discover.json \
   --output /tmp/scan.json \
   --summary
 
@@ -174,6 +181,26 @@ node a11y-audit/scripts/scan.js \
 
 Baseline changes are explicit acceptance decisions. Review and commit
 them; never refresh the baseline automatically in CI.
+
+### Adopt in GitHub Actions
+
+The reusable Action can serve a static build, select representative templates,
+compare against reviewed debt, and upload both the scan and discovery plan:
+
+```yaml
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.0
+  with:
+    serve-path: dist
+    discover-url: http://127.0.0.1:8088/
+    baseline: .a11y-audit/baseline.json
+    fail-on: new
+    output: artifacts/a11y-scan.json
+    discover-output: artifacts/a11y-discover.json
+```
+
+Adapt `serve-path` to the repository's build output. Pin the Action to the
+full release commit SHA where organizational policy requires immutable Action
+references.
 
 ## Assistant Guide
 
@@ -223,7 +250,9 @@ Shared issues on `regulation/*`, `requires/*/*`, `authority/*`: dlitem
 
 ### Dependency Resolution
 
-scan.js resolves axe-core and Puppeteer in this order:
+scan.js resolves axe-core and Puppeteer in this order. Auto-install uses the
+versions validated by this release; project or global packages can still take
+precedence and their resolved versions are recorded:
 
 1. **Skill-local** `deps/` (auto-installed, gitignored)
 2. **Target project** `node_modules/`

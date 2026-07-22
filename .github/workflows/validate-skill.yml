@@ -2,11 +2,17 @@ name: Validate Skill Bundle
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
   validate:
+    name: Validate (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -14,10 +20,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node }}
+
+      - name: Install validation dependencies
+        run: npm ci
 
       - name: Validate skill bundle
         run: npm run validate
+
+  guidecheck:
+    name: Verify assistant guide
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Checkout pinned GuideCheck verifier
         uses: actions/checkout@v4
@@ -28,3 +44,21 @@ jobs:
 
       - name: Verify assistant guide against GuideCheck 0.7.0
         run: python3 .guidecheck/scripts/guidecheck_verify.py assistant-guide.txt --pretty
+
+  browser-eval:
+    name: Real browser eval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pinned scanner dependencies
+        run: npm install --prefix a11y-audit/deps axe-core@4.12.1 puppeteer@24.40.0
+
+      - name: Run real browser and baseline eval
+        run: npm run eval:browser

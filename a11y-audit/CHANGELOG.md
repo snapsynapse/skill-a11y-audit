@@ -1,15 +1,52 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 23
-version_date: 2026-07-13
-previous_version: 22
+version: 24
+version_date: 2026-07-21
+previous_version: 23
 change_summary: >
-  Records v2.4.0: pluggable standards data (wcag21-aa, wcag22-aa,
-  en301549) with the criteria matrix moved from code to data files.
+  Records v2.5.0: template-aware Action adoption, versioned JSON Schema,
+  real-browser and manifest evals, scanner reliability, and repo cleanup.
 ---
 
 # Changelog
+
+## v2.5.0 -- 2026-07-21
+
+- **Template-aware reusable Action:** the composite Action can run
+  deterministic discovery before scanning, accepts cross-origin sitemap
+  policy and sample-size inputs, exposes discovery and scan paths, and
+  uploads both artifacts. The bundled workflow starter consumes the tagged
+  remote Action with an accepted-baseline gate.
+- **Safer scanner orchestration** (`scripts/scan.js` v8): `--discover`
+  consumes a discovery plan directly; URLs are restricted to HTTP(S),
+  normalized, and deduplicated. Puppeteer auto-install is pinned, page
+  failures produce partial evidence but exit nonzero, browser resources are
+  closed reliably, and the unused Lighthouse command placeholder is gone.
+- **Versioned machine contract** (`scripts/report.js` v6): generated JSON
+  records `schema_version: 1`; the canonical Draft 2020-12 schema is
+  published at https://skilla11y.dev/schema/audit-v1.json and enforced with
+  pinned Ajv validation.
+- **Stronger release gates:** offline validation now checks complete manifest
+  coverage and hashes, schema-valid sample/generated JSON, discover-plan
+  safety, public adoption surfaces, and Action contracts across Node 18, 20,
+  and 22. A separate CI and local eval launches real Puppeteer against a
+  loopback fixture, detects an axe violation, writes a reviewed baseline,
+  and verifies a zero-new-findings rescan.
+- **Adoption surfaces:** README, docs, and llms surfaces now include a
+  no-install trial command, a reusable Action example, and direct
+  discover-to-scan commands without shell-expanded URL lists.
+- **Cleanup:** removed an unreferenced malformed archive stub and its
+  unreferenced 1 MB image. The repository audit context no longer points to
+  a nonexistent accepted baseline.
+- CI validation runs only for main pushes and pull requests, avoiding
+  duplicate tag-triggered validation runs; Pages stages the versioned schema
+  beside the documentation site.
+
+## Assistant guide v0.3.5 -- 2026-07-21
+
+- Makes the bounded scan action consume the discovery plan directly and
+  refreshes scanner/report executable pins and the sidecar manifest.
 
 ## v2.4.0 -- 2026-07-13
 
