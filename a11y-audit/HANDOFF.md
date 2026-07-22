@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 19
+version: 20
 version_date: 2026-07-21
-previous_version: 18
+previous_version: 19
 change_summary: >
-  Records v2.5.0 template-aware Action adoption, schema and manifest gates,
-  a real-browser eval, scanner reliability, and repository cleanup.
+  Records v2.5.1 consumer Action evidence, immutable workflow references,
+  locked scanner dependencies, actionlint, and zizmor release gates.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v24 (release v2.5.0), self-contained and executable-eval validated
+## Current State: bundle v25 (release v2.5.1), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -30,6 +30,9 @@ validated. The repo now has a deterministic offline eval runner wired to
 The reusable Action now runs template discovery before scanning, and a
 separate browser eval exercises real Puppeteer, axe-core, and accepted
 baseline behavior against a loopback fixture.
+The public composite Action is also exercised through its consumer inputs.
+Remote Actions are SHA-pinned, scanner dependency transitive versions are
+locked, and actionlint plus zizmor block workflow delivery regressions.
 
 The three most recent correctness issues are now resolved:
 
@@ -64,7 +67,7 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 17 eval cases with passing or explicitly partial results |
+| evals/evals.json | 18 eval cases with passing or explicitly partial results |
 | evals/run-evals.js | Offline executable eval, schema, manifest, and Action validation runner |
 | evals/run-browser-eval.js | Real Puppeteer + axe-core fixture and baseline rescan |
 | references/claude-code.md | Claude-specific launch and Preview notes |
@@ -129,7 +132,7 @@ four token-efficiency improvements, all now implemented in v10.
    and requires the report to state the skip reason explicitly.
 
 6. **No hosted continuous monitoring.** CI gating exists — the composite
-   action at `.github/actions/scan` (v2.5.0) runs discovery and scanning on
+   action at `.github/actions/scan` (v2.5.1) runs discovery and scanning on
    push/PR and supports accepted-baseline gating. `assets/ci/github-actions/` has a
    workflow starter — but there is no scheduled scanning service,
    dashboard, or trend store beyond the `markdown+json` artifacts.
@@ -251,6 +254,17 @@ remediate code, or replace enterprise monitoring.
 - No-install trial and remote Action examples across public adoption surfaces
 - Node 18, 20, and 22 validation matrix without duplicate tag-triggered runs
 - Removal of two unreferenced archive artifacts
+
+### Done in v2.5.1
+
+- End-to-end composite Action consumer smoke test with retained evidence
+- Full-SHA pinning for every remote Action reference
+- Environment-mediated Action inputs instead of direct shell interpolation
+- Read-only workflow permissions and disabled checkout credential persistence
+- Committed scanner dependency package and lock manifests with clean audit
+- Blocking actionlint 1.7.12 and zizmor 1.28.0 workflow gates
+- Dependabot coverage for Actions and both npm dependency graphs
+- Public and agent-facing adoption surfaces synchronized to the stronger gate
 
 ### Next, in priority order
 

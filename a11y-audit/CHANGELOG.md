@@ -1,15 +1,41 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 24
+version: 25
 version_date: 2026-07-21
-previous_version: 23
+previous_version: 24
 change_summary: >
-  Records v2.5.0: template-aware Action adoption, versioned JSON Schema,
-  real-browser and manifest evals, scanner reliability, and repo cleanup.
+  Records v2.5.1: consumer Action execution, immutable Action references,
+  locked scanner dependencies, actionlint, and zizmor release gates.
 ---
 
 # Changelog
+
+## v2.5.1 -- 2026-07-21
+
+- **Consumer-path evidence:** CI now invokes the local composite Action through
+  its public inputs against the served eval fixture, then verifies retained
+  discovery and scan JSON. This closes the gap between testing scanner helpers
+  and testing the Action consumers actually adopt.
+- **Workflow supply-chain hardening:** all remote Action references are pinned
+  to full commit SHAs with release comments. Checkout credentials are not
+  persisted, and validation defaults to read-only repository permissions.
+- **Input-injection hardening:** server path and port inputs now enter composite
+  Action shell code through environment variables rather than direct GitHub
+  expression interpolation.
+- **Locked browser dependencies:** validated axe-core and Puppeteer versions,
+  including patched transitive dependencies, now have committed package and
+  lock manifests. Browser CI installs them with `npm ci`.
+- **Blocking workflow analysis:** pinned actionlint 1.7.12 checks workflow
+  semantics and pinned zizmor 1.28.0 checks workflow and composite-Action
+  security. The hardened tree reports no low-or-higher zizmor findings.
+- Dependabot covers GitHub Actions plus the root and scanner npm lockfiles so
+  immutable pins remain maintainable through reviewed update pull requests.
+- README, website, llms surfaces, SKILL.md, workflow starter, eval-18, manifest,
+  and handoff now describe and enforce the same v2.5.1 adoption contract.
+
+Assistant guide v0.3.5 remains current because no guide action command or
+repository-owned executable changed.
 
 ## v2.5.0 -- 2026-07-21
 

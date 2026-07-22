@@ -417,7 +417,7 @@
       "date": "2026-07-21",
       "notes": [
         "Deterministic Action-contract coverage runs in npm run validate",
-        "The packaged workflow starter uses the v2.5.0 Action surface with template discovery and fail-on-new gating"
+        "The packaged workflow starter uses the v2.5.1 Action surface with template discovery and fail-on-new gating"
       ]
     }
   },
@@ -442,6 +442,32 @@
       "notes": [
         "Schema and manifest checks run in npm run validate",
         "The real browser eval runs separately in CI and locally through npm run eval:browser"
+      ]
+    }
+  },
+  {
+    "id": "eval-18",
+    "prompt": "Validate the reusable Action as a real consumer and harden its delivery chain. Run the local composite Action against a served fixture, retain scan and discovery evidence, require immutable remote Action references, prevent shell injection through Action inputs, and reject workflow semantic or security regressions.",
+    "expectations": {
+      "structural": [
+        "A CI job invokes ./.github/actions/scan through the consumer-facing inputs",
+        "All remote Action references are pinned to full commit SHAs with version comments",
+        "Scanner dependencies install from committed package and lock manifests",
+        "actionlint and zizmor run as blocking validation jobs"
+      ],
+      "behavioral": [
+        "Consumer execution produces non-empty discovery and scan JSON artifacts",
+        "Action inputs reach shell scripts through environment variables rather than direct template interpolation",
+        "Checkout credentials are not persisted and validation uses read-only repository permissions",
+        "The workflow security audit reports no low-or-higher findings"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-07-21",
+      "notes": [
+        "Deterministic supply-chain assertions run in npm run validate",
+        "Pinned actionlint 1.7.12 and zizmor 1.28.0 pass locally; the consumer Action path is exercised in GitHub Actions"
       ]
     }
   }

@@ -99,7 +99,9 @@ recorded the same way.
 - Read `references/issue-trackers.md` only when `output_mode` is
   `markdown+issues`.
 - If the user wants to operationalize recurring audits in CI, start from
-  `assets/ci/github-actions/accessibility-audit.yml`.
+  `assets/ci/github-actions/accessibility-audit.yml`. The upstream Action
+  is exercised as a real consumer and checked with actionlint and zizmor;
+  adapt the inputs without copying its implementation into the target repo.
 - Prefer `scripts/plan-issues.js` before live ticket creation when you
   need a safe review and deduplication pass.
 
@@ -398,6 +400,8 @@ specific findings pattern).
 If the user wants a recurring or on-demand CI job, adapt
 `assets/ci/github-actions/accessibility-audit.yml` to the target
 workspace instead of inventing a workflow from scratch.
+Keep baseline updates outside CI and preserve the Action's discovery and scan
+artifacts so a failed gate remains reviewable.
 
 ### Phase 6 -- Issue Creation (conditional)
 
@@ -471,6 +475,8 @@ After completing an audit, verify these quality checks:
   push/PR and can fail on all violations or only findings outside an
   accepted baseline, plus a workflow starter at
   `assets/ci/github-actions/accessibility-audit.yml`. The
+  upstream repository exercises the composite Action end to end and runs
+  workflow semantic and security checks. The
   `markdown+json` output mode provides structured data for building
   further integrations.
 - **Third-party auditing**: only audits the project's own frontend,

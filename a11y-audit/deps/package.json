@@ -1,0 +1,10 @@
+{
+  "name": "a11y-audit-deps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auto-managed dependencies for a11y-audit skill scripts",
+  "dependencies": {
+    "axe-core": "4.12.1",
+    "puppeteer": "24.40.0"
+  }
+}

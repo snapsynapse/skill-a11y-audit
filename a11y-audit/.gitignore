@@ -1,2 +1,5 @@
-# Auto-installed dependencies for scan.js
-deps/
+# Scanner dependency installation area. Keep the reproducible manifests,
+# exclude installed packages and all other generated contents.
+deps/*
+!deps/package.json
+!deps/package-lock.json

@@ -52,6 +52,7 @@ Or run scripts directly:
 - [references/output-contract.md](a11y-audit/references/output-contract.md): report format specification
 - [references/output-schema.json](a11y-audit/references/output-schema.json): JSON output schema
 - [Reusable GitHub Action](.github/actions/scan/action.yml): template-aware discovery, scanning, and accepted-baseline gating
+- [Validation workflow](.github/workflows/validate-skill.yml): Node matrix, GuideCheck, real-browser, consumer-Action, actionlint, and zizmor gates
 - [assets/sample-output/](a11y-audit/assets/sample-output/): example report from a real site audit
 - [CHANGELOG.md](a11y-audit/CHANGELOG.md): version history
 - [MANIFEST.yaml](a11y-audit/MANIFEST.yaml): bundle inventory

@@ -94,20 +94,23 @@ runs:
   using: 'composite'
   steps:
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ inputs.node-version }}
 
     - name: Start local http-server
       if: inputs.serve-path != ''
       shell: bash
+      env:
+        SERVE_PATH: ${{ inputs.serve-path }}
+        PORT: ${{ inputs.port }}
       run: |
-        npx --yes http-server@14.1.1 "${{ inputs.serve-path }}" -p "${{ inputs.port }}" -c-1 > /tmp/a11y-http.log 2>&1 &
+        npx --yes http-server@14.1.1 "$SERVE_PATH" -p "$PORT" -c-1 > /tmp/a11y-http.log 2>&1 &
         echo $! > /tmp/a11y-http.pid
         for i in $(seq 1 30); do
-          curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null && break || sleep 0.5
+          curl -fs "http://localhost:$PORT/" > /dev/null && break || sleep 0.5
         done
-        curl -fs "http://localhost:${{ inputs.port }}/" > /dev/null || (cat /tmp/a11y-http.log; exit 1)
+        curl -fs "http://localhost:$PORT/" > /dev/null || (cat /tmp/a11y-http.log; exit 1)
 
     - name: Discover representative templates
       if: inputs.discover-url != ''
@@ -159,7 +162,7 @@ runs:
 
     - name: Upload results artifact
       if: always() && inputs.upload-artifact == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.artifact-name }}
         path: |

@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 7
+version: 8
 version_date: 2026-07-21
-previous_version: 6
+previous_version: 7
 change_summary: >
-  Adds executable JSON Schema, manifest-integrity, discover-plan, reusable
-  Action, and public-adoption surface regression coverage.
+  Adds locked scanner-dependency, immutable Action reference, consumer smoke,
+  actionlint, and zizmor release-gate regression coverage.
 */
 
 const assert = require('assert');
@@ -143,6 +143,8 @@ function validateJsonFiles() {
     'a11y-audit/evals/evals.json',
     'a11y-audit/references/output-schema.json',
     'a11y-audit/assets/sample-output/audit-sample.json',
+    'a11y-audit/deps/package.json',
+    'a11y-audit/deps/package-lock.json',
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
@@ -169,7 +171,7 @@ function validateManifestIntegrity() {
   const walk = (dir, prefix = '') => {
     const files = [];
     for (const name of fs.readdirSync(dir).sort()) {
-      if (name === 'deps' || name === '.DS_Store') continue;
+      if (name === 'node_modules' || name === '.DS_Store') continue;
       const absolute = path.join(dir, name);
       const relative = path.posix.join(prefix, name);
       if (fs.statSync(absolute).isDirectory()) files.push(...walk(absolute, relative));
@@ -623,7 +625,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.1/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
@@ -641,9 +643,34 @@ function reusableActionRegression() {
   assert.match(action, /scripts\/discover\.js/);
   assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.1/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.doesNotMatch(starter, /curl .*sitemap/);
+}
+
+function workflowSecurityRegression() {
+  const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
+  const validate = fs.readFileSync(repoPath('.github/workflows/validate-skill.yml'), 'utf8');
+  const pages = fs.readFileSync(repoPath('.github/workflows/pages.yml'), 'utf8');
+  const combined = `${action}\n${validate}\n${pages}`;
+  const remoteUses = [...combined.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)]
+    .map((match) => match[1])
+    .filter((value) => !value.startsWith('./'));
+  for (const use of remoteUses) {
+    assert.match(use, /@[0-9a-f]{40}$/, `remote Action must be SHA-pinned: ${use}`);
+  }
+  assert.doesNotMatch(action, /"\$\{\{ inputs\.(serve-path|port) \}\}"/);
+  assert.match(validate, /^permissions:\n  contents: read$/m);
+  assert.match(validate, /^  action-consumer:$/m);
+  assert.match(validate, /^  workflow-audit:$/m);
+  assert.match(validate, /actionlint\/cmd\/actionlint@v1\.7\.12/);
+  assert.match(validate, /zizmorcore\/zizmor-action@[0-9a-f]{40}/);
+  assert.match(validate, /npm ci --prefix a11y-audit\/deps/);
+  const deps = readJson(repoPath('a11y-audit/deps/package.json'));
+  assert.deepStrictEqual(deps.dependencies, {
+    'axe-core': '4.12.1',
+    puppeteer: '24.40.0',
+  });
 }
 
 function assistantGuideArtifactRegression() {
@@ -715,6 +742,7 @@ test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingR
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);
 test('public install surfaces stay current and synchronized', installationSurfaceRegression);
 test('reusable Action and workflow starter stay template-aware', reusableActionRegression);
+test('workflow and Action supply-chain controls stay enforced', workflowSecurityRegression);
 test('assistant guide artifacts stay bounded, pinned, and synchronized', assistantGuideArtifactRegression);
 
 const failed = results.filter((result) => !result.ok);

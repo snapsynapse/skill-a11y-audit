@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 24
+bundle_version: 25
 bundle_date: 2026-07-21
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -190,32 +190,31 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 18
-    hash: sha256:2f9a8656f8965e0f082fdd7d320575efa6765f92e2748e8d3345889999005ea6
+    version: 19
+    hash: sha256:2f7e8b8b64487dc632d283ffe03cfe8ea736f1aee7a12dde96f7ba97345dcf0d
     note: >
-      v18 documents direct discovery-plan scanning and pinned scanner
-      dependency behavior
+      v19 documents consumer-path and workflow-security release evidence
 
   - path: evals/evals.json
     role: evals
-    version: 13
-    hash: sha256:4685203fe32d13bb9b1c08572a012cf2dc53ae12be93f40955b2d0d3daef9b1a
+    version: 14
+    hash: sha256:8c2c838361793cf8785989d4dfa92f863488c3b494c74088857838fa2c7de346
     note: >
-      17 eval cases including Action adoption and real-browser release integrity
+      18 eval cases including consumer Action and workflow security gates
 
   - path: HANDOFF.md
     role: handoff
-    version: 19
-    hash: sha256:d07b31a5104ab2c1c64262a7f620bbf9afbbb9617b18e9f5087ad4684dbcfed6
+    version: 20
+    hash: sha256:d017a594452579ab42c422144ae06f2a3d8af23aa545262a1741e15c5cb18367
     note: >
-      v19 records v2.5.0 adoption, validation, and cleanup work
+      v20 records v2.5.1 consumer-path and workflow hardening
 
   - path: CHANGELOG.md
     role: reference
-    version: 24
-    hash: sha256:72a74bc544d836040334c57a38a0f56a5452fff2f6f294978fe74247c93ca834
+    version: 25
+    hash: sha256:782496d5a0fcc3ac4d57decf8f5ffef559cab4fa77adaf4a5895c0215ee8e76d
     note: >
-      Append-only history -- v24 records v2.5.0
+      Append-only history -- v25 records v2.5.1
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -225,10 +224,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 7
-    hash: sha256:3fa71e9059a89864d4f80f15f85513085bc33c9d603131269ad46b8c62909fcb
+    version: 8
+    hash: sha256:4996400eb36c10de7e9ff131641ba3b660c8e3b87fb7dcc107cf06f9ff096635
     note: >
-      v7 adds schema, manifest, discover-plan, Action, and adoption checks
+      v8 adds locked dependency and workflow supply-chain regression checks
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -458,9 +457,21 @@ files:
 
   - path: .gitignore
     role: config
+    version: 2
+    hash: sha256:2fcab863708d17832bedae952da75621119bc2d8e295f3924b7bfb1862a22685
+    note: Retains scanner dependency manifests while excluding installed packages
+
+  - path: deps/package.json
+    role: config
     version: 1
-    hash: sha256:b14334a65f6992514d8c5a01cc20eb899b03c597223fbe94c9991e906d993746
-    note: Excludes deps/ (auto-installed scan.js dependencies)
+    hash: sha256:5b0e0a78bc8bc21cad2b373f1e3b275e579067c0c10b26937f6476bb108a69ca
+    note: Exact validated axe-core and Puppeteer scanner dependencies
+
+  - path: deps/package-lock.json
+    role: config
+    version: 1
+    hash: sha256:a2991e2da2954f987a66f17de1a0f07d660ecea6bff215e3cdcbc865747f1e81
+    note: Reproducible scanner dependency graph with patched transitive releases
 
   - path: assets/sample-output/audit-sample.md
     role: asset
@@ -482,9 +493,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 2
-    hash: sha256:76b4651d89c6a10c891f884649bb21817ec5096222ce70b21e202264c77e1173
-    note: Template-aware remote Action starter with accepted-baseline gating
+    version: 3
+    hash: sha256:7eecfb6ff4e3ccf740bc82ca0fe4e6e25b1e3d609cefff4ddf4b9077f461aa94
+    note: v2.5.1 template-aware remote Action starter with accepted-baseline gating
 
   - path: agents/openai.yaml
     role: agents
@@ -518,6 +529,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 19
+    version: 20
     hash: null
     note: This file -- self-referential hash omitted

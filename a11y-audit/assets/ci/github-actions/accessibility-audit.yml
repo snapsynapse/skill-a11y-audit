@@ -18,7 +18,7 @@ jobs:
         run: npm ci && npm run build
 
       - name: Scan representative templates
-        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.0
+        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.1
         with:
           serve-path: dist
           port: '8088'
