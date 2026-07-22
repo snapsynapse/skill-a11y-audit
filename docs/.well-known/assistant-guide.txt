@@ -4,7 +4,7 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.6
+guide-version: 0.3.7
 applies-to: skill-a11y-audit 2.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
@@ -93,7 +93,7 @@ command: node SKILL_DIR/scripts/scan.js --discover DISCOVER_JSON --output SCAN_J
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URLs in DISCOVER_JSON, registry.npmjs.org
-exec-sha256: 886bcb309aea06de77556875bd570999584c09adb3a8309ea0b0ee94993d023d
+exec-sha256: 45f40403a1588aaa6a9dbb29176596b5553522aec8d86917bfa2456aafd056f7
 notes: Runs browser automation and may install pinned scanner dependencies.
 [/action]
 
@@ -105,7 +105,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --write-baseline BASELIN
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org
-exec-sha256: 886bcb309aea06de77556875bd570999584c09adb3a8309ea0b0ee94993d023d
+exec-sha256: 45f40403a1588aaa6a9dbb29176596b5553522aec8d86917bfa2456aafd056f7
 notes: Replaces a baseline only after human review; acceptance is not conformance.
 [/action]
 
@@ -117,7 +117,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --baseline BASELINE_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org
-exec-sha256: 886bcb309aea06de77556875bd570999584c09adb3a8309ea0b0ee94993d023d
+exec-sha256: 45f40403a1588aaa6a9dbb29176596b5553522aec8d86917bfa2456aafd056f7
 notes: Stops on axe-core drift and reports accepted, new, and resolved findings.
 [/action]
 

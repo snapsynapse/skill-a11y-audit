@@ -417,7 +417,7 @@
       "date": "2026-07-21",
       "notes": [
         "Deterministic Action-contract coverage runs in npm run validate",
-        "The packaged workflow starter uses the v2.5.1 Action surface with template discovery and fail-on-new gating"
+        "The packaged workflow starter uses the v2.5.2 Action surface with template discovery and fail-on-new gating"
       ]
     }
   },
@@ -453,7 +453,8 @@
         "A CI job invokes ./.github/actions/scan through the consumer-facing inputs",
         "All remote Action references are pinned to full commit SHAs with version comments",
         "Scanner dependencies install from committed package and lock manifests",
-        "actionlint and zizmor run as blocking validation jobs"
+        "actionlint and zizmor run as blocking validation jobs",
+        "Routine scanner dependency PRs are disabled while security updates remain available"
       ],
       "behavioral": [
         "Consumer execution produces non-empty discovery and scan JSON artifacts",
@@ -467,7 +468,7 @@
       "date": "2026-07-21",
       "notes": [
         "Deterministic supply-chain assertions run in npm run validate",
-        "Pinned actionlint 1.7.12 and patched zizmor 1.28.0 pass locally; the consumer Action path exercises crawl fallback, including a link-free entry page, in GitHub Actions"
+        "Pinned actionlint 1.7.12 and patched zizmor 1.28.0 pass locally; Puppeteer 24.43.1 retains Node 18+ support; the consumer Action path exercises crawl fallback, including a link-free entry page, in GitHub Actions"
       ]
     }
   }

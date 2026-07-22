@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 22
+version: 23
 version_date: 2026-07-21
-previous_version: 21
+previous_version: 22
 change_summary: >
-  Records the single-page crawl correction and assistant-guide v0.3.6.
+  Records v2.5.2 dependency synchronization and assistant-guide v0.3.7.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -16,7 +16,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v25 (release v2.5.1), self-contained and executable-eval validated
+## Current State: bundle v28 (release v2.5.2), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -131,7 +131,7 @@ four token-efficiency improvements, all now implemented in v10.
    and requires the report to state the skip reason explicitly.
 
 6. **No hosted continuous monitoring.** CI gating exists — the composite
-   action at `.github/actions/scan` (v2.5.1) runs discovery and scanning on
+   action at `.github/actions/scan` (v2.5.2) runs discovery and scanning on
    push/PR and supports accepted-baseline gating. `assets/ci/github-actions/` has a
    workflow starter — but there is no scheduled scanning service,
    dashboard, or trend store beyond the `markdown+json` artifacts.
@@ -253,6 +253,13 @@ remediate code, or replace enterprise monitoring.
 - No-install trial and remote Action examples across public adoption surfaces
 - Node 18, 20, and 22 validation matrix without duplicate tag-triggered runs
 - Removal of two unreferenced archive artifacts
+
+### Done in v2.5.2
+
+- Tested Puppeteer 24.43.1 synchronized across the scanner, lockfile, evals,
+  manifest, public adoption surfaces, and assistant guide
+- Routine scanner-graph version PRs disabled while security updates remain on
+- Dependency-only merge drift converted into a release-blocking invariant
 
 ### Done in v2.5.1
 

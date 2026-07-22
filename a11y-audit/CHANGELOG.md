@@ -1,14 +1,31 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 27
+version: 28
 version_date: 2026-07-21
-previous_version: 26
+previous_version: 27
 change_summary: >
-  Records the v2.5.1 single-page crawl correction and assistant-guide v0.3.6.
+  Records v2.5.2 dependency synchronization and assistant-guide v0.3.7.
 ---
 
 # Changelog
+
+## v2.5.2 -- 2026-07-21
+
+- Accepts tested Puppeteer 24.43.1 while retaining its Node 18+ support.
+- Synchronizes the scanner fallback pin, locked dependency graph, eval contract,
+  manifest hashes, workflow starter, README, and website.
+- Disables routine Dependabot version pull requests for the versioned scanner
+  graph. Dependabot security updates remain enabled; ordinary upgrades require
+  coordinated eval, manifest, changelog, and release updates.
+- Corrects the recurring CI failure caused when dependency-only pull requests
+  reached `main` without the bundle metadata required by skill versioning.
+
+## Assistant guide v0.3.7 -- 2026-07-21
+
+- Re-pins all scan actions to the Puppeteer 24.43.1-aware `scan.js` executable.
+- Keeps commands, approvals, authority boundaries, and GuideCheck profile
+  unchanged.
 
 ## v2.5.1 -- 2026-07-21
 

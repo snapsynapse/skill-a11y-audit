@@ -90,7 +90,7 @@ function validateBrowserLib(browserLib) {
 // the output JSON either way so report.js can flag cross-version deltas.
 const PINNED_VERSIONS = {
   'axe-core': '4.12.1',
-  puppeteer: '24.40.0',
+  puppeteer: '24.43.1',
 };
 
 function validateAxeVersion(value) {

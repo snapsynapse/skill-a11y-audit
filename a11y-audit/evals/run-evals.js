@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 10
+version: 11
 version_date: 2026-07-21
-previous_version: 9
+previous_version: 10
 change_summary: >
-  Requires sitemap-free discovery to retain its entry page and the consumer
-  smoke test to exercise that fallback.
+  Aligns the scanner dependency contract and Action starter with v2.5.2.
 */
 
 const assert = require('assert');
@@ -625,7 +624,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.1/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.2/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
@@ -643,7 +642,7 @@ function reusableActionRegression() {
   assert.match(action, /scripts\/discover\.js/);
   assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.1/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.2/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.doesNotMatch(starter, /curl .*sitemap/);
 }
@@ -653,6 +652,7 @@ function workflowSecurityRegression() {
   const discover = fs.readFileSync(repoPath('a11y-audit/scripts/discover.js'), 'utf8');
   const validate = fs.readFileSync(repoPath('.github/workflows/validate-skill.yml'), 'utf8');
   const pages = fs.readFileSync(repoPath('.github/workflows/pages.yml'), 'utf8');
+  const dependabot = fs.readFileSync(repoPath('.github/dependabot.yml'), 'utf8');
   const combined = `${action}\n${validate}\n${pages}`;
   const remoteUses = [...combined.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)]
     .map((match) => match[1])
@@ -670,10 +670,11 @@ function workflowSecurityRegression() {
   assert.match(validate, /astral-sh\/setup-uv@[0-9a-f]{40}/);
   assert.match(validate, /uvx zizmor==1\.28\.0 --offline --min-severity low \./);
   assert.match(validate, /npm ci --prefix a11y-audit\/deps/);
+  assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
-    puppeteer: '24.40.0',
+    puppeteer: '24.43.1',
   });
 }
 
@@ -689,7 +690,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.6$/m);
+  assert.match(text, /^guide-version: 0\.3\.7$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -714,7 +715,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.6$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.7$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);

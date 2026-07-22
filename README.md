@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.5.1)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.5.2)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -188,7 +188,7 @@ The reusable Action can serve a static build, select representative templates,
 compare against reviewed debt, and upload both the scan and discovery plan:
 
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.1
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.2
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
@@ -208,8 +208,10 @@ when the served build has no sitemap and should be crawled from
 
 The repository tests this exact consumer path against a served fixture. CI
 also runs actionlint for workflow semantics and zizmor for GitHub Actions
-security regressions before a release is published. Dependabot keeps the
-immutable Action references and both locked npm dependency graphs reviewable.
+security regressions before a release is published. Dependabot maintains
+immutable Action and root npm pins. The versioned scanner graph accepts
+security updates only; routine upgrades require synchronized eval and manifest
+changes.
 
 ## Assistant Guide
 
