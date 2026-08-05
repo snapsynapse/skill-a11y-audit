@@ -89,16 +89,21 @@ jobs:
           port: '8088'
           discover-url: http://127.0.0.1:8088/
           discover-no-sitemap: true
+          surface-map: a11y-audit/evals/fixtures/eval-19/surface-map.json
+          changed-files: a11y-audit/evals/fixtures/eval-19/changed-files.json
           fail-on: none
           output: artifacts/action-scan.json
           discover-output: artifacts/action-discover.json
+          selection-output: artifacts/action-selection.json
           artifact-name: consumer-action-evidence
 
       - name: Verify consumer outputs
         run: |
           test -s artifacts/action-scan.json
           test -s artifacts/action-discover.json
+          test -s artifacts/action-selection.json
           node -e "const s=require('./artifacts/action-scan.json'); if(!s.results?.length || s.errors?.length) process.exit(1)"
+          node -e "const s=require('./artifacts/action-selection.json'); if(s.changedSurface?.mode!=='targeted' || s.changedSurface?.reason!=='mapped-changes') process.exit(1)"
 
   workflow-audit:
     name: Workflow semantics and security

@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 23
-version_date: 2026-07-21
-previous_version: 22
+version: 24
+version_date: 2026-08-04
+previous_version: 23
 change_summary: >
-  Records v2.5.2 dependency synchronization and assistant-guide v0.3.7.
+  Records the v2.6.0 changed-surface candidate and current validation checklist.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -16,7 +16,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v28 (release v2.5.2), self-contained and executable-eval validated
+## Current State: bundle v29 (release candidate v2.6.0), self-contained and executable-eval validated
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -32,6 +32,14 @@ baseline behavior against a loopback fixture.
 The public composite Action is also exercised through its consumer inputs.
 Remote Actions are SHA-pinned, scanner dependency transitive versions are
 locked, and actionlint plus zizmor block workflow delivery regressions.
+
+Changed-surface selection is now available through an explicit project-owned
+source-prefix ownership map. The Action accepts either a changed-file JSON
+array or full Git base/head object IDs, emits a scan-compatible selection plan,
+and scans only exact mapped discovery groups. Any unmapped path, changed or
+malformed map, unknown group, shared-code rule, empty diff, or unavailable
+comparison retains the full representative sample and records its reason in
+`changedSurface`.
 
 The three most recent correctness issues are now resolved:
 
@@ -51,6 +59,7 @@ Those fixes now have runnable local regression fixtures:
 - `eval-9` covers cross-origin sitemap preservation
 - `eval-10` covers deterministic discovery across repeated runs
 - `eval-11` covers page-aware delta reporting
+- `eval-19` covers targeted changed surfaces and every conservative fallback
 
 A full audit was run 2026-03-26 against the AI Regulation Reference
 (10-page static HTML site, http://127.0.0.1:8081). The audit found
@@ -66,7 +75,7 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 18 eval cases with passing or explicitly partial results |
+| evals/evals.json | 19 eval cases with passing or explicitly partial results |
 | evals/run-evals.js | Offline executable eval, schema, manifest, and Action validation runner |
 | evals/run-browser-eval.js | Real Puppeteer + axe-core fixture and baseline rescan |
 | references/claude-code.md | Claude-specific launch and Preview notes |
@@ -78,6 +87,7 @@ four token-efficiency improvements, all now implemented in v10.
 | scripts/scan.js | Reusable axe-based scanning helper (--summary flag) |
 | scripts/bootstrap-context.js | First-run context bootstrap helper |
 | scripts/discover.js | Template-aware page discovery and sampling |
+| scripts/select-changed-surfaces.js | Source-map selection with full-sample fallback |
 | scripts/report.js | Deterministic report generator for Phases 3+5 |
 | scripts/plan-issues.js | Non-destructive issue planning helper |
 | assets/sample-output/ | Sample markdown and JSON artifacts |
@@ -131,8 +141,9 @@ four token-efficiency improvements, all now implemented in v10.
    and requires the report to state the skip reason explicitly.
 
 6. **No hosted continuous monitoring.** CI gating exists — the composite
-   action at `.github/actions/scan` (v2.5.2) runs discovery and scanning on
-   push/PR and supports accepted-baseline gating. `assets/ci/github-actions/` has a
+   action at `.github/actions/scan` (v2.6.0 candidate) runs discovery,
+   conservative changed-surface selection, and scanning on push/PR and supports
+   accepted-baseline gating. `assets/ci/github-actions/` has a
    workflow starter — but there is no scheduled scanning service,
    dashboard, or trend store beyond the `markdown+json` artifacts.
 
@@ -261,6 +272,22 @@ remediate code, or replace enterprise monitoring.
 - Routine scanner-graph version PRs disabled while security updates remain on
 - Dependency-only merge drift converted into a release-blocking invariant
 
+### Done in v2.6.0 candidate
+
+- Explicit source-prefix ownership map and deterministic changed-surface
+  selector for representative discovery groups
+- Full representative-sample fallback with machine-readable reasons for every
+  unmapped, changed-map, ambiguous, invalid, global, or unavailable-input
+  condition
+- Composite Action inputs and retained selection evidence for changed files or
+  full Git base/head comparisons
+- Consumer Action fixture and eval-19 coverage for target selection and safe
+  degradation
+- Version-invariant validation for manifest entries and embedded file headers
+- Assistant guide v0.3.8 including the selector executable hash
+- Compatible transitive security updates: `fast-uri` 3.1.5 in the root
+  validation graph and `ip-address` 10.4.0 in the scanner graph
+
 ### Done in v2.5.1
 
 - End-to-end composite Action consumer smoke test with retained evidence
@@ -277,38 +304,36 @@ remediate code, or replace enterprise monitoring.
 
 ### Next, in priority order
 
-1. **Changed-surface auditing.** Map a PR's changed files to affected route
-   or template groups, then prioritize their representative pages. Keep a
-   conservative full-sample fallback when ownership cannot be inferred.
-2. **Interoperability adapter.** Make discover/scan/report easy to invoke
+1. **Interoperability adapter.** Make discover/scan/report easy to invoke
    from broader ecosystems, including a Community Access extension if its
    contract remains stable. Prefer this over a competing general-purpose
    agent suite.
-3. **Authenticated deterministic journeys.** Accept a Playwright storage
+2. **Authenticated deterministic journeys.** Accept a Playwright storage
    state or bounded journey file as a scan input. Do not expand into an
    unconstrained browser agent.
-4. **SARIF emitter.** Useful for public repositories and organizations
+3. **SARIF emitter.** Useful for public repositories and organizations
    with GitHub Code Security, but secondary to baseline and template-aware
    adoption. Preserve repository-native JSON for universal CI use.
-5. **First-class Playwright execution.** Add only where it improves
+4. **First-class Playwright execution.** Add only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
-### v2.3 field validation
+### v2.6 field validation
 
-The first post-release tests should measure the regression contract rather
-than broad scan recall:
+The first post-release tests should verify changed-surface safety and adoption:
 
-- whether selector normalization produces noisy "new" findings after
-  harmless markup or origin changes
-- whether the baseline review step makes accepted debt understandable and
-  deliberate
-- whether `baseline` + `fail-on: new` is sufficient in real consumer Action
-  workflows without custom shell parsing
-- whether users expect template-aware discovery inside the Action after
-  seeing it as the primary product differentiator
+- whether maintainers can author and review source-prefix ownership maps
+  without missing route groups
+- whether fallback evidence makes unmapped, ownership-map, or shared-code
+  changes clear enough to trust the complete representative scan
+- whether pull-request base/head inputs are available in common CI events and
+  trigger the documented fallback when history is shallow or absent
+- whether targeted selection shortens meaningful CI runs without masking
+  cross-template regressions
+- whether `baseline` plus `fail-on: new` remains understandable when the scan
+  plan is targeted or falls back to the complete representative sample
 
-Use those results to set v2.4 scope. Do not add breadth merely to match the
-feature lists of larger agent suites or hosted platforms.
+Use those results to refine ownership-map ergonomics and interoperability,
+not to add broad autonomous browsing or remediation behavior.
 
 ### Explicit non-goals
 

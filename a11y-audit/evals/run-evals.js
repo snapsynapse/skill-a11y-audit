@@ -2,11 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 11
-version_date: 2026-07-21
-previous_version: 10
+version: 12
+version_date: 2026-08-04
+previous_version: 11
 change_summary: >
-  Aligns the scanner dependency contract and Action starter with v2.5.2.
+  Adds changed-surface selection coverage, validates embedded file versions
+  against the manifest, and aligns the reusable Action contract with v2.6.0.
 */
 
 const assert = require('assert');
@@ -127,6 +128,7 @@ function test(name, fn) {
 function validateSyntax() {
   const files = [
     'a11y-audit/scripts/discover.js',
+    'a11y-audit/scripts/select-changed-surfaces.js',
     'a11y-audit/scripts/scan.js',
     'a11y-audit/scripts/report.js',
     'a11y-audit/scripts/bootstrap-context.js',
@@ -144,6 +146,9 @@ function validateJsonFiles() {
     'a11y-audit/assets/sample-output/audit-sample.json',
     'a11y-audit/deps/package.json',
     'a11y-audit/deps/package-lock.json',
+    'a11y-audit/assets/ci/github-actions/surface-map.example.json',
+    'a11y-audit/evals/fixtures/eval-19/changed-files.json',
+    'a11y-audit/evals/fixtures/eval-19/surface-map.json',
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
@@ -158,15 +163,35 @@ function validateManifestIntegrity() {
   ].join('; ');
   const manifest = JSON.parse(runCommand('ruby', ['-e', ruby]).stdout);
   const listed = new Set();
+  const versions = [];
   for (const entry of manifest.files || []) {
     listed.add(entry.path);
+    if (Number.isInteger(entry.version)) versions.push(entry.version);
     const file = repoPath('a11y-audit', entry.path);
     assert.ok(fs.existsSync(file), `manifest path does not exist: ${entry.path}`);
     if (entry.path === 'MANIFEST.yaml') continue;
     assert.match(entry.hash || '', /^sha256:[0-9a-f]{64}$/, `invalid manifest hash: ${entry.path}`);
-    const digest = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    const bytes = fs.readFileSync(file);
+    const digest = crypto.createHash('sha256').update(bytes).digest('hex');
     assert.strictEqual(entry.hash, `sha256:${digest}`, `stale manifest hash: ${entry.path}`);
+
+    const text = bytes.toString('utf8').slice(0, 1600);
+    if (/skill_bundle:\s*a11y-audit/.test(text)) {
+      const embedded = text.match(/(?:^|\n)[ \t*]*version:\s*(\d+)/)
+        || text.match(/skill_bundle:\s*a11y-audit\s*\/\s*file_role:[^/]+\/\s*version:\s*(\d+)/);
+      assert.ok(embedded, `embedded version missing: ${entry.path}`);
+      assert.strictEqual(
+        Number(embedded[1]),
+        entry.version,
+        `manifest/header version mismatch: ${entry.path}`
+      );
+    }
   }
+  assert.strictEqual(
+    manifest.bundle_version,
+    Math.max(...versions),
+    'bundle_version must equal the highest tracked file version'
+  );
   const walk = (dir, prefix = '') => {
     const files = [];
     for (const name of fs.readdirSync(dir).sort()) {
@@ -448,6 +473,142 @@ function scannerDiscoverPlanRegression() {
   assert.throws(() => scan.loadUrlsFromDiscoverPlan(planPath), /non-empty scanList/);
 }
 
+function eval19ChangedSurfaceSelection() {
+  const selector = require(repoPath('a11y-audit/scripts/select-changed-surfaces.js'));
+  const plan = {
+    source: 'fixture',
+    runtimeUrl: 'https://example.com/',
+    totalPages: 7,
+    selectedPages: 5,
+    coverageRatio: '3 template groups, 5 pages selected',
+    groups: [
+      {
+        pattern: '/',
+        count: 1,
+        selected: ['https://example.com/'],
+        reason: 'top-level page',
+      },
+      {
+        pattern: 'docs/*',
+        count: 3,
+        selected: ['https://example.com/docs/a', 'https://example.com/docs/c'],
+        reason: 'representatives',
+      },
+      {
+        pattern: 'blog/*',
+        count: 3,
+        selected: ['https://example.com/blog/a', 'https://example.com/blog/c'],
+        reason: 'representatives',
+      },
+    ],
+    scanList: [
+      'https://example.com/',
+      'https://example.com/docs/a',
+      'https://example.com/docs/c',
+      'https://example.com/blog/a',
+      'https://example.com/blog/c',
+    ],
+  };
+  const map = {
+    schema_version: 1,
+    rules: [
+      { name: 'docs template', source_prefixes: ['src/docs'], groups: ['docs/*'] },
+      { name: 'shared shell', source_prefixes: ['src/shared'], groups: ['*'] },
+    ],
+  };
+
+  const targeted = selector.selectChangedSurfaces(plan, map, ['src/docs/page.js']);
+  assert.strictEqual(targeted.changedSurface.mode, 'targeted');
+  assert.strictEqual(targeted.changedSurface.reason, 'mapped-changes');
+  assert.deepStrictEqual(targeted.changedSurface.affectedGroups, ['docs/*']);
+  assert.deepStrictEqual(targeted.scanList, [
+    'https://example.com/docs/a',
+    'https://example.com/docs/c',
+  ]);
+  assert.deepStrictEqual(
+    selector.selectChangedSurfaces(plan, map, ['src/docs/page.js']),
+    targeted,
+    'changed-surface selection must be deterministic'
+  );
+
+  const unmatched = selector.selectChangedSurfaces(plan, map, [
+    'README.md',
+    'src/docs/page.js',
+  ]);
+  assert.strictEqual(unmatched.changedSurface.mode, 'full-fallback');
+  assert.strictEqual(unmatched.changedSurface.reason, 'unmapped-changes');
+  assert.deepStrictEqual(unmatched.changedSurface.unmatchedFiles, ['README.md']);
+  assert.deepStrictEqual(unmatched.scanList, plan.scanList);
+
+  const global = selector.selectChangedSurfaces(plan, map, ['src/shared/nav.js']);
+  assert.strictEqual(global.changedSurface.reason, 'global-surface-rule');
+  assert.deepStrictEqual(global.scanList, plan.scanList);
+
+  const unknown = selector.selectChangedSurfaces(plan, {
+    schema_version: 1,
+    rules: [{ name: 'unknown', source_prefixes: ['src/other'], groups: ['other/*'] }],
+  }, ['src/other/page.js']);
+  assert.strictEqual(unknown.changedSurface.reason, 'unknown-template-groups');
+  assert.deepStrictEqual(unknown.scanList, plan.scanList);
+
+  const dir = tmpPath('eval-19');
+  resetDir(dir);
+  const invalidMapPath = path.join(dir, 'surface-map.json');
+  const changedFilesPath = path.join(dir, 'changed-files.json');
+  const changedMapFilesPath = path.join(dir, 'changed-map-files.json');
+  fs.writeFileSync(invalidMapPath, '{');
+  fs.writeFileSync(changedFilesPath, JSON.stringify(['src/docs/page.js']));
+  fs.writeFileSync(changedMapFilesPath, JSON.stringify([
+    'a11y-audit/evals/fixtures/eval-19/surface-map.json',
+  ]));
+  const fallback = selector.buildSelection(plan, {
+    map: invalidMapPath,
+    'changed-files': changedFilesPath,
+  });
+  assert.strictEqual(fallback.changedSurface.reason, 'surface-map-invalid');
+  assert.deepStrictEqual(fallback.scanList, plan.scanList);
+
+  const mapChanged = selector.buildSelection(plan, {
+    map: 'a11y-audit/evals/fixtures/eval-19/surface-map.json',
+    'changed-files': changedMapFilesPath,
+  });
+  assert.strictEqual(mapChanged.changedSurface.reason, 'surface-map-changed');
+  assert.deepStrictEqual(mapChanged.scanList, plan.scanList);
+
+  const gitDir = path.join(dir, 'git-repository');
+  fs.mkdirSync(path.join(gitDir, 'src', 'docs'), { recursive: true });
+  const runGit = (args) => {
+    const run = spawnSync('git', args, { cwd: gitDir, encoding: 'utf8' });
+    assert.strictEqual(run.status, 0, run.stderr || `git ${args.join(' ')} failed`);
+    return run.stdout.trim();
+  };
+  runGit(['init', '--quiet']);
+  runGit(['config', 'user.name', 'A11y Eval']);
+  runGit(['config', 'user.email', 'a11y-eval@example.invalid']);
+  fs.writeFileSync(path.join(gitDir, 'src', 'docs', 'page.js'), 'first\n');
+  runGit(['add', '--', 'src/docs/page.js']);
+  runGit(['commit', '--quiet', '-m', 'base']);
+  const base = runGit(['rev-parse', 'HEAD']);
+  fs.writeFileSync(path.join(gitDir, 'src', 'docs', 'page.js'), 'second\n');
+  runGit(['add', '--', 'src/docs/page.js']);
+  runGit(['commit', '--quiet', '-m', 'head']);
+  const head = runGit(['rev-parse', 'HEAD']);
+  assert.deepStrictEqual(selector.gitChangedFiles(base, head, gitDir), {
+    files: ['src/docs/page.js'],
+    source: 'git-diff',
+  });
+
+  assert.strictEqual(selector.validCommit('a'.repeat(40)), true);
+  assert.strictEqual(selector.validCommit('HEAD', true), true);
+  assert.strictEqual(selector.validCommit('--output=/tmp/unsafe'), false);
+  assert.strictEqual(selector.surfaceMapWasChanged(
+    ['.a11y-audit/surface-map.json'],
+    '.a11y-audit/surface-map.json'
+  ), true);
+  assert.throws(() => selector.normalizeRepositoryPath('../outside'), /traverse/);
+  assert.throws(() => selector.normalizeRepositoryPath('.'), /identify/);
+}
+
 function scannerBaselineRegression() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
   const previousResults = [
@@ -624,7 +785,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.2/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.0/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
@@ -635,21 +796,40 @@ function reusableActionRegression() {
     repoPath('a11y-audit/assets/ci/github-actions/accessibility-audit.yml'),
     'utf8'
   );
-  for (const input of ['discover-url', 'discover-output', 'discover-max-per-group', 'discover-no-sitemap', 'baseline', 'fail-on']) {
+  for (const input of [
+    'discover-url',
+    'discover-output',
+    'discover-max-per-group',
+    'discover-no-sitemap',
+    'surface-map',
+    'changed-files',
+    'changed-base',
+    'changed-head',
+    'selection-output',
+    'baseline',
+    'fail-on',
+  ]) {
     assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
   }
   assert.match(action, /http-server@14\.1\.1/);
   assert.match(action, /scripts\/discover\.js/);
+  assert.match(action, /scripts\/select-changed-surfaces\.js/);
   assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
+  assert.match(action, /--changed-files "\$CHANGED_FILES"/);
+  assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.5\.2/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
+  assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
+  assert.match(starter, /changed-base: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(starter, /fetch-depth: 0/);
   assert.doesNotMatch(starter, /curl .*sitemap/);
 }
 
 function workflowSecurityRegression() {
   const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
   const discover = fs.readFileSync(repoPath('a11y-audit/scripts/discover.js'), 'utf8');
+  const selectChanged = fs.readFileSync(repoPath('a11y-audit/scripts/select-changed-surfaces.js'), 'utf8');
   const validate = fs.readFileSync(repoPath('.github/workflows/validate-skill.yml'), 'utf8');
   const pages = fs.readFileSync(repoPath('.github/workflows/pages.yml'), 'utf8');
   const dependabot = fs.readFileSync(repoPath('.github/dependabot.yml'), 'utf8');
@@ -661,6 +841,9 @@ function workflowSecurityRegression() {
     assert.match(use, /@[0-9a-f]{40}$/, `remote Action must be SHA-pinned: ${use}`);
   }
   assert.doesNotMatch(action, /"\$\{\{ inputs\.(serve-path|port) \}\}"/);
+  assert.doesNotMatch(action, /"\$\{\{ inputs\.(surface-map|changed-files|changed-base|changed-head) \}\}"/);
+  assert.match(selectChanged, /spawnSync\('git', \['diff', '--name-only', '-z'/);
+  assert.ok(selectChanged.includes('/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i'));
   assert.match(validate, /^permissions:\n  contents: read$/m);
   assert.match(validate, /^  action-consumer:$/m);
   assert.match(validate, /discover-no-sitemap: true/);
@@ -676,6 +859,12 @@ function workflowSecurityRegression() {
     'axe-core': '4.12.1',
     puppeteer: '24.43.1',
   });
+  const depsLock = readJson(repoPath('a11y-audit/deps/package-lock.json'));
+  assert.strictEqual(
+    depsLock.packages['node_modules/ip-address'].version,
+    '10.4.0',
+    'scanner lockfile must retain the patched ip-address release'
+  );
 }
 
 function assistantGuideArtifactRegression() {
@@ -690,11 +879,12 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.7$/m);
+  assert.match(text, /^guide-version: 0\.3\.8$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
     ['a11y-audit/scripts/discover.js', null],
+    ['a11y-audit/scripts/select-changed-surfaces.js', null],
     ['a11y-audit/scripts/scan.js', null],
     ['a11y-audit/scripts/report.js', null],
   ]);
@@ -715,7 +905,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.7$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.8$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -727,13 +917,14 @@ if (validateMode) {
   test('syntax checks cover bundled scripts and eval harnesses', validateSyntax);
   test('JSON files parse and sample output matches audit shape', validateJsonFiles);
   test('YAML and frontmatter files parse', validateYamlFiles);
-  test('manifest paths and hashes cover the complete bundle', validateManifestIntegrity);
+  test('manifest paths, hashes, and embedded versions cover the complete bundle', validateManifestIntegrity);
   test('bootstrap-context smoke test creates workspace context', validateBootstrapSmoke);
 }
 
 test('eval-9 preserves cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
 test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
+test('eval-19 targets mapped changed surfaces and falls back conservatively', eval19ChangedSurfaceSelection);
 test('eval-2 plans issues with labels and deduplication', eval2IssuePlanning);
 test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);

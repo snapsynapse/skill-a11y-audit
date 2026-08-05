@@ -1,8 +1,8 @@
 name: 'a11y scan'
 description: >
-  Discover representative templates when requested, run axe-core via
-  Puppeteer, fail on all or only newly introduced violations, and retain
-  scan and discovery evidence as artifacts.
+  Discover representative templates, optionally prioritize groups affected
+  by repository changes, run axe-core via Puppeteer, fail on all or only newly
+  introduced violations, and retain scan and selection evidence as artifacts.
 
 outputs:
   results-path:
@@ -11,6 +11,9 @@ outputs:
   discovery-path:
     description: Path to the discovery plan JSON when discover-url is set.
     value: ${{ inputs.discover-output }}
+  selection-path:
+    description: Path to the changed-surface selection plan when enabled.
+    value: ${{ inputs.selection-output }}
 
 inputs:
   serve-path:
@@ -65,6 +68,26 @@ inputs:
     description: '`true` to allow discover.js to follow sitemap documents on other origins.'
     required: false
     default: 'false'
+  surface-map:
+    description: Repository-relative path to the source-prefix ownership map.
+    required: false
+    default: ''
+  changed-files:
+    description: Optional path to a JSON array of changed repository paths.
+    required: false
+    default: ''
+  changed-base:
+    description: Full Git object ID for the base of changed-surface comparison.
+    required: false
+    default: ''
+  changed-head:
+    description: Full Git object ID or HEAD for the comparison head.
+    required: false
+    default: 'HEAD'
+  selection-output:
+    description: Path to retain the scan-compatible changed-surface plan JSON.
+    required: false
+    default: 'a11y-selection-plan.json'
   fail-on:
     description: '`errors` for any violation, `new` for findings outside the accepted baseline, or `none`.'
     required: false
@@ -132,6 +155,25 @@ runs:
         [ "$ALLOW_CROSS_ORIGIN_SITEMAPS" = "true" ] && ARGS+=(--allow-cross-origin-sitemaps)
         node "${{ github.action_path }}/../../../a11y-audit/scripts/discover.js" "${ARGS[@]}"
 
+    - name: Select changed surfaces
+      if: inputs.discover-url != '' && inputs.surface-map != '' && (inputs.changed-files != '' || inputs.changed-base != '')
+      shell: bash
+      env:
+        DISCOVER_OUTPUT: ${{ inputs.discover-output }}
+        SURFACE_MAP: ${{ inputs.surface-map }}
+        CHANGED_FILES: ${{ inputs.changed-files }}
+        CHANGED_BASE: ${{ inputs.changed-base }}
+        CHANGED_HEAD: ${{ inputs.changed-head }}
+        SELECTION_OUTPUT: ${{ inputs.selection-output }}
+      run: |
+        ARGS=(--discover "$DISCOVER_OUTPUT" --map "$SURFACE_MAP" --output "$SELECTION_OUTPUT")
+        if [ -n "$CHANGED_FILES" ]; then
+          ARGS+=(--changed-files "$CHANGED_FILES")
+        else
+          ARGS+=(--base "$CHANGED_BASE" --head "$CHANGED_HEAD")
+        fi
+        node "${{ github.action_path }}/../../../a11y-audit/scripts/select-changed-surfaces.js" "${ARGS[@]}"
+
     - name: Run a11y scan
       shell: bash
       env:
@@ -142,18 +184,26 @@ runs:
         URLS: ${{ inputs.urls }}
         DISCOVER_URL: ${{ inputs.discover-url }}
         DISCOVER_OUTPUT: ${{ inputs.discover-output }}
+        SURFACE_MAP: ${{ inputs.surface-map }}
+        CHANGED_FILES: ${{ inputs.changed-files }}
+        CHANGED_BASE: ${{ inputs.changed-base }}
+        SELECTION_OUTPUT: ${{ inputs.selection-output }}
         FAIL_ON: ${{ inputs.fail-on }}
         BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
         SUMMARY: ${{ inputs.summary }}
       run: |
         ARGS=()
+        DISCOVER_PLAN="$DISCOVER_OUTPUT"
+        if [ -n "$SURFACE_MAP" ] && [ -s "$SELECTION_OUTPUT" ] && { [ -n "$CHANGED_FILES" ] || [ -n "$CHANGED_BASE" ]; }; then
+          DISCOVER_PLAN="$SELECTION_OUTPUT"
+        fi
         [ -n "$SITEMAP" ]         && ARGS+=(--sitemap "$SITEMAP")
         [ -n "$SITEMAP_FIND" ]    && ARGS+=(--sitemap-find "$SITEMAP_FIND")
         [ -n "$SITEMAP_REPLACE" ] && ARGS+=(--sitemap-replace "$SITEMAP_REPLACE")
         [ -n "$SITEMAP_EXCLUDE" ] && ARGS+=(--sitemap-exclude "$SITEMAP_EXCLUDE")
         [ -n "$URLS" ]            && ARGS+=(--urls "$URLS")
-        [ -n "$DISCOVER_URL" ]    && ARGS+=(--discover "$DISCOVER_OUTPUT")
+        [ -n "$DISCOVER_URL" ]    && ARGS+=(--discover "$DISCOVER_PLAN")
         [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
         [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
@@ -174,4 +224,5 @@ runs:
         path: |
           ${{ inputs.output }}
           ${{ inputs.discover-output }}
+          ${{ inputs.selection-output }}
         if-no-files-found: ignore

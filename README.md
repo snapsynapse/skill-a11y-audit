@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.5.2)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.6.0)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -184,18 +184,23 @@ them; never refresh the baseline automatically in CI.
 
 ### Adopt in GitHub Actions
 
-The reusable Action can serve a static build, select representative templates,
-compare against reviewed debt, and upload both the scan and discovery plan:
+The reusable Action can serve a static build, discover representative templates,
+prioritize mapped changed surfaces, compare against reviewed debt, and upload
+the scan, discovery plan, and selection evidence:
 
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.2
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.6.0
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
+    surface-map: .a11y-audit/surface-map.json
+    changed-base: ${{ github.event.pull_request.base.sha }}
+    changed-head: ${{ github.event.pull_request.head.sha }}
     baseline: .a11y-audit/baseline.json
     fail-on: new
     output: artifacts/a11y-scan.json
     discover-output: artifacts/a11y-discover.json
+    selection-output: artifacts/a11y-selection.json
 ```
 
 Adapt `serve-path` to the repository's build output. Pin the Action to the
@@ -205,6 +210,14 @@ references.
 Discovery reads the site's sitemap by default. Add `discover-no-sitemap: true`
 when the served build has no sitemap and should be crawled from
 `discover-url` instead.
+
+Copy `a11y-audit/assets/ci/github-actions/surface-map.example.json` to
+`.a11y-audit/surface-map.json` and map every changed source prefix to exact
+discovery-group patterns. When a file is unmapped, the map itself changes or is
+invalid, Git history is unavailable, or a rule marks shared code, the Action
+records why and scans the full representative sample instead of silently
+reducing scope. Fetch full Git history before supplying base and head SHAs; the
+bundled workflow starter configures checkout accordingly.
 
 The repository tests this exact consumer path against a served fixture. CI
 also runs actionlint for workflow semantics and zizmor for GitHub Actions
@@ -312,6 +325,7 @@ Changed: color-contrast 26 → 2 (↓24)
 | Script | Purpose |
 |--------|---------|
 | `scripts/discover.js` | Sitemap-first page discovery with template-aware sampling |
+| `scripts/select-changed-surfaces.js` | Maps changed source paths to discovery groups with a full-sample fallback |
 | `scripts/scan.js` | axe-core scanning with self-contained dependency resolution |
 | `scripts/report.js` | Deterministic report generation (markdown + JSON) |
 | `scripts/bootstrap-context.js` | Create workspace-local project configuration |

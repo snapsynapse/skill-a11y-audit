@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "name": "eval fixture page",
+      "source_prefixes": [
+        "a11y-audit/evals/fixtures/eval-3"
+      ],
+      "groups": [
+        "/"
+      ]
+    }
+  ]
+}

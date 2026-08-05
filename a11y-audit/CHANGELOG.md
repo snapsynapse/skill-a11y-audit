@@ -1,14 +1,39 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 28
-version_date: 2026-07-21
-previous_version: 27
+version: 29
+version_date: 2026-08-04
+previous_version: 28
 change_summary: >
-  Records v2.5.2 dependency synchronization and assistant-guide v0.3.7.
+  Records v2.6.0 changed-surface selection and assistant-guide v0.3.8.
 ---
 
 # Changelog
+
+## v2.6.0 -- 2026-08-04
+
+- `scripts/select-changed-surfaces.js` and `references/changed-surfaces.md`:
+  add explicit source-prefix ownership maps, deterministic group selection,
+  and evidence-backed full-sample fallback for every incomplete or unsafe
+  mapping condition.
+- `.github/actions/scan`, the workflow starter, and the consumer fixture:
+  accept changed-file or Git base/head inputs, preserve a selection plan, and
+  scan that plan only after the selector records a valid targeted result.
+- `evals/evals.json`, `evals/run-evals.js`, and eval-19 fixtures: cover
+  targeted, global, unmapped, invalid, unknown-group, and deterministic paths;
+  manifest validation now rejects embedded file-version drift.
+- `README.md`, `docs/index.html`, `llms.txt`, `docs/llms.txt`, `SKILL.md`,
+  `agents/openai.yaml`, and the Action example: document v2.6.0 adoption and
+  the explicit no-silent-scope-reduction contract.
+- `assistant-guide.txt` and its hosted copy: prepare v0.3.8 with current
+  discover, selector, and scanner executable hashes. The sidecar manifest is
+  synchronized to the hosted guide bytes and digest.
+- `package.json`, `package-lock.json`, `MANIFEST.yaml`, and `HANDOFF.md`:
+  synchronize the release candidate, bundle inventory, and field-validation
+  checklist. No tag, GitHub Release, or publication is implied by this entry.
+- Root and scanner lockfiles: retain the existing direct dependency pins while
+  updating compatible transitives to patched `fast-uri` 3.1.5 and `ip-address`
+  10.4.0 releases. Live npm audits report zero known vulnerabilities.
 
 ## v2.5.2 -- 2026-07-21
 

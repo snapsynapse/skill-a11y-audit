@@ -2,13 +2,13 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 8
+version: 9
 version_date: 2026-07-21
-previous_version: 7
+previous_version: 8
 change_summary: >
-  Adds discover-plan input, URL validation and deduplication, pinned
-  Puppeteer installation, bounded per-page failure reporting, and reliable
-  browser cleanup. Removes the non-executing Lighthouse command placeholder.
+  Synchronizes the tested Puppeteer 24.43.1 fallback while retaining Node 18
+  support and the existing discover-plan, URL-safety, and browser-cleanup
+  contract.
 */
 
 const fs = require('fs');

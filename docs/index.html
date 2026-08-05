@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-07-13T00:00:00Z">
+  <meta property="article:modified_time" content="2026-08-04T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -466,9 +466,9 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-07-21">July 21, 2026</time>
+      Updated <time datetime="2026-08-04">August 4, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.5.2</span>
+      <span class="version">v2.6.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
@@ -571,13 +571,15 @@
       </div>
       <div class="code-block">
         <h3>3. Reuse the GitHub Action</h3>
-<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.2
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.6.0
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
+    surface-map: .a11y-audit/surface-map.json
+    changed-base: ${{ github.event.pull_request.base.sha }}
     baseline: .a11y-audit/baseline.json
     fail-on: new</pre>
-        <p class="annotation">The Action retains both the representative discovery plan and scan evidence as workflow artifacts. The repository exercises this consumer path end to end and statically checks workflow semantics and security. Dependabot maintains repository pins; the versioned scanner graph accepts security updates only so routine upgrades cannot bypass eval and manifest synchronization.</p>
+        <p class="annotation">An explicit ownership map narrows scans to changed template groups only when every changed path is mapped. Changed maps, unknown ownership, missing history, and shared-code rules retain the full representative sample with selection evidence. The repository exercises this consumer path end to end and statically checks workflow semantics and security.</p>
       </div>
     </div>
   </div>
@@ -732,7 +734,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.5.2 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.6.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>

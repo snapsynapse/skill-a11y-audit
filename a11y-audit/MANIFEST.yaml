@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 28
-bundle_date: 2026-07-21
+bundle_version: 29
+bundle_date: 2026-08-04
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -190,31 +190,31 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 20
-    hash: sha256:6b2201cfbfd3fba7a3082387b830a1239ba7bb37facd4fe25d350416cbfe6d76
+    version: 21
+    hash: sha256:6f6b6abcfbc0f526bc1d179e4f2d3d2a580e970a43c45c8256f6685bfa0ee6b2
     note: >
-      v20 documents sitemap-first discovery and explicit Action crawl fallback
+      v21 documents explicit changed-surface selection and full-sample fallback
 
   - path: evals/evals.json
     role: evals
-    version: 17
-    hash: sha256:b2e803ed7309bca27e9aad7eb9e65dd29bf2871e15ed435d6783464106fa2aca
+    version: 18
+    hash: sha256:330d81ec11fcb46e20dd3aa286347a7c9590636822e59cdf6757357aa118af69
     note: >
-      18 eval cases including synchronized scanner dependency policy
+      19 eval cases including changed-surface selection safety
 
   - path: HANDOFF.md
     role: handoff
-    version: 23
-    hash: sha256:f6fa771b27962b4553d8a51cd55c3ae9ab650ae474d726a79e6b5ab4d15a8387
+    version: 24
+    hash: sha256:e4b475a9d1ac93712dcc791416632c06eb835c9380c5a80db96720551f2c7203
     note: >
-      v23 records v2.5.2 dependency synchronization
+      v24 records the v2.6.0 candidate and field-validation checklist
 
   - path: CHANGELOG.md
     role: reference
-    version: 28
-    hash: sha256:030f5515b303bcf1a886052bfa386091a0b7eb72fbd179d49635f10abc463daf
+    version: 29
+    hash: sha256:c0476f062d4e4eb2a427edf981b07cc3242083c7958aa9bfe2fdd19b6e4b60da
     note: >
-      Append-only history -- v28 records v2.5.2
+      Append-only history; v29 records v2.6.0 changed-surface selection
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -224,10 +224,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 11
-    hash: sha256:7b00f31fe161a3abd2af755192789040e0a21f439caa3bb25516390f700093e0
+    version: 12
+    hash: sha256:cbe9c1184e8cca3026112b1aa0d8a9181c63b7ed6cecc01392a0e42eae56bfff
     note: >
-      v11 aligns scanner dependencies and version-update policy
+      v12 validates changed-surface selection and embedded-version invariants
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -425,7 +425,7 @@ files:
   - path: scripts/scan.js
     role: script
     version: 9
-    hash: sha256:45f40403a1588aaa6a9dbb29176596b5553522aec8d86917bfa2456aafd056f7
+    hash: sha256:b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
     note: >
       v9 pins tested Node 18-compatible Puppeteer 24.43.1
 
@@ -451,8 +451,14 @@ files:
   - path: scripts/discover.js
     role: script
     version: 4
-    hash: sha256:96a9e4f3002e399b45fea5fd5cf7fcd6cc1211f95901579ffd5e52c8b615168e
+    hash: sha256:1bb1dde9e173fe4a8b5a44e73e24978e8bc657c8efde62b9267e2184426606e4
     note: Bounded discovery retaining the entry page during crawl fallback
+
+  - path: scripts/select-changed-surfaces.js
+    role: script
+    version: 1
+    hash: sha256:4c3bae512306cd33a94b05cce7a2c8c6250019f198b05a48106844d905511565
+    note: Explicit source-prefix changed-surface selection with full fallback
 
   - path: .gitignore
     role: config
@@ -468,9 +474,9 @@ files:
 
   - path: deps/package-lock.json
     role: config
-    version: 2
-    hash: sha256:e6bfa901c7b889bd608487647a2f10e3aa61bc3c89156961623a2b2a88d3113a
-    note: Reproducible Node 18-compatible scanner dependency graph
+    version: 3
+    hash: sha256:109dee0f7265bf1f4865f53c5f215a55b45485fd52d4a75d05ee3ec181272523
+    note: Reproducible scanner graph with patched ip-address 10.4.0
 
   - path: assets/sample-output/audit-sample.md
     role: asset
@@ -492,15 +498,45 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 4
-    hash: sha256:085ac5414e4d7fb7136bad2125b3c16724dd3866a02b255e6f85aae2798cbf73
-    note: v2.5.2 template-aware remote Action starter with accepted-baseline gating
+    version: 5
+    hash: sha256:5f928d89714d2d144aa4e5e2e3a54922590dd191edb47c33b2943a55790d25e9
+    note: v2.6.0 remote Action starter with changed-surface selection
+
+  - path: assets/ci/github-actions/surface-map.example.json
+    role: asset
+    version: 1
+    hash: sha256:5e445396f3c643805e0a541ba931ff18e7b5601a8f68c3d88e8cee62fb1ca376
+    note: Example source-prefix ownership map for changed-surface selection
 
   - path: agents/openai.yaml
     role: agents
-    version: 2
-    hash: sha256:29bb6c70c2539c249e29fd9529e3c1904ba1190f911ca850ad83f010a10f1a0b
-    note: Codex UI metadata focused on template discovery and regression gating
+    version: 3
+    hash: sha256:0bfdc494c3216f2e1046d167a68ff334ceac2713e04212702e84c236107ccf72
+    note: Codex UI metadata includes safe changed-surface prioritization
+
+  - path: references/changed-surfaces.md
+    role: reference
+    version: 1
+    hash: sha256:515fb7593de53471697e8dfd272a983c608135758390751831f45d8db2d66eb8
+    note: Ownership-map format and conservative changed-surface fallback contract
+
+  - path: evals/fixtures/eval-19/README.md
+    role: evals
+    version: 1
+    hash: sha256:b03c3d503ba25b38e375911eec05ab49f33e2458dd71ab8efdc87a86a846747a
+    note: Fixture documentation for consumer changed-surface selection
+
+  - path: evals/fixtures/eval-19/changed-files.json
+    role: evals
+    version: 1
+    hash: sha256:654cfbf05830907ff21223fbfa1044dc607d467470863a995f1d2d525f6fe1cc
+    note: Repository-relative changed-file fixture for Action selection
+
+  - path: evals/fixtures/eval-19/surface-map.json
+    role: evals
+    version: 1
+    hash: sha256:9355e6071ff353f3b3a9d5a209841fd8cb05aa6c8c36296f21c8c85484a7fd80
+    note: Explicit source-prefix ownership map fixture for Action selection
 
   - path: references/standards/wcag21-aa.json
     role: reference
@@ -528,6 +564,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 23
+    version: 24
     hash: null
     note: This file -- self-referential hash omitted

@@ -54,6 +54,11 @@ Prefer bundled helpers over ad hoc generation when they fit:
   template groups and a ready-to-use URL list for scan.js. Discovery is
   same-origin by default; use `--allow-cross-origin-sitemaps` only after
   the user approves sitemap-declared cross-origin targets.
+- `scripts/select-changed-surfaces.js` maps an explicit project-owned
+  source-prefix map to exact discovery groups. It narrows an existing plan
+  only if every changed path maps safely; otherwise it preserves the full
+  representative sample and records the fallback reason. Read
+  `references/changed-surfaces.md` when configuring or reviewing this path.
 
 ### Dependencies
 
@@ -104,6 +109,8 @@ recorded the same way.
   Discovery is sitemap-first; set `discover-no-sitemap: true` in the Action
   when a served build must be crawled from `discover-url` instead, then
   adapt the inputs without copying its implementation into the target repo.
+  For pull-request scope reduction, copy the explicit ownership-map example,
+  supply `changed-base` and `changed-head`, and retain the selection artifact.
 - Prefer `scripts/plan-issues.js` before live ticket creation when you
   need a safe review and deduplication pass.
 
@@ -403,7 +410,9 @@ If the user wants a recurring or on-demand CI job, adapt
 `assets/ci/github-actions/accessibility-audit.yml` to the target
 workspace instead of inventing a workflow from scratch.
 Keep baseline updates outside CI and preserve the Action's discovery and scan
-artifacts so a failed gate remains reviewable.
+artifacts so a failed gate remains reviewable. When using changed-surface
+selection, also preserve its selection artifact. Do not infer ownership from
+framework naming: use `references/changed-surfaces.md` and a reviewed map.
 
 ### Phase 6 -- Issue Creation (conditional)
 

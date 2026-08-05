@@ -13,20 +13,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Build site
         run: npm ci && npm run build
 
-      - name: Scan representative templates
-        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.5.2
+      - name: Scan affected representative templates
+        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.6.0
         with:
           serve-path: dist
           port: '8088'
           discover-url: http://127.0.0.1:8088/
+          surface-map: .a11y-audit/surface-map.json
+          changed-base: ${{ github.event.pull_request.base.sha }}
+          changed-head: ${{ github.event.pull_request.head.sha }}
           baseline: .a11y-audit/baseline.json
           fail-on: new
           output: artifacts/a11y-scan.json
           discover-output: artifacts/a11y-discover.json
+          selection-output: artifacts/a11y-selection.json
 
-# Adapt the build command and serve-path to the target repository. Create or
-# update .a11y-audit/baseline.json only after explicit human review.
+# Adapt the build command, serve-path, and surface map to the target repository.
+# Copy surface-map.example.json to .a11y-audit/surface-map.json and replace its
+# prefixes and groups. Missing or unmatched ownership safely uses the full
+# representative sample. Create or update the baseline only after human review.

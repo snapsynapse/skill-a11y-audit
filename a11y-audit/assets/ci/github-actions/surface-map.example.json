@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "name": "shared application shell",
+      "source_prefixes": [
+        "src/layouts",
+        "src/components/navigation"
+      ],
+      "groups": [
+        "*"
+      ]
+    },
+    {
+      "name": "article pages",
+      "source_prefixes": [
+        "src/pages/articles",
+        "src/templates/article"
+      ],
+      "groups": [
+        "articles/*"
+      ]
+    }
+  ]
+}

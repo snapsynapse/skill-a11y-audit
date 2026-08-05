@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 3
-version_date: 2026-05-31
-previous_version: 2
+version: 4
+version_date: 2026-07-21
+previous_version: 3
 change_summary: >
-  Added bounded fetches, same-origin discovery defaults, explicit
-  cross-origin sitemap opt-in, and origin disclosure.
+  Retains the entry URL during sitemap-free crawl fallback so a valid
+  link-free single-page site still produces a representative scan plan.
 */
 
 const fs = require('fs');

@@ -417,7 +417,7 @@
       "date": "2026-07-21",
       "notes": [
         "Deterministic Action-contract coverage runs in npm run validate",
-        "The packaged workflow starter uses the v2.5.2 Action surface with template discovery and fail-on-new gating"
+        "The packaged workflow starter uses the v2.6.0 Action surface with changed-surface selection and fail-on-new gating"
       ]
     }
   },
@@ -469,6 +469,30 @@
       "notes": [
         "Deterministic supply-chain assertions run in npm run validate",
         "Pinned actionlint 1.7.12 and patched zizmor 1.28.0 pass locally; Puppeteer 24.43.1 retains Node 18+ support; the consumer Action path exercises crawl fallback, including a link-free entry page, in GitHub Actions"
+      ]
+    }
+  },
+  {
+    "id": "eval-19",
+    "prompt": "Adopt the reusable GitHub Action for a pull request on a large site. Use a reviewed source-prefix ownership map to prioritize only representatives affected by changed files, retain selection evidence, and safely scan the complete representative sample whenever ownership or Git comparison input is incomplete.",
+    "expectations": {
+      "structural": [
+        "The Action exposes surface-map, changed-file, Git base/head, and selection-artifact inputs",
+        "The selector writes a scan-compatible discovery plan with changed-surface evidence",
+        "The packaged workflow starter carries an explicit ownership-map path and pull-request base/head SHAs"
+      ],
+      "behavioral": [
+        "Mapped files select only exact known discovery groups in deterministic order",
+        "Unmapped files, changed or invalid maps, unknown groups, shared-code rules, and unavailable Git input retain the full representative sample",
+        "The consumer Action fixture verifies targeted selection before passing its plan to scan.js"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-08-04",
+      "notes": [
+        "Deterministic coverage in npm run validate exercises targeted, global, unmatched, changed-map, unknown-group, invalid-map, real Git base/head, path-validation, and repeatability cases",
+        "The consumer Action uses the eval-19 ownership fixture and retains a targeted selection artifact"
       ]
     }
   }
