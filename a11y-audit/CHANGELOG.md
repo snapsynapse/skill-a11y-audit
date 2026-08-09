@@ -1,14 +1,32 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 29
-version_date: 2026-08-04
-previous_version: 28
+version: 31
+version_date: 2026-08-09
+previous_version: 30
 change_summary: >
-  Records v2.6.0 changed-surface selection and assistant-guide v0.3.8.
+  Releases the v2.6.1 scanner dependency security repair and continuous audit gates.
 ---
 
 # Changelog
+
+## v2.6.1 -- 2026-08-09
+
+- Scanner lockfile: update transitive `js-yaml` from 4.3.0 to 4.3.1 within
+  Puppeteer's existing dependency range, resolving
+  `GHSA-5p4m-2wfm-xmqj` / `CVE-2026-59870` without changing the pinned
+  axe-core 4.12.1 or Puppeteer 24.43.1 releases.
+- Validation workflow and executable eval contract: run and retain a
+  high-severity npm advisory gate for both the
+  root validation graph and the separately locked scanner graph. This turns
+  advisory drift into a blocking hosted check instead of relying on release-
+  time manual validation.
+- Repository security controls: enable Dependabot vulnerability alerts and
+  automated security fixes, secret scanning and push protection, plus active
+  rulesets blocking deletion and history rewrites for `main` and `v*` tags.
+- `package.json`, `package-lock.json`, `MANIFEST.yaml`, `HANDOFF.md`, README,
+  website, Action starter, and executable eval contract: synchronize the
+  v2.6.1 release and correct post-release v2.6.0 roadmap language.
 
 ## v2.6.0 -- 2026-08-04
 

@@ -1,6 +1,6 @@
 {
   "name": "skill-a11y-audit",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Open accessibility regression evidence for large web estates, with template-aware sampling and legacy-friendly CI baselines.",
   "keywords": [
     "accessibility",

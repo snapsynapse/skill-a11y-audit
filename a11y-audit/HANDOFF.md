@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 24
-version_date: 2026-08-04
-previous_version: 23
+version: 26
+version_date: 2026-08-09
+previous_version: 25
 change_summary: >
-  Records the v2.6.0 changed-surface candidate and current validation checklist.
+  Records the v2.6.1 security release and post-release field-validation plan.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -16,7 +16,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v29 (release candidate v2.6.0), self-contained and executable-eval validated
+## Current State: bundle v31 (v2.6.1 security release)
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -141,7 +141,7 @@ four token-efficiency improvements, all now implemented in v10.
    and requires the report to state the skip reason explicitly.
 
 6. **No hosted continuous monitoring.** CI gating exists — the composite
-   action at `.github/actions/scan` (v2.6.0 candidate) runs discovery,
+   action at `.github/actions/scan` (released in v2.6.0) runs discovery,
    conservative changed-surface selection, and scanning on push/PR and supports
    accepted-baseline gating. `assets/ci/github-actions/` has a
    workflow starter — but there is no scheduled scanning service,
@@ -272,7 +272,7 @@ remediate code, or replace enterprise monitoring.
 - Routine scanner-graph version PRs disabled while security updates remain on
 - Dependency-only merge drift converted into a release-blocking invariant
 
-### Done in v2.6.0 candidate
+### Done in v2.6.0
 
 - Explicit source-prefix ownership map and deterministic changed-surface
   selector for representative discovery groups
@@ -287,6 +287,16 @@ remediate code, or replace enterprise monitoring.
 - Assistant guide v0.3.8 including the selector executable hash
 - Compatible transitive security updates: `fast-uri` 3.1.5 in the root
   validation graph and `ip-address` 10.4.0 in the scanner graph
+
+### Done in v2.6.1
+
+- Update the scanner graph from vulnerable transitive `js-yaml` 4.3.0 to
+  patched 4.3.1 without changing the axe-core or Puppeteer pins
+- Add high-severity npm advisory gates for both lockfiles to hosted validation
+- Restore repository security-alert coverage and protect `main` and release
+  refs against destructive or non-fast-forward updates
+- Keep assistant-guide commands and executable hashes unchanged because the
+  scanner entry point and its authority boundary did not change
 
 ### Done in v2.5.1
 

@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 12
-version_date: 2026-08-04
-previous_version: 11
+version: 14
+version_date: 2026-08-09
+previous_version: 13
 change_summary: >
-  Adds changed-surface selection coverage, validates embedded file versions
-  against the manifest, and aligns the reusable Action contract with v2.6.0.
+  Locks the v2.6.1 Action examples, repaired js-yaml transitive, and continuous
+  dependency audit gates into the release regression contract.
 */
 
 const assert = require('assert');
@@ -785,7 +785,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.1/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
@@ -818,7 +818,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.1/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
   assert.match(starter, /changed-base: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
@@ -853,6 +853,8 @@ function workflowSecurityRegression() {
   assert.match(validate, /astral-sh\/setup-uv@[0-9a-f]{40}/);
   assert.match(validate, /uvx zizmor==1\.28\.0 --offline --min-severity low \./);
   assert.match(validate, /npm ci --prefix a11y-audit\/deps/);
+  assert.match(validate, /npm audit --audit-level=high/);
+  assert.match(validate, /npm audit --prefix a11y-audit\/deps --audit-level=high/);
   assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {
@@ -864,6 +866,11 @@ function workflowSecurityRegression() {
     depsLock.packages['node_modules/ip-address'].version,
     '10.4.0',
     'scanner lockfile must retain the patched ip-address release'
+  );
+  assert.strictEqual(
+    depsLock.packages['node_modules/js-yaml'].version,
+    '4.3.1',
+    'scanner lockfile must retain the patched js-yaml release'
   );
 }
 

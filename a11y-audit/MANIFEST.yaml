@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 29
-bundle_date: 2026-08-04
+bundle_version: 31
+bundle_date: 2026-08-09
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -204,17 +204,17 @@ files:
 
   - path: HANDOFF.md
     role: handoff
-    version: 24
-    hash: sha256:e4b475a9d1ac93712dcc791416632c06eb835c9380c5a80db96720551f2c7203
+    version: 26
+    hash: sha256:6b554e6c41dd1c441ee48c47038cbb7e91bd9f8c4bd18224f16d255e21496b23
     note: >
-      v24 records the v2.6.0 candidate and field-validation checklist
+      v26 records the v2.6.1 security release and post-release field plan
 
   - path: CHANGELOG.md
     role: reference
-    version: 29
-    hash: sha256:c0476f062d4e4eb2a427edf981b07cc3242083c7958aa9bfe2fdd19b6e4b60da
+    version: 31
+    hash: sha256:3703f4ca8e905c75eac02a20f9d9c388d25835f3ea7431588d9d59f89ab4bbbb
     note: >
-      Append-only history; v29 records v2.6.0 changed-surface selection
+      Append-only history; v31 releases the v2.6.1 security repair
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -224,10 +224,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 12
-    hash: sha256:cbe9c1184e8cca3026112b1aa0d8a9181c63b7ed6cecc01392a0e42eae56bfff
+    version: 14
+    hash: sha256:6c00602329d4cec6e63a86bc722c180322c036d62164ddc975aeccdd73a27446
     note: >
-      v12 validates changed-surface selection and embedded-version invariants
+      v14 retains v2.6.1 surfaces, advisory gates, and patched transitives
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -474,9 +474,9 @@ files:
 
   - path: deps/package-lock.json
     role: config
-    version: 3
-    hash: sha256:109dee0f7265bf1f4865f53c5f215a55b45485fd52d4a75d05ee3ec181272523
-    note: Reproducible scanner graph with patched ip-address 10.4.0
+    version: 4
+    hash: sha256:1206ce98b61a0b7c8e0c16e6b029692b288db8c5756c8b03679a49c4e1d240de
+    note: Reproducible scanner graph with patched js-yaml 4.3.1
 
   - path: assets/sample-output/audit-sample.md
     role: asset
@@ -498,9 +498,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 5
-    hash: sha256:5f928d89714d2d144aa4e5e2e3a54922590dd191edb47c33b2943a55790d25e9
-    note: v2.6.0 remote Action starter with changed-surface selection
+    version: 6
+    hash: sha256:69d0553d08ce8959d576bae46c16a3d22c99b9e8205fb2cab84a97cc69ab6b92
+    note: v2.6.1 remote Action starter with changed-surface selection
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -564,6 +564,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 24
+    version: 26
     hash: null
     note: This file -- self-referential hash omitted

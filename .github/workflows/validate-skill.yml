@@ -33,6 +33,10 @@ jobs:
       - name: Validate skill bundle
         run: npm run validate
 
+      - name: Audit root validation dependencies
+        if: matrix.node == 20
+        run: npm audit --audit-level=high
+
   guidecheck:
     name: Verify assistant guide
     runs-on: ubuntu-latest
@@ -69,6 +73,9 @@ jobs:
 
       - name: Install pinned scanner dependencies
         run: npm ci --prefix a11y-audit/deps
+
+      - name: Audit scanner dependencies
+        run: npm audit --prefix a11y-audit/deps --audit-level=high
 
       - name: Run real browser and baseline eval
         run: npm run eval:browser
