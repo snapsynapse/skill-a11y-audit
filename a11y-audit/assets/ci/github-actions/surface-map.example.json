@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rules": [
     {
       "name": "shared application shell",
@@ -19,7 +19,12 @@
       ],
       "groups": [
         "articles/*"
-      ]
+      ],
+      "direct_route": {
+        "source_prefix": "src/pages/articles",
+        "source_suffix": ".md",
+        "route_prefix": "/"
+      }
     }
   ]
 }

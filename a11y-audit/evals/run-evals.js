@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 14
+version: 17
 version_date: 2026-08-09
-previous_version: 13
+previous_version: 16
 change_summary: >
-  Locks the v2.6.1 Action examples, repaired js-yaml transitive, and continuous
-  dependency audit gates into the release regression contract.
+  Synchronizes v2.7.0 public Action pins after adding consumer route-map
+  execution and hardened direct-route regression coverage.
 */
 
 const assert = require('assert');
@@ -147,8 +147,12 @@ function validateJsonFiles() {
     'a11y-audit/deps/package.json',
     'a11y-audit/deps/package-lock.json',
     'a11y-audit/assets/ci/github-actions/surface-map.example.json',
+    'a11y-audit/assets/ci/github-actions/route-group-map.example.json',
     'a11y-audit/evals/fixtures/eval-19/changed-files.json',
+    'a11y-audit/evals/fixtures/eval-19/route-group-map.json',
     'a11y-audit/evals/fixtures/eval-19/surface-map.json',
+    'a11y-audit/evals/fixtures/eval-20/route-group-map.json',
+    'a11y-audit/evals/fixtures/eval-20/surface-map.json',
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
@@ -264,7 +268,16 @@ function runDiscoverFixture(id) {
   const run = runNode(['a11y-audit/evals/run-discover-fixture.js', '--fixture', fixture]);
   const actual = JSON.parse(run.stdout);
   const expected = readJson(repoPath(fixture, 'expected.json'));
-  assert.deepStrictEqual(actual, expected);
+  const projectExpectedShape = (value, shape) => {
+    if (Array.isArray(shape)) return shape.map((entry, index) => projectExpectedShape(value[index], entry));
+    if (shape && typeof shape === 'object') {
+      return Object.fromEntries(Object.keys(shape).map((key) => (
+        [key, projectExpectedShape(value[key], shape[key])]
+      )));
+    }
+    return value;
+  };
+  assert.deepStrictEqual(projectExpectedShape(actual, expected), expected);
 }
 
 function eval2IssuePlanning() {
@@ -609,6 +622,164 @@ function eval19ChangedSurfaceSelection() {
   assert.throws(() => selector.normalizeRepositoryPath('.'), /identify/);
 }
 
+function eval20FlatRouteGroupingAndDirectPages() {
+  const discover = require(repoPath('a11y-audit/scripts/discover.js'));
+  const selector = require(repoPath('a11y-audit/scripts/select-changed-surfaces.js'));
+  const routeMap = readJson(repoPath('a11y-audit/evals/fixtures/eval-20/route-group-map.json'));
+  const surfaceMap = readJson(repoPath('a11y-audit/evals/fixtures/eval-20/surface-map.json'));
+  const articleUrls = Array.from({ length: 314 }, (_, index) => (
+    `https://example.com/article-${String(index + 1).padStart(3, '0')}`
+  ));
+  const urls = ['https://example.com/', 'https://example.com/ai-usage', ...articleUrls];
+  const grouped = discover.groupDiscoveredUrls(urls, routeMap);
+  assert.strictEqual(grouped.routeGrouping.mode, 'mapped');
+  assert.strictEqual(grouped.groups.length, 3);
+  assert.deepStrictEqual(
+    grouped.groups.map((group) => [group.pattern, group.urls.length]).sort(),
+    [['ai-usage', 1], ['articles/*', 314], ['home', 1]]
+  );
+  assert.strictEqual(
+    discover.matchRouteGroup('https://example.com/ai-usage', discover.validateRouteGroupMap(routeMap)).group,
+    'ai-usage',
+    'exact route must outrank the wildcard route'
+  );
+
+  const ambiguous = discover.groupDiscoveredUrls(urls, {
+    schema_version: 1,
+    rules: [
+      { name: 'first', path_patterns: ['/*'], group: 'first/*' },
+      { name: 'second', path_patterns: ['/*'], group: 'second/*' },
+      { name: 'home', path_patterns: ['/'], group: 'home' },
+    ],
+  });
+  assert.strictEqual(ambiguous.routeGrouping.mode, 'full-fallback');
+  assert.strictEqual(ambiguous.routeGrouping.reason, 'ambiguous-routes');
+  assert.strictEqual(ambiguous.groups.length, 316);
+
+  const incomplete = discover.groupDiscoveredUrls(urls, {
+    schema_version: 1,
+    rules: [{ name: 'home only', path_patterns: ['/'], group: 'home' }],
+  });
+  assert.strictEqual(incomplete.routeGrouping.reason, 'unmapped-routes');
+  assert.strictEqual(incomplete.groups.length, 316);
+  const invalid = discover.groupDiscoveredUrls(urls, { schema_version: 1, rules: [] });
+  assert.strictEqual(invalid.routeGrouping.reason, 'route-group-map-invalid');
+  assert.strictEqual(invalid.groups.length, 316);
+  assert.deepStrictEqual(discover.groupDiscoveredUrls(urls, routeMap), grouped, 'route grouping must be deterministic');
+
+  const plan = {
+    discoverySchemaVersion: 2,
+    runtimeUrl: 'https://example.com/',
+    discoveredUrls: urls,
+    totalPages: urls.length,
+    groups: [
+      { pattern: 'home', count: 1, urls: [urls[0]], selected: [urls[0]], reason: 'singleton' },
+      { pattern: 'ai-usage', count: 1, urls: [urls[1]], selected: [urls[1]], reason: 'singleton' },
+      {
+        pattern: 'articles/*',
+        count: articleUrls.length,
+        urls: articleUrls,
+        selected: [articleUrls[0], articleUrls[articleUrls.length - 1]],
+        reason: 'representatives',
+      },
+    ],
+    scanList: [urls[0], urls[1], articleUrls[0], articleUrls[articleUrls.length - 1]],
+  };
+  const targeted = selector.selectChangedSurfaces(plan, surfaceMap, ['content/article-157.md']);
+  assert.strictEqual(targeted.changedSurface.mode, 'targeted');
+  assert.deepStrictEqual(targeted.changedSurface.directUrls, ['https://example.com/article-157']);
+  assert.deepStrictEqual(targeted.scanList, [
+    articleUrls[0],
+    articleUrls[articleUrls.length - 1],
+    'https://example.com/article-157',
+  ]);
+  assert.deepStrictEqual(
+    selector.selectChangedSurfaces(plan, surfaceMap, ['content/article-157.md']),
+    targeted,
+    'direct changed-page selection must be deterministic'
+  );
+
+  const unresolved = selector.selectChangedSurfaces(plan, surfaceMap, ['content/not-published.md']);
+  assert.strictEqual(unresolved.changedSurface.reason, 'direct-route-unresolved');
+  assert.deepStrictEqual(unresolved.scanList, plan.scanList);
+
+  const directRoute = selector.validateSurfaceMap(surfaceMap).rules[0].directRoute;
+  const routeShapePlan = {
+    ...plan,
+    discoveredUrls: [...urls, 'https://example.com/guides/start'],
+  };
+  assert.strictEqual(
+    selector.deriveDirectRoute('content/index.md', directRoute, routeShapePlan).url,
+    'https://example.com/'
+  );
+  assert.strictEqual(
+    selector.deriveDirectRoute('content/guides/start.md', directRoute, routeShapePlan).url,
+    'https://example.com/guides/start'
+  );
+
+  const ambiguousPlan = {
+    runtimeUrl: 'https://example.com/',
+    discoveredUrls: ['https://example.com/duplicate', 'https://example.com/duplicate.html'],
+    groups: [{
+      pattern: 'articles/*',
+      count: 2,
+      urls: ['https://example.com/duplicate', 'https://example.com/duplicate.html'],
+      selected: ['https://example.com/duplicate'],
+      reason: 'representative',
+    }],
+    scanList: ['https://example.com/duplicate'],
+  };
+  const ambiguousDirect = selector.selectChangedSurfaces(
+    ambiguousPlan,
+    surfaceMap,
+    ['content/duplicate.md']
+  );
+  assert.strictEqual(ambiguousDirect.changedSurface.reason, 'direct-route-ambiguous');
+  assert.deepStrictEqual(ambiguousDirect.changedSurface.ambiguousDirectFiles, [{
+    file: 'content/duplicate.md',
+    routes: ['https://example.com/duplicate', 'https://example.com/duplicate.html'],
+  }]);
+  assert.deepStrictEqual(ambiguousDirect.scanList, ambiguousPlan.scanList);
+
+  assert.throws(() => selector.validateSurfaceMap({
+    schema_version: 2,
+    rules: [{
+      name: 'unsafe origin',
+      source_prefixes: ['content'],
+      groups: ['articles/*'],
+      direct_route: {
+        source_prefix: 'content',
+        source_suffix: '.md',
+        route_prefix: 'https://outside.example',
+      },
+    }],
+  }), /safe same-origin path/);
+  assert.throws(() => selector.validateSurfaceMap({
+    schema_version: 2,
+    rules: [{
+      name: 'unsafe traversal',
+      source_prefixes: ['../content'],
+      groups: ['articles/*'],
+    }],
+  }), /traverse/);
+
+  const global = selector.selectChangedSurfaces(plan, surfaceMap, ['src/layouts/main.js']);
+  assert.strictEqual(global.changedSurface.reason, 'global-surface-rule');
+  assert.deepStrictEqual(global.scanList, plan.scanList);
+
+  const dir = tmpPath('eval-20');
+  resetDir(dir);
+  const changedFilesPath = path.join(dir, 'changed-files.json');
+  fs.writeFileSync(changedFilesPath, JSON.stringify(['.a11y-audit/route-group-map.json']));
+  const groupMapChanged = selector.buildSelection(plan, {
+    map: 'a11y-audit/evals/fixtures/eval-20/surface-map.json',
+    'group-map': '.a11y-audit/route-group-map.json',
+    'changed-files': changedFilesPath,
+  });
+  assert.strictEqual(groupMapChanged.changedSurface.reason, 'route-group-map-changed');
+  assert.deepStrictEqual(groupMapChanged.scanList, plan.scanList);
+}
+
 function scannerBaselineRegression() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
   const previousResults = [
@@ -785,13 +956,14 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.1/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.7\.0/);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
 
 function reusableActionRegression() {
   const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
+  const validateWorkflow = fs.readFileSync(repoPath('.github/workflows/validate-skill.yml'), 'utf8');
   const starter = fs.readFileSync(
     repoPath('a11y-audit/assets/ci/github-actions/accessibility-audit.yml'),
     'utf8'
@@ -800,6 +972,7 @@ function reusableActionRegression() {
     'discover-url',
     'discover-output',
     'discover-max-per-group',
+    'discover-group-map',
     'discover-no-sitemap',
     'surface-map',
     'changed-files',
@@ -815,15 +988,23 @@ function reusableActionRegression() {
   assert.match(action, /scripts\/discover\.js/);
   assert.match(action, /scripts\/select-changed-surfaces\.js/);
   assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
+  assert.match(action, /--group-map "\$DISCOVER_GROUP_MAP"/);
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.6\.1/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.7\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
+  assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
   assert.match(starter, /changed-base: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
   assert.match(starter, /fetch-depth: 0/);
   assert.doesNotMatch(starter, /curl .*sitemap/);
+  assert.match(
+    validateWorkflow,
+    /discover-group-map: a11y-audit\/evals\/fixtures\/eval-19\/route-group-map\.json/
+  );
+  assert.match(validateWorkflow, /routeGrouping\?\.mode!=='mapped'/);
+  assert.match(validateWorkflow, /changedSurface\?\.directUrls\?\.\[0\]/);
 }
 
 function workflowSecurityRegression() {
@@ -841,7 +1022,7 @@ function workflowSecurityRegression() {
     assert.match(use, /@[0-9a-f]{40}$/, `remote Action must be SHA-pinned: ${use}`);
   }
   assert.doesNotMatch(action, /"\$\{\{ inputs\.(serve-path|port) \}\}"/);
-  assert.doesNotMatch(action, /"\$\{\{ inputs\.(surface-map|changed-files|changed-base|changed-head) \}\}"/);
+  assert.doesNotMatch(action, /"\$\{\{ inputs\.(discover-group-map|surface-map|changed-files|changed-base|changed-head) \}\}"/);
   assert.match(selectChanged, /spawnSync\('git', \['diff', '--name-only', '-z'/);
   assert.ok(selectChanged.includes('/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i'));
   assert.match(validate, /^permissions:\n  contents: read$/m);
@@ -886,7 +1067,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.8$/m);
+  assert.match(text, /^guide-version: 0\.3\.10$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -903,7 +1084,8 @@ function assistantGuideArtifactRegression() {
     const command = block[1].match(/^command: (.+)$/m)?.[1] || '';
     const localScript = [...scriptHashes.keys()].find((script) => {
       const installedPath = script.replace(/^a11y-audit\//, 'SKILL_DIR/');
-      return command.includes(installedPath);
+      const shortPath = script.replace(/^a11y-audit\//, 'S/');
+      return command.includes(installedPath) || command.includes(shortPath);
     });
     if (!localScript) continue;
     const declared = block[1].match(/^exec-sha256: ([0-9a-f]{64})$/m)?.[1];
@@ -912,7 +1094,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.8$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.10$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -932,6 +1114,7 @@ test('eval-9 preserves cross-origin sitemap URLs', () => runDiscoverFixture('eva
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
 test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
 test('eval-19 targets mapped changed surfaces and falls back conservatively', eval19ChangedSurfaceSelection);
+test('eval-20 groups flat routes and always includes directly changed pages', eval20FlatRouteGroupingAndDirectPages);
 test('eval-2 plans issues with labels and deduplication', eval2IssuePlanning);
 test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);

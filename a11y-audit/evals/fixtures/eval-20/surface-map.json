@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "rules": [
+    {
+      "name": "article source",
+      "source_prefixes": ["content"],
+      "groups": ["articles/*"],
+      "direct_route": {
+        "source_prefix": "content",
+        "source_suffix": ".md",
+        "route_prefix": "/"
+      }
+    },
+    {
+      "name": "global shell",
+      "source_prefixes": ["src/layouts"],
+      "groups": ["*"]
+    }
+  ]
+}

@@ -4,12 +4,12 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.8
-applies-to: skill-a11y-audit 2.x
+guide-version: 0.3.10
+applies-to: skill-a11y-audit 2.7.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
-last-reviewed: 2026-08-04
+last-reviewed: 2026-08-09
 reviewed-by: Snap Synapse LLC
 status: active
 recommended-verifier: https://guidecheck.org/verify
@@ -77,23 +77,23 @@ notes: Runs the third-party skills installer and fetches this public repository.
 id: discover-site
 class: code-executing, networked, persistence-changing
 approval: required
-command: node SKILL_DIR/scripts/discover.js --url TARGET_URL --output DISCOVER_JSON
+command: node SKILL_DIR/scripts/discover.js --url TARGET_URL --group-map ROUTE_MAP --output DISCOVER_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: TARGET_URL
-exec-sha256: 1bb1dde9e173fe4a8b5a44e73e24978e8bc657c8efde62b9267e2184426606e4
-notes: Discovers public pages and writes a representative scan plan.
+exec-sha256: c5e4182b42c0c48d80a84f66b0c578c3299ea0bb95eb728bd7b0ad38eb5ed763
+notes: ROUTE_MAP is reviewed route-group JSON; discovery writes a representative plan.
 [/action]
 
 [action]
 id: select-changed-surfaces
 class: code-executing, persistence-changing
 approval: required
-command: node SKILL_DIR/scripts/select-changed-surfaces.js --discover PLAN --map MAP --changed-files FILES --output OUT
+command: node S/scripts/select-changed-surfaces.js --discover P --map M --group-map R --changed-files F --output O
 runner: argv
 cwd: TARGET_WORKSPACE
-exec-sha256: 4c3bae512306cd33a94b05cce7a2c8c6250019f198b05a48106844d905511565
-notes: PLAN is discovery JSON; MAP is ownership JSON; FILES is changed-path JSON; OUT receives the selected plan.
+exec-sha256: a6ea36588704409058b66cbce2042214234f270dabd2d85f0dd29748e3e74f63
+notes: S is SKILL_DIR; P plan; M ownership JSON; R route-group JSON; F changed paths; O output.
 [/action]
 
 [action]

@@ -495,5 +495,28 @@
         "The consumer Action uses the eval-19 ownership fixture and retains a targeted selection artifact"
       ]
     }
+  },
+  {
+    "id": "eval-20",
+    "prompt": "Adopt the reusable Action on a flat static site with roughly 316 one-segment routes. Use a reviewed route-group map to keep home and special application pages separate from article pages, and always include a directly changed article in addition to its representative template sample. An unsafe route-group map must retain every discovered URL; an unsafe changed-surface map must retain the complete representative sample.",
+    "expectations": {
+      "structural": [
+        "Discovery evidence records mapped, heuristic, or full-fallback route grouping mode",
+        "The Action consumer executes a project-owned route-group map alongside a schema-v2 source ownership map",
+        "Changed-surface evidence records directly included, unresolved, and ambiguous direct routes"
+      ],
+      "behavioral": [
+        "Exact path rules outrank wildcard rules and equally specific conflicting rules trigger full fallback",
+        "A flat 316-page fixture collapses into reviewed groups while keeping special pages separate",
+        "A directly changed article is included even when it is not a representative; canonical ambiguity, global changes, or unresolved routes retain the complete representative sample"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-08-09",
+      "notes": [
+        "Deterministic coverage validates 316 flat URLs, Action-consumer map execution, exact-over-wildcard precedence, full discovered-set fallback, nested and index routes, canonical ambiguity, unsafe direct-route rejection, global fallback, changed-map fallback, and repeatability"
+      ]
+    }
   }
 ]

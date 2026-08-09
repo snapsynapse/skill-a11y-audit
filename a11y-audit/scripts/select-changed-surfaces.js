@@ -2,20 +2,20 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-08-04
-previous_version: null
+version: 3
+version_date: 2026-08-09
+previous_version: 2
 change_summary: >
-  Selects representative discovery groups from repository changes using an
-  explicit source-prefix map, with a documented full-sample fallback whenever
-  ownership cannot be established safely.
+  Distinguishes ambiguous canonical direct routes from unresolved routes while
+  retaining the conservative full-sample fallback for both conditions.
 */
 
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const CHANGED_SURFACE_SCHEMA_VERSION = 1;
+const CHANGED_SURFACE_SCHEMA_VERSION = 2;
+const SUPPORTED_SURFACE_MAP_SCHEMAS = new Set([1, 2]);
 const MAX_GIT_OUTPUT_BYTES = 4 * 1024 * 1024;
 
 function parseArgs(argv) {
@@ -98,6 +98,27 @@ function validateDiscoveryPlan(plan) {
         throw new Error(`Discovery group ${group.pattern} selects a URL outside scanList`);
       }
     }
+    if (group.urls !== undefined) {
+      if (!Array.isArray(group.urls) || group.urls.length === 0) {
+        throw new Error(`Discovery group ${group.pattern} has an invalid urls list`);
+      }
+      for (const url of group.urls) {
+        if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+          throw new Error(`Discovery group ${group.pattern} contains an invalid URL`);
+        }
+      }
+    }
+  }
+
+  if (plan.discoveredUrls !== undefined) {
+    if (!Array.isArray(plan.discoveredUrls) || plan.discoveredUrls.length === 0) {
+      throw new Error('Discovery plan discoveredUrls must be a non-empty array');
+    }
+    for (const url of plan.discoveredUrls) {
+      if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+        throw new Error('Discovery discoveredUrls entries must be HTTP(S) URLs');
+      }
+    }
   }
 
   return plan;
@@ -107,8 +128,8 @@ function validateSurfaceMap(surfaceMap) {
   if (!surfaceMap || typeof surfaceMap !== 'object' || Array.isArray(surfaceMap)) {
     throw new Error('Surface map must be a JSON object');
   }
-  if (surfaceMap.schema_version !== CHANGED_SURFACE_SCHEMA_VERSION) {
-    throw new Error(`Surface map schema_version must be ${CHANGED_SURFACE_SCHEMA_VERSION}`);
+  if (!SUPPORTED_SURFACE_MAP_SCHEMAS.has(surfaceMap.schema_version)) {
+    throw new Error('Surface map schema_version must be 1 or 2');
   }
   if (!Array.isArray(surfaceMap.rules) || surfaceMap.rules.length === 0) {
     throw new Error('Surface map must contain at least one rule');
@@ -143,10 +164,44 @@ function validateSurfaceMap(surfaceMap) {
       return group;
     }))].sort();
 
-    return { name, sourcePrefixes, groups };
+    let directRoute = null;
+    if (rule.direct_route !== undefined) {
+      if (surfaceMap.schema_version !== 2) {
+        throw new Error(`Surface map rule ${name} requires schema_version 2 for direct_route`);
+      }
+      const direct = rule.direct_route;
+      if (!direct || typeof direct !== 'object' || Array.isArray(direct)) {
+        throw new Error(`Surface map rule ${name} direct_route must be an object`);
+      }
+      const sourcePrefix = normalizeRepositoryPath(
+        direct.source_prefix,
+        `direct_route source_prefix in rule ${name}`
+      );
+      if (!sourcePrefixes.includes(sourcePrefix)) {
+        throw new Error(`Surface map rule ${name} direct_route source_prefix must also appear in source_prefixes`);
+      }
+      if (typeof direct.source_suffix !== 'string'
+        || !/^\.[A-Za-z0-9][A-Za-z0-9._-]*$/.test(direct.source_suffix)) {
+        throw new Error(`Surface map rule ${name} direct_route source_suffix is invalid`);
+      }
+      if (typeof direct.route_prefix !== 'string'
+        || !direct.route_prefix.startsWith('/')
+        || /[\\?#*\0\r\n]/.test(direct.route_prefix)
+        || direct.route_prefix.split('/').includes('..')) {
+        throw new Error(`Surface map rule ${name} direct_route route_prefix must be a safe same-origin path`);
+      }
+      const routePrefix = direct.route_prefix.replace(/\/+$/, '') || '/';
+      directRoute = {
+        sourcePrefix,
+        sourceSuffix: direct.source_suffix,
+        routePrefix,
+      };
+    }
+
+    return { name, sourcePrefixes, groups, directRoute };
   });
 
-  return { schemaVersion: CHANGED_SURFACE_SCHEMA_VERSION, rules };
+  return { schemaVersion: surfaceMap.schema_version, rules };
 }
 
 function sourcePrefixMatches(file, prefix) {
@@ -175,6 +230,58 @@ function surfaceMapWasChanged(changedFiles, mapPath, cwd = process.cwd()) {
   }
 }
 
+function inputPathWasChanged(changedFiles, inputPath, cwd = process.cwd()) {
+  if (typeof inputPath !== 'string') return false;
+  try {
+    const normalizedFiles = normalizeChangedFiles(changedFiles);
+    return normalizedFiles.includes(repositoryRelativeInputPath(inputPath, cwd));
+  } catch {
+    return false;
+  }
+}
+
+function canonicalRouteKey(urlStr) {
+  const url = new URL(urlStr);
+  if (!/^https?:$/.test(url.protocol)) throw new Error('Direct routes must use HTTP(S)');
+  let pathname = url.pathname.replace(/\/index\.html$/, '/');
+  pathname = pathname.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+  return `${url.origin}${pathname}`;
+}
+
+function discoveredUrlsForPlan(plan) {
+  const candidates = Array.isArray(plan.discoveredUrls)
+    ? plan.discoveredUrls
+    : plan.groups.flatMap((group) => Array.isArray(group.urls) ? group.urls : group.selected);
+  return [...new Set(candidates)].sort();
+}
+
+function deriveDirectRoute(file, directRoute, plan) {
+  if (!directRoute || !sourcePrefixMatches(file, directRoute.sourcePrefix)) {
+    return { applicable: false };
+  }
+  if (!file.endsWith(directRoute.sourceSuffix)) {
+    return { applicable: true, error: 'source-suffix-mismatch' };
+  }
+  const relative = file.slice(directRoute.sourcePrefix.length).replace(/^\//, '');
+  const stem = relative.slice(0, -directRoute.sourceSuffix.length);
+  if (!stem) return { applicable: true, error: 'empty-route' };
+  const segments = stem.split('/');
+  if (segments[segments.length - 1] === 'index') segments.pop();
+  const prefixSegments = directRoute.routePrefix === '/'
+    ? []
+    : directRoute.routePrefix.slice(1).split('/');
+  const pathname = `/${[...prefixSegments, ...segments].map(encodeURIComponent).join('/')}` || '/';
+  const runtimeUrl = new URL(plan.runtimeUrl || plan.scanList[0]);
+  const expected = new URL(pathname || '/', runtimeUrl.origin).href;
+  const expectedKey = canonicalRouteKey(expected);
+  const matches = discoveredUrlsForPlan(plan).filter((url) => canonicalRouteKey(url) === expectedKey);
+  if (matches.length === 0) return { applicable: true, error: 'route-not-discovered', expected };
+  if (matches.length > 1) {
+    return { applicable: true, error: 'ambiguous-discovered-route', expected, routes: matches };
+  }
+  return { applicable: true, url: matches[0] };
+}
+
 function fullSample(plan, reason, details = {}) {
   const scanList = [...plan.scanList];
   return {
@@ -189,6 +296,9 @@ function fullSample(plan, reason, details = {}) {
       matchedRules: details.matchedRules || [],
       affectedGroups: details.affectedGroups || [],
       unmatchedFiles: details.unmatchedFiles || [],
+      directUrls: details.directUrls || [],
+      unresolvedDirectFiles: details.unresolvedDirectFiles || [],
+      ambiguousDirectFiles: details.ambiguousDirectFiles || [],
       fullSamplePages: plan.scanList.length,
       selectedPages: scanList.length,
     },
@@ -206,6 +316,9 @@ function selectChangedSurfaces(planInput, mapInput, changedFilesInput) {
   const matchedRules = new Set();
   const affectedGroups = new Set();
   const unmatchedFiles = [];
+  const directUrls = new Set();
+  const unresolvedDirectFiles = [];
+  const ambiguousDirectFiles = [];
 
   for (const file of changedFiles) {
     const matches = surfaceMap.rules.filter((rule) => (
@@ -219,6 +332,22 @@ function selectChangedSurfaces(planInput, mapInput, changedFilesInput) {
       matchedRules.add(rule.name);
       for (const group of rule.groups) affectedGroups.add(group);
     }
+    const derived = matches
+      .map((rule) => deriveDirectRoute(file, rule.directRoute, plan))
+      .filter((route) => route.applicable);
+    const ambiguous = derived.filter((route) => route.error === 'ambiguous-discovered-route');
+    const ambiguousRoutes = [...new Set(ambiguous.flatMap((route) => route.routes || []))].sort();
+    const errors = derived.filter((route) => route.error && route.error !== 'ambiguous-discovered-route');
+    if (errors.length > 0) {
+      unresolvedDirectFiles.push({ file, reasons: [...new Set(errors.map((route) => route.error))].sort() });
+    }
+    const routes = [...new Set(derived.filter((route) => route.url).map((route) => route.url))].sort();
+    if (ambiguousRoutes.length > 0 || routes.length > 1) {
+      ambiguousDirectFiles.push({
+        file,
+        routes: [...new Set([...ambiguousRoutes, ...routes])].sort(),
+      });
+    } else if (routes.length === 1) directUrls.add(routes[0]);
   }
 
   const details = {
@@ -226,8 +355,13 @@ function selectChangedSurfaces(planInput, mapInput, changedFilesInput) {
     matchedRules: [...matchedRules].sort(),
     affectedGroups: [...affectedGroups].sort(),
     unmatchedFiles,
+    directUrls: [...directUrls].sort(),
+    unresolvedDirectFiles,
+    ambiguousDirectFiles,
   };
   if (unmatchedFiles.length > 0) return fullSample(plan, 'unmapped-changes', details);
+  if (ambiguousDirectFiles.length > 0) return fullSample(plan, 'direct-route-ambiguous', details);
+  if (unresolvedDirectFiles.length > 0) return fullSample(plan, 'direct-route-unresolved', details);
   if (affectedGroups.has('*')) return fullSample(plan, 'global-surface-rule', details);
 
   const knownGroups = new Map(plan.groups.map((group) => [group.pattern, group]));
@@ -243,7 +377,11 @@ function selectChangedSurfaces(planInput, mapInput, changedFilesInput) {
   for (const pattern of affectedGroups) {
     for (const url of knownGroups.get(pattern).selected) selectedUrls.add(url);
   }
-  const scanList = plan.scanList.filter((url) => selectedUrls.has(url));
+  for (const url of directUrls) selectedUrls.add(url);
+  const scanList = [
+    ...plan.scanList.filter((url) => selectedUrls.has(url)),
+    ...[...directUrls].sort().filter((url) => !plan.scanList.includes(url)),
+  ];
   if (scanList.length === 0) return fullSample(plan, 'empty-targeted-sample', details);
 
   const targetedGroups = [...affectedGroups].sort();
@@ -260,6 +398,9 @@ function selectChangedSurfaces(planInput, mapInput, changedFilesInput) {
       matchedRules: [...matchedRules].sort(),
       affectedGroups: targetedGroups,
       unmatchedFiles: [],
+      directUrls: [...directUrls].sort(),
+      unresolvedDirectFiles: [],
+      ambiguousDirectFiles: [],
       fullSamplePages: plan.scanList.length,
       selectedPages: scanList.length,
     },
@@ -320,6 +461,9 @@ function buildSelection(plan, args) {
     if (surfaceMapWasChanged(changedFiles, args.map)) {
       return fullSample(plan, 'surface-map-changed', { changedFiles });
     }
+    if (inputPathWasChanged(changedFiles, args['group-map'])) {
+      return fullSample(plan, 'route-group-map-changed', { changedFiles });
+    }
     return selectChangedSurfaces(plan, surfaceMap, changedFiles);
   } catch {
     return fullSample(plan, 'changed-files-invalid');
@@ -341,7 +485,7 @@ function writeResult(result, output) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (typeof args.discover !== 'string') {
-    console.error('Usage: select-changed-surfaces.js --discover <plan.json> --map <surface-map.json> (--changed-files <files.json> | --base <sha> [--head <sha|HEAD>]) [--output <path>]');
+    console.error('Usage: select-changed-surfaces.js --discover <plan.json> --map <surface-map.json> [--group-map <route-group-map.json>] (--changed-files <files.json> | --base <sha> [--head <sha|HEAD>]) [--output <path>]');
     process.exit(1);
   }
 
@@ -364,6 +508,9 @@ module.exports = {
   buildSelection,
   fullSample,
   gitChangedFiles,
+  canonicalRouteKey,
+  deriveDirectRoute,
+  inputPathWasChanged,
   normalizeChangedFiles,
   normalizeRepositoryPath,
   repositoryRelativeInputPath,

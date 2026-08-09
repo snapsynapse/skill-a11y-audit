@@ -1,11 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 26
+version: 29
 version_date: 2026-08-09
-previous_version: 25
+previous_version: 28
 change_summary: >
-  Records the v2.6.1 security release and post-release field-validation plan.
+  Records the v2.7.0 release, release-hardening evidence, and paused first
+  field pilot.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -16,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v31 (v2.6.1 security release)
+## Current State: bundle v34 (v2.7.0 release)
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -41,6 +42,14 @@ malformed map, unknown group, shared-code rule, empty diff, or unavailable
 comparison retains the full representative sample and records its reason in
 `changedSurface`.
 
+The v2.7.0 release adds a project-owned route-group map for flat or irregular
+sites. Exact route patterns outrank wildcard patterns. Invalid, incomplete, or
+equally specific conflicting maps expand to one exact group per discovered URL
+and record machine-readable evidence. Schema-v2 surface maps can also include a
+directly changed page when a constrained source-to-route transform resolves
+uniquely to an already discovered same-origin URL. Any unresolved transform or
+changed route-group map retains the full representative sample.
+
 The three most recent correctness issues are now resolved:
 
 - `discover.js` preserves published sitemap URLs across `robots.txt`,
@@ -60,6 +69,8 @@ Those fixes now have runnable local regression fixtures:
 - `eval-10` covers deterministic discovery across repeated runs
 - `eval-11` covers page-aware delta reporting
 - `eval-19` covers targeted changed surfaces and every conservative fallback
+- `eval-20` covers a 316-route flat site, reviewed route grouping, direct
+  changed-page inclusion, precedence, ambiguity, and conservative degradation
 
 A full audit was run 2026-03-26 against the AI Regulation Reference
 (10-page static HTML site, http://127.0.0.1:8081). The audit found
@@ -75,11 +86,12 @@ four token-efficiency improvements, all now implemented in v10.
 | MANIFEST.yaml | Bundle metadata, dependencies, file inventory |
 | CHANGELOG.md | Append-only change history |
 | HANDOFF.md | This file -- current state and next steps |
-| evals/evals.json | 19 eval cases with passing or explicitly partial results |
+| evals/evals.json | 20 eval cases with passing or explicitly partial results |
 | evals/run-evals.js | Offline executable eval, schema, manifest, and Action validation runner |
 | evals/run-browser-eval.js | Real Puppeteer + axe-core fixture and baseline rescan |
 | references/claude-code.md | Claude-specific launch and Preview notes |
 | references/codex.md | Codex-specific execution notes |
+| references/route-grouping.md | Reviewed route-map and fallback contract |
 | references/output-contract.md | Markdown/JSON output rules |
 | references/issue-trackers.md | Issue creation and deduplication rules |
 | references/output-schema.json | Stable JSON output schema |
@@ -298,6 +310,20 @@ remediate code, or replace enterprise monitoring.
 - Keep assistant-guide commands and executable hashes unchanged because the
   scanner entry point and its authority boundary did not change
 
+### Done in v2.7.0
+
+- Reviewed route-group maps with exact-over-wildcard specificity
+- Exact-page discovery fallback for invalid, incomplete, or ambiguous maps
+- Discovery evidence containing every discovered URL and grouping decision
+- Schema-v2 direct changed-page transforms constrained to repository-relative
+  source paths and already discovered same-origin URLs
+- Action inputs, examples, references, and eval-20 coverage for both maps
+- Composite Action consumer execution of both maps and a schema-v2 direct route
+- Canonical-route ambiguity, unsafe configuration, nested route, and index
+  route regression coverage
+- Precise fallback terminology: route-map failures retain every discovered
+  URL; changed-surface failures retain the complete representative plan
+
 ### Done in v2.5.1
 
 - End-to-end composite Action consumer smoke test with retained evidence
@@ -327,9 +353,9 @@ remediate code, or replace enterprise monitoring.
 4. **First-class Playwright execution.** Add only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
-### v2.6 field validation
+### v2.7 field validation
 
-The first post-release tests should verify changed-surface safety and adoption:
+The first post-release field test should verify route grouping and changed-page safety:
 
 - whether maintainers can author and review source-prefix ownership maps
   without missing route groups
@@ -341,6 +367,30 @@ The first post-release tests should verify changed-surface safety and adoption:
   cross-template regressions
 - whether `baseline` plus `fail-on: new` remains understandable when the scan
   plan is targeted or falls back to the complete representative sample
+- whether a flat sitemap collapses into reviewed template groups without
+  merging standalone application routes into article coverage
+- whether a changed article is always present in the scan list even when it
+  was not chosen as a representative
+
+The planned `sam-rogers.com` pilot is explicitly paused while another session
+finishes in that repository. Do not read, build, scan, or modify that checkout
+until the maintainer clears the concurrency boundary. Resume by rechecking its
+live branch and worktree before any pilot action.
+
+### v2.7 release validation
+
+- `npm run validate`: 25/25 passed
+- `npm run eval:browser`: real Puppeteer/axe scan and accepted-baseline rescan passed
+- Local consumer chain: route-grouped discovery, schema-v2 direct selection,
+  and real-browser scan passed with one selected URL and zero scan errors
+- skill-creator `quick_validate.py`: passed
+- GuideCheck local verifier 0.7.1: Level 3, zero blockers, zero warnings
+- actionlint 1.7.12: passed
+- zizmor 1.28.0: no findings at low-or-higher severity
+- root and scanner `npm audit --audit-level=high`: zero vulnerabilities
+- `git diff --check`: passed
+- Hosted composite Action execution of the new fixture is the post-push release
+  verification gate
 
 Use those results to refine ownership-map ergonomics and interoperability,
 not to add broad autonomous browsing or remediation behavior.

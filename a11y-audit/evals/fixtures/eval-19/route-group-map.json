@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "name": "eval fixture route",
+      "path_patterns": [
+        "/"
+      ],
+      "group": "fixture"
+    }
+  ]
+}

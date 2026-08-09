@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 4
-version_date: 2026-07-21
-previous_version: 3
+version: 5
+version_date: 2026-08-09
+previous_version: 4
 change_summary: >
-  Retains the entry URL during sitemap-free crawl fallback so a valid
-  link-free single-page site still produces a representative scan plan.
+  Adds reviewed route-group maps with exact-over-wildcard precedence and
+  exact-page fallback when the map is invalid, ambiguous, or incomplete.
 */
 
 const fs = require('fs');
@@ -17,6 +17,7 @@ const https = require('https');
 
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
 const DEFAULT_MAX_REDIRECTS = 5;
+const ROUTE_GROUP_SCHEMA_VERSION = 1;
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -164,6 +165,193 @@ function classifyUrl(urlStr) {
 
   const patternParts = [parts[0], ...parts.slice(1).map(() => '*')];
   return { pattern: patternParts.join('/'), segments: parts };
+}
+
+function normalizeRoutePath(value, label = 'route path', allowWildcard = false) {
+  if (typeof value !== 'string' || !value.startsWith('/') || /[\\?#\0\r\n]/.test(value)) {
+    throw new Error(`${label} must be an absolute URL path without query, fragment, backslash, or controls`);
+  }
+  if (/%(?:0[0-9a-f]|1[0-9a-f]|2f|5c|7f)/i.test(value)) {
+    throw new Error(`${label} contains an encoded delimiter or control character`);
+  }
+
+  let normalized = value.replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
+  const segments = normalized === '/' ? [] : normalized.split('/').slice(1);
+  for (const segment of segments) {
+    if (!segment || segment === '.' || segment === '..') {
+      throw new Error(`${label} contains an empty or traversal segment`);
+    }
+    if (segment.includes('*') && (!allowWildcard || segment !== '*')) {
+      throw new Error(`${label} may use * only as a complete path segment`);
+    }
+  }
+  return normalized;
+}
+
+function routePathForUrl(urlStr) {
+  const url = new URL(urlStr);
+  if (!/^https?:$/.test(url.protocol)) throw new Error('Discovered route must use HTTP(S)');
+  return normalizeRoutePath(url.pathname || '/', 'discovered route');
+}
+
+function validateRouteGroupMap(routeMap) {
+  if (!routeMap || typeof routeMap !== 'object' || Array.isArray(routeMap)) {
+    throw new Error('Route-group map must be a JSON object');
+  }
+  if (routeMap.schema_version !== ROUTE_GROUP_SCHEMA_VERSION) {
+    throw new Error(`Route-group map schema_version must be ${ROUTE_GROUP_SCHEMA_VERSION}`);
+  }
+  if (!Array.isArray(routeMap.rules) || routeMap.rules.length === 0) {
+    throw new Error('Route-group map must contain at least one rule');
+  }
+
+  const names = new Set();
+  return {
+    schemaVersion: ROUTE_GROUP_SCHEMA_VERSION,
+    rules: routeMap.rules.map((rule, index) => {
+      if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+        throw new Error(`Route-group rule ${index + 1} must be an object`);
+      }
+      const name = typeof rule.name === 'string' ? rule.name.trim() : '';
+      if (!name) throw new Error(`Route-group rule ${index + 1} must have a name`);
+      if (names.has(name)) throw new Error(`Duplicate route-group rule name: ${name}`);
+      names.add(name);
+      if (typeof rule.group !== 'string' || !rule.group.trim() || /[\0\r\n]/.test(rule.group)) {
+        throw new Error(`Route-group rule ${name} must have a valid group`);
+      }
+      if (!Array.isArray(rule.path_patterns) || rule.path_patterns.length === 0) {
+        throw new Error(`Route-group rule ${name} must contain path_patterns`);
+      }
+      const patterns = [...new Set(rule.path_patterns.map((pattern) => (
+        normalizeRoutePath(pattern, `path pattern in rule ${name}`, true)
+      )))].sort().map((pattern) => {
+        const segments = pattern === '/' ? [] : pattern.slice(1).split('/');
+        return {
+          pattern,
+          segments,
+          literalSegments: segments.filter((segment) => segment !== '*').length,
+        };
+      });
+      return { name, group: rule.group.trim(), patterns };
+    }),
+  };
+}
+
+function patternMatchesPath(pattern, pathname) {
+  const pathSegments = pathname === '/' ? [] : pathname.slice(1).split('/');
+  return pattern.segments.length === pathSegments.length
+    && pattern.segments.every((segment, index) => segment === '*' || segment === pathSegments[index]);
+}
+
+function matchRouteGroup(urlStr, routeMap) {
+  const pathname = routePathForUrl(urlStr);
+  const matches = [];
+  for (const rule of routeMap.rules) {
+    for (const pattern of rule.patterns) {
+      if (patternMatchesPath(pattern, pathname)) matches.push({ rule, pattern });
+    }
+  }
+  if (matches.length === 0) return { pathname, unmatched: true };
+  const highestSpecificity = Math.max(...matches.map((match) => match.pattern.literalSegments));
+  const best = matches.filter((match) => match.pattern.literalSegments === highestSpecificity);
+  const groups = [...new Set(best.map((match) => match.rule.group))];
+  if (groups.length > 1) {
+    return {
+      pathname,
+      ambiguous: true,
+      rules: best.map((match) => match.rule.name).sort(),
+    };
+  }
+  best.sort((a, b) => a.rule.name.localeCompare(b.rule.name));
+  return { pathname, group: groups[0], rule: best[0].rule.name };
+}
+
+function exactFallbackGroups(urls) {
+  return urls.map((url) => ({ pattern: `exact:${url}`, urls: [url] }));
+}
+
+function groupDiscoveredUrls(urls, routeMapInput) {
+  if (routeMapInput === undefined || routeMapInput === null) {
+    const groups = new Map();
+    for (const url of urls) {
+      const { pattern } = classifyUrl(url);
+      if (!groups.has(pattern)) groups.set(pattern, { pattern, urls: [] });
+      groups.get(pattern).urls.push(url);
+    }
+    return {
+      groups: [...groups.values()],
+      routeGrouping: {
+        schemaVersion: ROUTE_GROUP_SCHEMA_VERSION,
+        mode: 'heuristic',
+        reason: 'no-route-group-map',
+        matchedRules: [],
+        unmatchedUrls: [],
+        ambiguousUrls: [],
+      },
+    };
+  }
+
+  let routeMap;
+  try {
+    routeMap = validateRouteGroupMap(routeMapInput);
+  } catch (error) {
+    return {
+      groups: exactFallbackGroups(urls),
+      routeGrouping: {
+        schemaVersion: ROUTE_GROUP_SCHEMA_VERSION,
+        mode: 'full-fallback',
+        reason: 'route-group-map-invalid',
+        error: error.message,
+        matchedRules: [],
+        unmatchedUrls: [],
+        ambiguousUrls: [],
+      },
+    };
+  }
+
+  const matches = [];
+  for (const url of urls) {
+    try {
+      matches.push({ url, ...matchRouteGroup(url, routeMap) });
+    } catch (error) {
+      matches.push({ url, invalid: true, error: error.message });
+    }
+  }
+  const unmatchedUrls = matches.filter((match) => match.unmatched || match.invalid).map((match) => match.url).sort();
+  const ambiguousUrls = matches.filter((match) => match.ambiguous).map((match) => ({
+    url: match.url,
+    rules: match.rules,
+  })).sort((a, b) => a.url.localeCompare(b.url));
+  if (unmatchedUrls.length > 0 || ambiguousUrls.length > 0) {
+    return {
+      groups: exactFallbackGroups(urls),
+      routeGrouping: {
+        schemaVersion: ROUTE_GROUP_SCHEMA_VERSION,
+        mode: 'full-fallback',
+        reason: ambiguousUrls.length > 0 ? 'ambiguous-routes' : 'unmapped-routes',
+        matchedRules: [],
+        unmatchedUrls,
+        ambiguousUrls,
+      },
+    };
+  }
+
+  const groups = new Map();
+  for (const match of matches) {
+    if (!groups.has(match.group)) groups.set(match.group, { pattern: match.group, urls: [] });
+    groups.get(match.group).urls.push(match.url);
+  }
+  return {
+    groups: [...groups.values()],
+    routeGrouping: {
+      schemaVersion: ROUTE_GROUP_SCHEMA_VERSION,
+      mode: 'mapped',
+      reason: 'route-group-map',
+      matchedRules: [...new Set(matches.map((match) => match.rule))].sort(),
+      unmatchedUrls: [],
+      ambiguousUrls: [],
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -416,13 +604,11 @@ async function discover(runtimeUrl, opts = {}) {
     return { error: 'No pages discovered. Check the URL and try --no-sitemap for crawl mode.' };
   }
 
-  // 3. Classify into groups
-  const groupMap = new Map();
-  for (const url of allUrls) {
-    const { pattern } = classifyUrl(url);
-    if (!groupMap.has(pattern)) groupMap.set(pattern, { pattern, urls: [] });
-    groupMap.get(pattern).urls.push(url);
-  }
+  allUrls = [...new Set(allUrls)].sort();
+
+  // 3. Classify into groups, preferring a reviewed project-owned map.
+  const grouped = groupDiscoveredUrls(allUrls, opts.routeGroupMap);
+  const groupMap = grouped.groups;
 
   // 4. Fetch API manifest for enrichment
   let apiManifest = null;
@@ -437,7 +623,7 @@ async function discover(runtimeUrl, opts = {}) {
   const groups = [];
   const scanList = [];
 
-  const sorted = [...groupMap.values()].sort((a, b) => {
+  const sorted = [...groupMap].sort((a, b) => {
     const aIsTopLevel = !a.pattern.includes('/') && !a.pattern.includes('*');
     const bIsTopLevel = !b.pattern.includes('/') && !b.pattern.includes('*');
     if (aIsTopLevel && !bIsTopLevel) return -1;
@@ -450,9 +636,10 @@ async function discover(runtimeUrl, opts = {}) {
     const isTopLevel = !group.pattern.includes('/') && !group.pattern.includes('*');
     let selected, reason, fingerprints;
 
-    if (isTopLevel || group.urls.length === 1) {
+    const heuristicTopLevel = grouped.routeGrouping.mode === 'heuristic' && isTopLevel;
+    if (heuristicTopLevel || group.urls.length === 1) {
       selected = group.urls.sort();
-      reason = isTopLevel ? 'top-level page — always included' : 'singleton — always included';
+      reason = heuristicTopLevel ? 'top-level page — always included' : 'singleton — always included';
     } else {
       // Only fingerprint groups with 4+ pages to limit HTTP requests
       const shouldFingerprint = useFingerprint && group.urls.length >= 4;
@@ -466,6 +653,7 @@ async function discover(runtimeUrl, opts = {}) {
     const groupEntry = {
       pattern: group.pattern,
       count: group.urls.length,
+      urls: [...group.urls].sort(),
       selected,
       reason,
     };
@@ -485,12 +673,14 @@ async function discover(runtimeUrl, opts = {}) {
   }).filter(Boolean))].sort();
 
   return {
+    discoverySchemaVersion: 2,
     source,
     runtimeUrl,
     originPolicy: allowCrossOriginSitemaps ? 'cross-origin-sitemaps-allowed' : 'same-origin',
     discoveredOrigins,
     blockedFetches,
     totalPages: allUrls.length,
+    discoveredUrls: allUrls,
     selectedPages: scanList.length,
     coverageRatio: `${groups.length} template groups, ${scanList.length} pages selected`,
     fingerprintedGroups: fingerprintCount,
@@ -498,6 +688,7 @@ async function discover(runtimeUrl, opts = {}) {
       version: apiManifest.meta?.version,
       endpoints: Object.keys(apiManifest.endpoints || apiManifest.files || {}).length,
     } : null,
+    routeGrouping: grouped.routeGrouping,
     groups,
     scanList,
   };
@@ -511,8 +702,17 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const url = args.url;
   if (!url) {
-    console.error('Usage: discover.js --url <base-url> [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint] [--allow-cross-origin-sitemaps]');
+    console.error('Usage: discover.js --url <base-url> [--group-map <route-group-map.json>] [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint] [--allow-cross-origin-sitemaps]');
     process.exit(1);
+  }
+
+  let routeGroupMap;
+  if (typeof args['group-map'] === 'string') {
+    try {
+      routeGroupMap = JSON.parse(fs.readFileSync(path.resolve(args['group-map']), 'utf8'));
+    } catch (error) {
+      routeGroupMap = { invalid: true, error: error.message };
+    }
   }
 
   const result = await discover(url, {
@@ -520,6 +720,7 @@ async function main() {
     noSitemap: args['no-sitemap'] === true || args['no-sitemap'] === 'true',
     fingerprint: !(args['no-fingerprint'] === true || args['no-fingerprint'] === 'true'),
     allowCrossOriginSitemaps: args['allow-cross-origin-sitemaps'] === true || args['allow-cross-origin-sitemaps'] === 'true',
+    routeGroupMap,
   });
 
   if (result.error) {
@@ -545,6 +746,7 @@ async function main() {
     console.error(`Blocked fetches: ${result.blockedFetches.length}`);
   }
   console.error(`Selected ${result.selectedPages} pages across ${result.groups.length} template groups`);
+  console.error(`Route grouping: ${result.routeGrouping.mode} (${result.routeGrouping.reason})`);
   if (result.fingerprintedGroups > 0) {
     console.error(`DOM fingerprinting used on ${result.fingerprintedGroups} groups`);
   }
@@ -563,8 +765,12 @@ module.exports = {
   fetchResource,
   fingerprintCandidates,
   httpFetch,
+  groupDiscoveredUrls,
+  matchRouteGroup,
+  normalizeRoutePath,
   parseSitemap,
   selectRepresentatives,
+  validateRouteGroupMap,
 };
 
 if (require.main === module) {

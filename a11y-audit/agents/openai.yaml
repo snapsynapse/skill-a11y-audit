@@ -1,4 +1,4 @@
 interface:
   display_name: "Accessibility Audit"
   short_description: "Gate changed accessibility regressions"
-  default_prompt: "Use $a11y-audit to discover representative site templates, safely prioritize mapped changed surfaces when available, and report or gate newly introduced findings against the accepted baseline."
+  default_prompt: "Use $a11y-audit to discover representative site templates with reviewed route groups when available, include safely mapped changed pages, and report or gate newly introduced findings against the accepted baseline."

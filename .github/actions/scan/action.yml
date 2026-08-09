@@ -60,6 +60,10 @@ inputs:
     description: Maximum representative pages selected per template group.
     required: false
     default: '2'
+  discover-group-map:
+    description: Repository-relative path to a reviewed route-group map.
+    required: false
+    default: ''
   discover-no-sitemap:
     description: '`true` to crawl from discover-url instead of reading a sitemap.'
     required: false
@@ -146,11 +150,13 @@ runs:
         DISCOVER_URL: ${{ inputs.discover-url }}
         DISCOVER_OUTPUT: ${{ inputs.discover-output }}
         DISCOVER_MAX_PER_GROUP: ${{ inputs.discover-max-per-group }}
+        DISCOVER_GROUP_MAP: ${{ inputs.discover-group-map }}
         DISCOVER_NO_SITEMAP: ${{ inputs.discover-no-sitemap }}
         ALLOW_CROSS_ORIGIN_SITEMAPS: ${{ inputs.allow-cross-origin-sitemaps }}
       run: |
         ARGS=(--url "$DISCOVER_URL" --output "$DISCOVER_OUTPUT")
         [ -n "$DISCOVER_MAX_PER_GROUP" ] && ARGS+=(--max-per-group "$DISCOVER_MAX_PER_GROUP")
+        [ -n "$DISCOVER_GROUP_MAP" ] && ARGS+=(--group-map "$DISCOVER_GROUP_MAP")
         [ "$DISCOVER_NO_SITEMAP" = "true" ] && ARGS+=(--no-sitemap)
         [ "$ALLOW_CROSS_ORIGIN_SITEMAPS" = "true" ] && ARGS+=(--allow-cross-origin-sitemaps)
         node "${{ github.action_path }}/../../../a11y-audit/scripts/discover.js" "${ARGS[@]}"
@@ -161,12 +167,14 @@ runs:
       env:
         DISCOVER_OUTPUT: ${{ inputs.discover-output }}
         SURFACE_MAP: ${{ inputs.surface-map }}
+        DISCOVER_GROUP_MAP: ${{ inputs.discover-group-map }}
         CHANGED_FILES: ${{ inputs.changed-files }}
         CHANGED_BASE: ${{ inputs.changed-base }}
         CHANGED_HEAD: ${{ inputs.changed-head }}
         SELECTION_OUTPUT: ${{ inputs.selection-output }}
       run: |
         ARGS=(--discover "$DISCOVER_OUTPUT" --map "$SURFACE_MAP" --output "$SELECTION_OUTPUT")
+        [ -n "$DISCOVER_GROUP_MAP" ] && ARGS+=(--group-map "$DISCOVER_GROUP_MAP")
         if [ -n "$CHANGED_FILES" ]; then
           ARGS+=(--changed-files "$CHANGED_FILES")
         else

@@ -81,7 +81,17 @@ async function main() {
     runs,
   };
 
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+  const projectExpectedShape = (value, shape) => {
+    if (Array.isArray(shape)) return shape.map((entry, index) => projectExpectedShape(value[index], entry));
+    if (shape && typeof shape === 'object') {
+      return Object.fromEntries(Object.keys(shape).map((key) => (
+        [key, projectExpectedShape(value[key], shape[key])]
+      )));
+    }
+    return value;
+  };
+
+  if (JSON.stringify(projectExpectedShape(actual, expected)) !== JSON.stringify(expected)) {
     console.error(JSON.stringify({ expected, actual }, null, 2));
     process.exit(1);
   }

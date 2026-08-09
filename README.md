@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.6.1)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.7.0)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -185,14 +185,16 @@ them; never refresh the baseline automatically in CI.
 ### Adopt in GitHub Actions
 
 The reusable Action can serve a static build, discover representative templates,
-prioritize mapped changed surfaces, compare against reviewed debt, and upload
-the scan, discovery plan, and selection evidence:
+apply a reviewed route-group map, prioritize mapped changed surfaces including
+directly changed pages, compare against reviewed debt, and upload the scan,
+discovery plan, and selection evidence:
 
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.6.1
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.7.0
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
+    discover-group-map: .a11y-audit/route-group-map.json
     surface-map: .a11y-audit/surface-map.json
     changed-base: ${{ github.event.pull_request.base.sha }}
     changed-head: ${{ github.event.pull_request.head.sha }}
@@ -211,13 +213,16 @@ Discovery reads the site's sitemap by default. Add `discover-no-sitemap: true`
 when the served build has no sitemap and should be crawled from
 `discover-url` instead.
 
-Copy `a11y-audit/assets/ci/github-actions/surface-map.example.json` to
-`.a11y-audit/surface-map.json` and map every changed source prefix to exact
-discovery-group patterns. When a file is unmapped, the map itself changes or is
-invalid, Git history is unavailable, or a rule marks shared code, the Action
-records why and scans the full representative sample instead of silently
-reducing scope. Fetch full Git history before supplying base and head SHAs; the
-bundled workflow starter configures checkout accordingly.
+Copy the route-group and surface-map examples from
+`a11y-audit/assets/ci/github-actions/` into `.a11y-audit/`. Route patterns are
+project-owned, exact routes outrank wildcards, and schema-v2 surface rules can
+derive a same-origin changed page only when it already appears in discovery.
+An invalid, incomplete, or ambiguous route-group map records why and scans
+every discovered URL. Separately, an unsafe changed-surface map, unavailable
+Git history, unmapped file, or shared-code rule retains the complete
+representative scan plan. Neither path silently reduces scope. Fetch full Git
+history before supplying base and head SHAs; the bundled workflow starter
+configures checkout accordingly.
 
 The repository tests this exact consumer path against a served fixture. CI
 also runs actionlint for workflow semantics and zizmor for GitHub Actions
@@ -257,6 +262,10 @@ selects representatives from each group:
   compare/*:                     561 pages → 2 selected (by DOM complexity)
   ...plus all 9 unique top-level pages
 ```
+
+For flat or irregular sites, a reviewed route-group map replaces path-depth
+classification. Invalid, ambiguous, or incomplete maps expand to one exact
+group per discovered URL so configuration errors cannot reduce coverage.
 
 Within each group, pages are ranked by structural complexity (count of
 tables, forms, interactive elements) so the scan covers the most and
@@ -324,12 +333,16 @@ Changed: color-contrast 26 → 2 (↓24)
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/discover.js` | Sitemap-first page discovery with template-aware sampling |
-| `scripts/select-changed-surfaces.js` | Maps changed source paths to discovery groups with a full-sample fallback |
+| `scripts/discover.js` | Sitemap-first discovery with reviewed route grouping and conservative fallback |
+| `scripts/select-changed-surfaces.js` | Maps changed sources to groups and optional direct routes with full-sample fallback |
 | `scripts/scan.js` | axe-core scanning with self-contained dependency resolution |
 | `scripts/report.js` | Deterministic report generation (markdown + JSON) |
 | `scripts/bootstrap-context.js` | Create workspace-local project configuration |
 | `scripts/plan-issues.js` | Dry-run issue planning for tracker integration |
+
+Detailed map contracts live in
+[`references/route-grouping.md`](a11y-audit/references/route-grouping.md) and
+[`references/changed-surfaces.md`](a11y-audit/references/changed-surfaces.md).
 
 ## Tested Against
 

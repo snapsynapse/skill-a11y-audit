@@ -1,14 +1,45 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 31
+version: 34
 version_date: 2026-08-09
-previous_version: 30
+previous_version: 33
 change_summary: >
-  Releases the v2.6.1 scanner dependency security repair and continuous audit gates.
+  Releases v2.7.0 with reviewed route grouping, direct changed-page selection,
+  consumer-Action execution, and conservative fallback evidence.
 ---
 
 # Changelog
+
+## v2.7.0 -- 2026-08-09
+
+- `scripts/discover.js`: accept reviewed route-group maps, prefer exact routes
+  over wildcard routes, publish complete discovery and grouping evidence, and
+  expand unsafe maps to one exact group per URL instead of reducing coverage.
+- `scripts/select-changed-surfaces.js`: accept schema-v2 source maps with
+  constrained direct changed-page transforms. Derived routes must resolve
+  uniquely to already discovered same-origin URLs; unresolved or ambiguous
+  routes and changed route-group maps retain the full representative sample.
+- Composite Action and starter: add `discover-group-map`, pass both reviewed
+  maps through discovery and selection, and retain existing evidence artifacts.
+- `references/route-grouping.md`, changed-surface reference v2, and example
+  maps: document the portable project-owned contracts without framework or
+  executable inference.
+- eval-20: exercise 316 flat URLs, exact-over-wildcard precedence, ambiguous
+  and incomplete map fallback, direct changed-page inclusion, global fallback,
+  changed-map fallback, and deterministic output.
+- Consumer Action fixture: execute a reviewed route-group map and schema-v2
+  direct route through the composite Action, then verify both discovery and
+  selection evidence in hosted CI.
+- Direct-route hardening: distinguish canonical-route ambiguity from ordinary
+  unresolved routes, reject unsafe origin and traversal configuration, and
+  cover nested paths plus `index` route normalization.
+- Documentation: distinguish route-group fallback over every discovered URL
+  from changed-surface fallback over the complete representative scan plan.
+- Assistant guide v0.3.10: re-pin the hardened selector executable while
+  retaining the existing authority and approval boundaries.
+- Package metadata, public surfaces, assistant guide, manifest, handoff, and
+  reusable Action pins are synchronized for the v2.7.0 release.
 
 ## v2.6.1 -- 2026-08-09
 

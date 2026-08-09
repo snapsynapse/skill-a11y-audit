@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "name": "home",
+      "path_patterns": ["/"],
+      "group": "home"
+    },
+    {
+      "name": "special page",
+      "path_patterns": ["/ai-usage"],
+      "group": "ai-usage"
+    },
+    {
+      "name": "articles",
+      "path_patterns": ["/*"],
+      "group": "articles/*"
+    }
+  ]
+}

@@ -54,9 +54,14 @@ Prefer bundled helpers over ad hoc generation when they fit:
   template groups and a ready-to-use URL list for scan.js. Discovery is
   same-origin by default; use `--allow-cross-origin-sitemaps` only after
   the user approves sitemap-declared cross-origin targets.
+  For flat or irregular route structures, use a reviewed route-group map
+  instead of relying on path depth. Read `references/route-grouping.md` when
+  authoring or reviewing that map.
 - `scripts/select-changed-surfaces.js` maps an explicit project-owned
   source-prefix map to exact discovery groups. It narrows an existing plan
-  only if every changed path maps safely; otherwise it preserves the full
+  only if every changed path maps safely. Schema-v2 maps can also include the
+  exact changed page when a reviewed source-to-route transform resolves to an
+  already discovered same-origin URL. Otherwise it preserves the full
   representative sample and records the fallback reason. Read
   `references/changed-surfaces.md` when configuring or reviewing this path.
 
@@ -109,8 +114,9 @@ recorded the same way.
   Discovery is sitemap-first; set `discover-no-sitemap: true` in the Action
   when a served build must be crawled from `discover-url` instead, then
   adapt the inputs without copying its implementation into the target repo.
-  For pull-request scope reduction, copy the explicit ownership-map example,
-  supply `changed-base` and `changed-head`, and retain the selection artifact.
+  For pull-request scope reduction, copy the route-group and ownership-map
+  examples, supply `changed-base` and `changed-head`, and retain both discovery
+  and selection artifacts.
 - Prefer `scripts/plan-issues.js` before live ticket creation when you
   need a safe review and deduplication pass.
 

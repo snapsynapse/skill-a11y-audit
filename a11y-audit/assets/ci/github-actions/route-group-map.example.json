@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "name": "home page",
+      "path_patterns": [
+        "/"
+      ],
+      "group": "home"
+    },
+    {
+      "name": "standalone usage page",
+      "path_patterns": [
+        "/ai-usage"
+      ],
+      "group": "ai-usage"
+    },
+    {
+      "name": "article pages",
+      "path_patterns": [
+        "/*"
+      ],
+      "group": "articles/*"
+    }
+  ]
+}

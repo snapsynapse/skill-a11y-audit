@@ -38,8 +38,8 @@ Prompt: "Run an accessibility audit on this project."
 
 Or run scripts directly:
 
-- `scripts/discover.js --url <base-url>`: discover pages and select representatives
-- `scripts/select-changed-surfaces.js --discover <plan.json> --map <surface-map.json> --changed-files <files.json>`: select mapped changed surfaces or retain the full sample
+- `scripts/discover.js --url <base-url> --group-map <route-group-map.json>`: discover pages using reviewed route groups or a conservative exact-page fallback
+- `scripts/select-changed-surfaces.js --discover <plan.json> --map <surface-map.json> --group-map <route-group-map.json> --changed-files <files.json>`: select mapped groups plus direct changed pages or retain the full sample
 - `scripts/scan.js --discover <discover.json>`: scan the representative discovery plan with axe-core
 - `scripts/scan.js --urls <url-list> --baseline <file> --fail-on new`: run a regression gate
 - `scripts/report.js --input <scan.json>`: generate markdown + JSON report
@@ -51,6 +51,7 @@ Or run scripts directly:
 - [SKILL.md](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md): core skill instructions
 - [scripts](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/scripts): discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
 - [changed-surface selection](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/changed-surfaces.md): ownership-map format and conservative fallback contract
+- [route grouping](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/route-grouping.md): route-pattern specificity and exact-page fallback contract
 - [output contract](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-contract.md): report format specification
 - [output schema](https://skilla11y.dev/schema/audit-v1.json): versioned JSON output schema
 - [reusable GitHub Action](https://github.com/snapsynapse/skill-a11y-audit/tree/main/.github/actions/scan): changed-surface selection, discovery, scanning, and accepted-baseline gating

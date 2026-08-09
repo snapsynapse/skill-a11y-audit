@@ -96,6 +96,7 @@ jobs:
           port: '8088'
           discover-url: http://127.0.0.1:8088/
           discover-no-sitemap: true
+          discover-group-map: a11y-audit/evals/fixtures/eval-19/route-group-map.json
           surface-map: a11y-audit/evals/fixtures/eval-19/surface-map.json
           changed-files: a11y-audit/evals/fixtures/eval-19/changed-files.json
           fail-on: none
@@ -110,7 +111,8 @@ jobs:
           test -s artifacts/action-discover.json
           test -s artifacts/action-selection.json
           node -e "const s=require('./artifacts/action-scan.json'); if(!s.results?.length || s.errors?.length) process.exit(1)"
-          node -e "const s=require('./artifacts/action-selection.json'); if(s.changedSurface?.mode!=='targeted' || s.changedSurface?.reason!=='mapped-changes') process.exit(1)"
+          node -e "const d=require('./artifacts/action-discover.json'); if(d.routeGrouping?.mode!=='mapped' || d.groups?.[0]?.pattern!=='fixture') process.exit(1)"
+          node -e "const s=require('./artifacts/action-selection.json'); if(s.changedSurface?.mode!=='targeted' || s.changedSurface?.reason!=='mapped-changes' || s.changedSurface?.directUrls?.[0]!=='http://127.0.0.1:8088/') process.exit(1)"
 
   workflow-audit:
     name: Workflow semantics and security

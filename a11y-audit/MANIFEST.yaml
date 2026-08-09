@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 31
+bundle_version: 34
 bundle_date: 2026-08-09
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -190,44 +190,44 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 21
-    hash: sha256:6f6b6abcfbc0f526bc1d179e4f2d3d2a580e970a43c45c8256f6685bfa0ee6b2
+    version: 22
+    hash: sha256:b4fc427ad878e188f167ba5c68d0ec29790856215d50c1ed0fa5d7fb0ae75c55
     note: >
-      v21 documents explicit changed-surface selection and full-sample fallback
+      v22 documents reviewed route grouping and direct changed-page selection
 
   - path: evals/evals.json
     role: evals
-    version: 18
-    hash: sha256:330d81ec11fcb46e20dd3aa286347a7c9590636822e59cdf6757357aa118af69
+    version: 20
+    hash: sha256:26e443e9ebbee8d9236c76fb9a98829d0ac04b865dd19467b48544f0c1e285e3
     note: >
-      19 eval cases including changed-surface selection safety
+      20 eval cases including Action-consumer maps and hardened direct routes
 
   - path: HANDOFF.md
     role: handoff
-    version: 26
-    hash: sha256:6b554e6c41dd1c441ee48c47038cbb7e91bd9f8c4bd18224f16d255e21496b23
+    version: 29
+    hash: sha256:bdf11124fa80136118ac6e2af79295d4c0d0d96e368dec1cbae0e1da4aea5489
     note: >
-      v26 records the v2.6.1 security release and post-release field plan
+      v29 records the v2.7.0 release and paused first field pilot
 
   - path: CHANGELOG.md
     role: reference
-    version: 31
-    hash: sha256:3703f4ca8e905c75eac02a20f9d9c388d25835f3ea7431588d9d59f89ab4bbbb
+    version: 34
+    hash: sha256:2ecec3093ccabc0fc0a0b0f56e51f9eb8bbb0c86cc2997760b01db4adaadd1ed
     note: >
-      Append-only history; v31 releases the v2.6.1 security repair
+      Append-only history; v34 releases the hardened v2.7.0 bundle
 
   - path: evals/run-discover-fixture.js
     role: evals
-    version: 1
-    hash: sha256:f3097709f3f2becbc6e9dbfb235e5fe329770cd58aca24599214d638b1d74818
-    note: Reusable mocked-network fixture runner for discover.js
+    version: 2
+    hash: sha256:0a14959a57d80a3ecd041527edd97e2a3850dd38c1d45c98a31bed0455feae95
+    note: Mocked-network runner preserving earlier fixture contract fields
 
   - path: evals/run-evals.js
     role: evals
-    version: 14
-    hash: sha256:6c00602329d4cec6e63a86bc722c180322c036d62164ddc975aeccdd73a27446
+    version: 17
+    hash: sha256:999bc959aecac10bb8950ef164b83e5ff9676d1da06a3cd7eace338e48dd0181
     note: >
-      v14 retains v2.6.1 surfaces, advisory gates, and patched transitives
+      v17 covers consumer maps, direct-route edge cases, and v2.7.0 pins
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -450,15 +450,15 @@ files:
 
   - path: scripts/discover.js
     role: script
-    version: 4
-    hash: sha256:1bb1dde9e173fe4a8b5a44e73e24978e8bc657c8efde62b9267e2184426606e4
-    note: Bounded discovery retaining the entry page during crawl fallback
+    version: 5
+    hash: sha256:c5e4182b42c0c48d80a84f66b0c578c3299ea0bb95eb728bd7b0ad38eb5ed763
+    note: Reviewed route grouping with exact-page conservative fallback
 
   - path: scripts/select-changed-surfaces.js
     role: script
-    version: 1
-    hash: sha256:4c3bae512306cd33a94b05cce7a2c8c6250019f198b05a48106844d905511565
-    note: Explicit source-prefix changed-surface selection with full fallback
+    version: 3
+    hash: sha256:a6ea36588704409058b66cbce2042214234f270dabd2d85f0dd29748e3e74f63
+    note: Schema-v2 direct changed pages with explicit ambiguity fallback
 
   - path: .gitignore
     role: config
@@ -498,33 +498,45 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 6
-    hash: sha256:69d0553d08ce8959d576bae46c16a3d22c99b9e8205fb2cab84a97cc69ab6b92
-    note: v2.6.1 remote Action starter with changed-surface selection
+    version: 9
+    hash: sha256:3e4d1753b1d2eea51c0029bbe279c7604db4d580f85124c0dfaa4be2548deac9
+    note: v2.7.0 Action starter with precise fallback terminology
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
+    version: 2
+    hash: sha256:8a06ea7a29ca596286499dac304cf6521b053a440afaef3825c4d052afe590e5
+    note: Schema-v2 ownership map with a direct changed-page transform
+
+  - path: assets/ci/github-actions/route-group-map.example.json
+    role: asset
     version: 1
-    hash: sha256:5e445396f3c643805e0a541ba931ff18e7b5601a8f68c3d88e8cee62fb1ca376
-    note: Example source-prefix ownership map for changed-surface selection
+    hash: sha256:5f7dd4131432af9376af3a1c2d92622854ee3125789c6cf5994bd0419ec585c3
+    note: Reviewed flat-site route-group map example
 
   - path: agents/openai.yaml
     role: agents
-    version: 3
-    hash: sha256:0bfdc494c3216f2e1046d167a68ff334ceac2713e04212702e84c236107ccf72
-    note: Codex UI metadata includes safe changed-surface prioritization
+    version: 4
+    hash: sha256:ba2ddbf3b7a675c0a2194187893abd67ae7e1bbc70d28eea72325b9900b4fe9b
+    note: Codex UI metadata includes reviewed route groups and changed pages
 
   - path: references/changed-surfaces.md
     role: reference
+    version: 2
+    hash: sha256:f52a08878673bc43b86504d1aa4d28af7e59af0be03c7942ae9f3b822b01613a
+    note: Schema-v2 ownership-map and direct-route fallback contract
+
+  - path: references/route-grouping.md
+    role: reference
     version: 1
-    hash: sha256:515fb7593de53471697e8dfd272a983c608135758390751831f45d8db2d66eb8
-    note: Ownership-map format and conservative changed-surface fallback contract
+    hash: sha256:d607ead2c0d14e696e2e6d6de73ec25c203223863013caf60dca8a2fdceeb675
+    note: Reviewed route-pattern specificity and fallback contract
 
   - path: evals/fixtures/eval-19/README.md
     role: evals
-    version: 1
-    hash: sha256:b03c3d503ba25b38e375911eec05ab49f33e2458dd71ab8efdc87a86a846747a
-    note: Fixture documentation for consumer changed-surface selection
+    version: 2
+    hash: sha256:5ce9e34bf2b5272ed406d92eebe3480b75d25bd64705a1af0877d64e15e93060
+    note: Consumer fixture documentation for both maps and a direct route
 
   - path: evals/fixtures/eval-19/changed-files.json
     role: evals
@@ -532,11 +544,29 @@ files:
     hash: sha256:654cfbf05830907ff21223fbfa1044dc607d467470863a995f1d2d525f6fe1cc
     note: Repository-relative changed-file fixture for Action selection
 
-  - path: evals/fixtures/eval-19/surface-map.json
+  - path: evals/fixtures/eval-19/route-group-map.json
     role: evals
     version: 1
-    hash: sha256:9355e6071ff353f3b3a9d5a209841fd8cb05aa6c8c36296f21c8c85484a7fd80
-    note: Explicit source-prefix ownership map fixture for Action selection
+    hash: sha256:a840a045584b9795693e700dde31893ab0e6949dd42e4d3dce8593db8807770d
+    note: Reviewed route-group map for the composite Action consumer fixture
+
+  - path: evals/fixtures/eval-19/surface-map.json
+    role: evals
+    version: 2
+    hash: sha256:e6801b35292cdb263dfdf1ea00745138c0c715a1c8f06fb6c04d3e534bf52be8
+    note: Schema-v2 direct-route ownership map for Action selection
+
+  - path: evals/fixtures/eval-20/route-group-map.json
+    role: evals
+    version: 1
+    hash: sha256:b696bc6829e30fcd99706cf9053ec2c1b74368556a08a7f37fad3827e016eb9d
+    note: Flat 316-route grouping fixture
+
+  - path: evals/fixtures/eval-20/surface-map.json
+    role: evals
+    version: 1
+    hash: sha256:afaeca6fef04624e409e8d1a1237bb667ae0fbc59effb7a152a8979197baf265
+    note: Direct changed-page and global fallback fixture
 
   - path: references/standards/wcag21-aa.json
     role: reference
@@ -564,6 +594,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 26
+    version: 29
     hash: null
     note: This file -- self-referential hash omitted

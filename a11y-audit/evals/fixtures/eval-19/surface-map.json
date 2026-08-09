@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rules": [
     {
       "name": "eval fixture page",
@@ -7,8 +7,13 @@
         "a11y-audit/evals/fixtures/eval-3"
       ],
       "groups": [
-        "/"
-      ]
+        "fixture"
+      ],
+      "direct_route": {
+        "source_prefix": "a11y-audit/evals/fixtures/eval-3",
+        "source_suffix": ".html",
+        "route_prefix": "/"
+      }
     }
   ]
 }
