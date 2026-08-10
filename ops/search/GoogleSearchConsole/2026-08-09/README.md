@@ -40,7 +40,7 @@ Inspected URL: `https://skilla11y.dev/`
 - Google-selected canonical: Inspected URL.
 - No indexing request was made because the only canonical HTML page is already indexed.
 
-## Sitemap
+## Sitemap before refresh
 
 - `https://skilla11y.dev/sitemap.xml`
 - Type: Sitemap.
@@ -49,7 +49,7 @@ Inspected URL: `https://skilla11y.dev/`
 - Status: Success.
 - Discovered pages: 1.
 - Discovered videos: 0.
-- The sitemap inventory is complete but its last read predates the 2026-08-09 site revision. Refresh only after the repaired sitemap is deployed and production validation passes.
+- The sitemap inventory was complete but its last read predated the 2026-08-09 site revision.
 
 ## HTTPS and Core Web Vitals
 
@@ -75,7 +75,23 @@ Inspected URL: `https://skilla11y.dev/`
 ## Console actions
 
 - Before deployment: none.
-- After deployment: pending production validation and sitemap refresh reconciliation.
+- After deployment and independent production validation, the existing sitemap was refreshed once by submitting the full canonical URL `https://skilla11y.dev/sitemap.xml`.
+- GSC confirmed `Sitemap submitted successfully` and retained status `Success`, 1 discovered page, and 0 discovered videos.
+- The submitted date changed to 2026-08-09. The last-read date remained 2026-08-05 immediately after submission, so processing is pending provider latency.
+- An initial relative-path entry, `sitemap.xml`, was rejected as an invalid sitemap address. It did not mutate the property. The accepted full canonical submission was not repeated.
+- No URL indexing request was made because `https://skilla11y.dev/` is already indexed.
+- No `Validate fix` action was started because the three redirect examples exactly match policy.
+
+## Deployment and production reconciliation
+
+- Deployed commit: `7e952ff249dec07b7e04f55aa8ff0d5e29bba839`.
+- GitHub Pages workflow `31349420921`: passed, including generated artifact staging, offline search validation, deployment, and the release-triggered production validator.
+- Repository validation workflow `31349420885`: passed.
+- Independent post-deployment offline result: 1 sitemap page, 0 defects, 0 infrastructure failures.
+- Independent post-deployment production result: 1 sitemap page, 0 defects, 0 infrastructure failures.
+- Repository and deployed sitemap URL sets matched exactly: `https://skilla11y.dev/`.
+- Raw deployed HTML, sitemap, both `.well-known` files, and generated schema matched the staged artifact byte-for-byte.
+- Live modification signals agreed on 2026-08-09: sitemap `lastmod`, Open Graph `article:modified_time`, and `TechArticle.dateModified`.
 
 ## Evidence classification
 
@@ -84,6 +100,6 @@ Inspected URL: `https://skilla11y.dev/`
 | Sitemap, Open Graph, and `TechArticle` modification dates disagree in production | Site defect requiring repair | Synchronize dates and deploy the deterministic contract |
 | One indexed canonical page | Healthy console observation | No indexing request |
 | Three protocol or alternate-host redirects | Expected policy-consistent exclusion | No `Validate fix` |
-| Sitemap last read predates current revision | Console action justified after production validation | Refresh the existing healthy sitemap after deployment |
+| Sitemap last read predates current revision | Pending provider processing after justified console action | Existing healthy sitemap refreshed once on 2026-08-09; wait for a new last-read date |
 | Core Web Vitals lacks mobile and desktop field data | Unknown because evidence is insufficient | Wait for sufficient Chrome UX Report data |
 | Console report dates lag the audit date | Pending recrawl or reporting latency | Reconcile after sitemap refresh and Google recrawl |

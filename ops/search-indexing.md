@@ -62,4 +62,4 @@ Exit code `0` is pass, `1` is a site defect, and `2` is configuration or infrast
 
 ## Current baseline
 
-The current dated Google Search Console evidence is recorded under `ops/search/GoogleSearchConsole/2026-08-09/`. Repository and production validation must pass before any console mutation.
+The current dated Google Search Console evidence is recorded under `ops/search/GoogleSearchConsole/2026-08-09/`. Commit `7e952ff` passed repository, CI, deployment, and production validation. The existing healthy sitemap was refreshed once after those gates passed; GSC accepted it on 2026-08-09 and its next read is pending provider latency.
