@@ -1,0 +1,113 @@
+{
+  "$schema": "portfolio-search-indexing-audit/v4",
+  "contractVersion": 4,
+  "canonicalOrigin": "https://skilla11y.dev/",
+  "outputDir": "_site",
+  "sitemaps": [
+    "sitemap.xml"
+  ],
+  "minimumWords": 120,
+  "thinPageExemptions": [],
+  "expectedNoindex": [],
+  "requireJsonLd": false,
+  "jsonLdRequiredPaths": [
+    "/"
+  ],
+  "dateModifiedRequiredPaths": [
+    "/"
+  ],
+  "compareRepositorySitemaps": true,
+  "internalSourceRules": [],
+  "requiredFiles": [
+    {
+      "path": "robots.txt",
+      "contentTypes": [
+        "text/plain"
+      ],
+      "contains": [
+        "Sitemap: https://skilla11y.dev/sitemap.xml"
+      ]
+    },
+    {
+      "path": "sitemap.xml",
+      "contentTypes": [
+        "xml"
+      ],
+      "contains": []
+    },
+    {
+      "path": "llms.txt",
+      "contentTypes": [
+        "text/plain"
+      ],
+      "contains": [
+        "https://skilla11y.dev/.well-known/assistant-guide.txt"
+      ]
+    },
+    {
+      "path": ".well-known/assistant-guide.txt",
+      "contentTypes": [
+        "text/plain"
+      ],
+      "contains": [
+        "canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt"
+      ]
+    },
+    {
+      "path": ".well-known/assistant-guide-manifest.txt",
+      "contentTypes": [
+        "text/plain"
+      ],
+      "contains": [
+        "guide-path: /.well-known/assistant-guide.txt"
+      ]
+    },
+    {
+      "path": "schema/audit-v1.json",
+      "contentTypes": [
+        "application/json"
+      ],
+      "contains": [
+        "https://skilla11y.dev/schema/audit-v1.json"
+      ]
+    },
+    {
+      "path": "favicon.svg",
+      "contentTypes": [
+        "image/svg+xml"
+      ],
+      "contains": [
+        "<svg"
+      ]
+    },
+    {
+      "path": "imgs/og.png",
+      "contentTypes": [
+        "image/png"
+      ],
+      "contains": []
+    }
+  ],
+  "redirects": [
+    {
+      "from": "http://skilla11y.dev/",
+      "to": "https://skilla11y.dev/"
+    },
+    {
+      "from": "https://www.skilla11y.dev/",
+      "to": "https://skilla11y.dev/"
+    },
+    {
+      "from": "http://www.skilla11y.dev/",
+      "to": "https://skilla11y.dev/"
+    }
+  ],
+  "hosted404Patterns": [
+    "There isn't a GitHub Pages site here",
+    "<title>Page not found",
+    "404 File not found"
+  ],
+  "expectedNotFound": [
+    "/__search-audit-404__"
+  ]
+}

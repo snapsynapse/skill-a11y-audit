@@ -33,6 +33,12 @@ jobs:
       - name: Validate skill bundle
         run: npm run validate
 
+      - name: Stage Pages artifact
+        run: npm run build:site
+
+      - name: Validate search contract
+        run: npm run check:search
+
       - name: Audit root validation dependencies
         if: matrix.node == 20
         run: npm audit --audit-level=high

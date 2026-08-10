@@ -26,6 +26,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build:site": "node scripts/build-site.mjs",
+    "check:search": "node scripts/check-search.mjs",
+    "check:search:production": "node scripts/check-production-search.mjs",
     "discover": "node a11y-audit/scripts/discover.js",
     "scan": "node a11y-audit/scripts/scan.js",
     "report": "node a11y-audit/scripts/report.js",

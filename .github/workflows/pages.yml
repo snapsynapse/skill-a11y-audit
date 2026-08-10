@@ -30,13 +30,26 @@ jobs:
           persist-credentials: false
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - name: Stage Pages artifact
-        run: |
-          mkdir -p _site/schema
-          cp -R docs/. _site/
-          cp a11y-audit/references/output-schema.json _site/schema/audit-v1.json
+        run: npm run build:site
+      - name: Verify offline search contract
+        run: npm run check:search
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
           include-hidden-files: true
       - id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+      - name: Verify production search contract
+        run: |
+          status=2
+          for attempt in 1 2 3 4 5 6; do
+            if npm run check:search:production; then
+              exit 0
+            else
+              status=$?
+            fi
+            if [ "$attempt" -lt 6 ]; then
+              sleep $((attempt * 10))
+            fi
+          done
+          exit "$status"

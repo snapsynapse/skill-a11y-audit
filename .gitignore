@@ -1,6 +1,7 @@
 .DS_Store
 *.log
 node_modules/
+_site/
 .codex/
 .claude/
 .a11y-audit/*
