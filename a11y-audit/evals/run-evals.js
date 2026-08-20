@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 17
-version_date: 2026-08-09
-previous_version: 16
+version: 18
+version_date: 2026-08-19
+previous_version: 17
 change_summary: >
-  Synchronizes v2.7.0 public Action pins after adding consumer route-map
-  execution and hardened direct-route regression coverage.
+  Asserts the reviewed-allowlist audit gate replacing the literal npm audit
+  commands, including allowlist reason and expiry enforcement.
 */
 
 const assert = require('assert');
@@ -1034,8 +1034,26 @@ function workflowSecurityRegression() {
   assert.match(validate, /astral-sh\/setup-uv@[0-9a-f]{40}/);
   assert.match(validate, /uvx zizmor==1\.28\.0 --offline --min-severity low \./);
   assert.match(validate, /npm ci --prefix a11y-audit\/deps/);
-  assert.match(validate, /npm audit --audit-level=high/);
-  assert.match(validate, /npm audit --prefix a11y-audit\/deps --audit-level=high/);
+  assert.match(validate, /npm run audit:deps/);
+  assert.match(validate, /npm run audit:scanner/);
+  const auditGate = fs.readFileSync(repoPath('scripts/audit-deps.mjs'), 'utf8');
+  assert.match(auditGate, /new Set\(\['high', 'critical'\]\)/);
+  assert.match(auditGate, /entry\.expires < today/);
+  const auditScripts = readJson(repoPath('package.json')).scripts;
+  assert.strictEqual(auditScripts['audit:deps'], 'node scripts/audit-deps.mjs');
+  assert.strictEqual(
+    auditScripts['audit:scanner'],
+    'node scripts/audit-deps.mjs --prefix=a11y-audit/deps --allowlist=ops/audit-allowlist.json'
+  );
+  // Every scanner exception must carry a reason and an unexpired review date.
+  for (const entry of readJson(repoPath('ops/audit-allowlist.json')).advisories) {
+    assert.ok(entry.id && entry.reason, `allowlist entry needs id and reason: ${entry.id}`);
+    assert.match(entry.expires, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(
+      entry.expires >= new Date().toISOString().slice(0, 10),
+      `allowlist entry ${entry.id} expired on ${entry.expires}`
+    );
+  }
   assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {

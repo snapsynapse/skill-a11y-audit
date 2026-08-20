@@ -224,10 +224,11 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 17
-    hash: sha256:999bc959aecac10bb8950ef164b83e5ff9676d1da06a3cd7eace338e48dd0181
+    version: 18
+    hash: sha256:275daee61bd3ccb28abc8887145efcddfea79da88fbb379a4a12183b05ea31ae
     note: >
-      v17 covers consumer maps, direct-route edge cases, and v2.7.0 pins
+      v18 covers consumer maps, direct-route edge cases, v2.7.0 pins, and the
+      reviewed-allowlist audit gate
 
   - path: evals/run-browser-eval.js
     role: evals

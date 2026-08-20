@@ -27,6 +27,8 @@
   "private": true,
   "scripts": {
     "build:site": "node scripts/build-site.mjs",
+    "audit:deps": "node scripts/audit-deps.mjs",
+    "audit:scanner": "node scripts/audit-deps.mjs --prefix=a11y-audit/deps --allowlist=ops/audit-allowlist.json",
     "check:search": "node scripts/check-search.mjs",
     "check:search:production": "node scripts/check-production-search.mjs",
     "discover": "node a11y-audit/scripts/discover.js",
