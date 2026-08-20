@@ -41,7 +41,7 @@ jobs:
 
       - name: Audit root validation dependencies
         if: matrix.node == 20
-        run: npm audit --audit-level=high
+        run: npm run audit:deps
 
   guidecheck:
     name: Verify assistant guide
@@ -80,8 +80,8 @@ jobs:
       - name: Install pinned scanner dependencies
         run: npm ci --prefix a11y-audit/deps
 
-      - name: Audit scanner dependencies
-        run: npm audit --prefix a11y-audit/deps --audit-level=high
+      - name: Audit scanner dependencies against the reviewed allowlist
+        run: npm run audit:scanner
 
       - name: Run real browser and baseline eval
         run: npm run eval:browser
