@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: handoff
-version: 29
-version_date: 2026-08-09
-previous_version: 28
+version: 30
+version_date: 2026-08-31
+previous_version: 29
 change_summary: >
-  Records the v2.7.0 release, release-hardening evidence, and paused first
-  field pilot.
+  Reconciles the completed v2.7.0 field pilot and records the unreleased
+  interoperability adapter plus pull-request event validation lane.
 ---
 
 # Accessibility Audit Skill -- Handoff Document
@@ -17,7 +17,7 @@ A portable accessibility-audit skill bundle for Claude Code and Codex.
 The core workflow lives in `SKILL.md`; platform-specific notes live in
 `references/claude-code.md` and `references/codex.md`.
 
-## Current State: bundle v34 (v2.7.0 release)
+## Current State: bundle v35 candidate on the v2.7.0 release
 
 The workflow has been run successfully in Claude Code for eval-1. Codex
 eval-1 has been exercised against PAICE2. The bundle now includes
@@ -33,6 +33,11 @@ baseline behavior against a loopback fixture.
 The public composite Action is also exercised through its consumer inputs.
 Remote Actions are SHA-pinned, scanner dependency transitive versions are
 locked, and actionlint plus zizmor block workflow delivery regressions.
+GitHub Actions npm audit and GitHub Dependabot currently report
+`GHSA-jmr9-qjv8-65gv` for `extract-zip` while local npm audit omits it. The
+reviewed exception remains bounded by its existing expiry and now records the
+cross-provider evidence explicitly; do not treat a single provider omission as
+proof that the advisory is resolved.
 
 Changed-surface selection is now available through an explicit project-owned
 source-prefix ownership map. The Action accepts either a changed-file JSON
@@ -49,6 +54,21 @@ and record machine-readable evidence. Schema-v2 surface maps can also include a
 directly changed page when a constrained source-to-route transform resolves
 uniquely to an already discovered same-origin URL. Any unresolved transform or
 changed route-group map retains the full representative sample.
+
+The planned `sam-rogers.com` field pilot was completed after the v2.7.0
+handoff was written. The consuming repository remains pinned to the exact
+v2.7.0 Action commit and runs the reviewed route-group map, schema-v2 surface
+map, accepted baseline, and `fail-on: new` gate on each deployment. The pilot
+and later content changes validated targeted direct-page inclusion, full
+fallback, baseline review, and real regression detection.
+
+The unreleased bundle candidate adds `scripts/run-audit.js`, a vendor-neutral
+JSON process adapter that composes discover, select, scan, and report without
+changing their native artifact schemas. eval-21 validates its dry-run plan,
+workspace confinement, conflicting-input rejection, and CI base/head
+propagation. The repository consumer workflow also contains a pull-request-only
+base/head lane; that lane becomes hosted evidence only when the candidate is
+run in an actual pull request.
 
 The three most recent correctness issues are now resolved:
 
@@ -71,6 +91,8 @@ Those fixes now have runnable local regression fixtures:
 - `eval-19` covers targeted changed surfaces and every conservative fallback
 - `eval-20` covers a 316-route flat site, reviewed route grouping, direct
   changed-page inclusion, precedence, ambiguity, and conservative degradation
+- `eval-21` covers the vendor-neutral process adapter and CI base/head
+  propagation
 
 A full audit was run 2026-03-26 against the AI Regulation Reference
 (10-page static HTML site, http://127.0.0.1:8081). The audit found
@@ -338,19 +360,25 @@ remediate code, or replace enterprise monitoring.
 - Public and agent-facing adoption surfaces synchronized to the stronger gate
 - Assistant guide v0.3.6 re-pinned to the corrected discover executable
 
+### Implemented after v2.7.0, not published
+
+1. **Interoperability adapter.** `scripts/run-audit.js` now exposes one strict
+   JSON process boundary with a dry-run plan and stable run envelope. A direct
+   Community Access extension remains deferred until its packaging contract is
+   stable.
+2. **Pull-request event lane.** The local candidate wires real GitHub event
+   base/head objects into the consumer Action. Hosted validation requires an
+   actual pull request and remains a publication-path gate.
+
 ### Next, in priority order
 
-1. **Interoperability adapter.** Make discover/scan/report easy to invoke
-   from broader ecosystems, including a Community Access extension if its
-   contract remains stable. Prefer this over a competing general-purpose
-   agent suite.
-2. **Authenticated deterministic journeys.** Accept a Playwright storage
+1. **Authenticated deterministic journeys.** Accept a Playwright storage
    state or bounded journey file as a scan input. Do not expand into an
    unconstrained browser agent.
-3. **SARIF emitter.** Useful for public repositories and organizations
+2. **SARIF emitter.** Useful for public repositories and organizations
    with GitHub Code Security, but secondary to baseline and template-aware
    adoption. Preserve repository-native JSON for universal CI use.
-4. **First-class Playwright execution.** Add only where it improves
+3. **First-class Playwright execution.** Add only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
 ### v2.7 field validation
@@ -372,10 +400,16 @@ The first post-release field test should verify route grouping and changed-page 
 - whether a changed article is always present in the scan list even when it
   was not chosen as a representative
 
-The planned `sam-rogers.com` pilot is explicitly paused while another session
-finishes in that repository. Do not read, build, scan, or modify that checkout
-until the maintainer clears the concurrency boundary. Resume by rechecking its
-live branch and worktree before any pilot action.
+The `sam-rogers.com` pilot completed on 2026-08-09. It discovered 317 pages,
+selected 10 representatives across 8 reviewed groups, added two explicit tag
+routes, and correctly used `full-fallback (unmapped-changes)` when ownership
+was incomplete. The final hosted pilot run passed with 0 new and 65 accepted
+findings after resolving unstable heatmap semantics and contrast defects.
+Later deployments kept the gate active and caught real heading regressions.
+
+One original field question remains distinct: the consuming site deploys only
+on `push`, so it did not exercise pull-request event SHAs. The skill repository
+candidate now has a non-deploying pull-request consumer lane for that evidence.
 
 ### v2.7 release validation
 

@@ -64,6 +64,10 @@ Prefer bundled helpers over ad hoc generation when they fit:
   already discovered same-origin URL. Otherwise it preserves the full
   representative sample and records the fallback reason. Read
   `references/changed-surfaces.md` when configuring or reviewing this path.
+- `scripts/run-audit.js` is the vendor-neutral process adapter for external
+  agent systems and CI runners that need one JSON request to compose discovery,
+  selection, scanning, and report generation. Read
+  `references/interoperability.md` when configuring that boundary.
 
 ### Dependencies
 

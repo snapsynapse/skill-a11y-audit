@@ -1,5 +1,5 @@
 {
-  "$comment": "Temporary npm audit exceptions. Every entry needs a reason and an expiry. Expired or unused entries fail the audit gate.",
+  "$comment": "Temporary npm audit exceptions. Every entry needs a reason and an expiry. Expired entries fail. Unused entries fail unless provider_variance records reviewed cross-provider evidence.",
   "advisories": [
     {
       "id": "GHSA-jmr9-qjv8-65gv",
@@ -7,7 +7,12 @@
       "severity": "high",
       "reason": "No fixed extract-zip release exists. The advisory clears only via @puppeteer/browsers 3.x, which requires Node >=22.12 and would drop the Node 18 and 20 support this skill bundle promises. Reached only when @puppeteer/browsers unpacks a browser archive from the pinned Google CDN download, not from user-supplied input.",
       "expires": "2026-11-30",
-      "review": "Re-evaluate when the bundle drops Node 18, or when a patched @puppeteer/browsers 2.x ships."
+      "review": "Re-evaluate when the bundle drops Node 18, when a patched @puppeteer/browsers 2.x ships, or when GitHub closes alert 2.",
+      "provider_variance": {
+        "reason": "GitHub Actions npm audit and GitHub Dependabot report the advisory while local npm audit omits it.",
+        "evidence": "https://github.com/snapsynapse/skill-a11y-audit/security/dependabot/2",
+        "checked": "2026-08-31"
+      }
     }
   ]
 }

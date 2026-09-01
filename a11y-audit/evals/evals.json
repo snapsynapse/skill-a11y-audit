@@ -518,5 +518,29 @@
         "Deterministic coverage validates 316 flat URLs, Action-consumer map execution, exact-over-wildcard precedence, full discovered-set fallback, nested and index routes, canonical ambiguity, unsafe direct-route rejection, global fallback, changed-map fallback, and repeatability"
       ]
     }
+  },
+  {
+    "id": "eval-21",
+    "prompt": "Invoke the accessibility regression workflow from another agent system or CI runner through one vendor-neutral process. Preserve the native discovery, selection, scan, and report JSON artifacts; accept pull-request base/head object IDs at invocation time; and expose a non-mutating dry-run plan.",
+    "expectations": {
+      "structural": [
+        "A schema-versioned JSON request configures discovery, selection, scanning, reporting, and artifact paths",
+        "The adapter emits an ordered stage plan and a run envelope without replacing native artifact schemas",
+        "CI base/head values override static request values without shell interpolation"
+      ],
+      "behavioral": [
+        "Dry-run performs no network, browser, or artifact writes",
+        "Discovery output feeds selection, selection output feeds scan and report, and every path remains inside the target workspace",
+        "Conflicting changed-file and Git comparison inputs are rejected before execution"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-08-31",
+      "notes": [
+        "Deterministic coverage in npm run validate checks stage composition, CI SHA propagation, workspace confinement, conflicting-input rejection, and dry-run artifacts",
+        "The hosted consumer workflow carries a pull-request-only base/head lane for real GitHub event validation"
+      ]
+    }
   }
 ]

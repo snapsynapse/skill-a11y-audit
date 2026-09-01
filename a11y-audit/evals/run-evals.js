@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 18
-version_date: 2026-08-19
-previous_version: 17
+version: 19
+version_date: 2026-08-31
+previous_version: 18
 change_summary: >
-  Asserts the reviewed-allowlist audit gate replacing the literal npm audit
-  commands, including allowlist reason and expiry enforcement.
+  Validates the vendor-neutral audit adapter, pull-request base/head
+  propagation, and explicit cross-provider advisory evidence.
 */
 
 const assert = require('assert');
@@ -131,6 +131,7 @@ function validateSyntax() {
     'a11y-audit/scripts/select-changed-surfaces.js',
     'a11y-audit/scripts/scan.js',
     'a11y-audit/scripts/report.js',
+    'a11y-audit/scripts/run-audit.js',
     'a11y-audit/scripts/bootstrap-context.js',
     'a11y-audit/scripts/plan-issues.js',
     'a11y-audit/evals/run-discover-fixture.js',
@@ -153,6 +154,7 @@ function validateJsonFiles() {
     'a11y-audit/evals/fixtures/eval-19/surface-map.json',
     'a11y-audit/evals/fixtures/eval-20/route-group-map.json',
     'a11y-audit/evals/fixtures/eval-20/surface-map.json',
+    'a11y-audit/evals/fixtures/eval-21/request.json',
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
@@ -780,6 +782,61 @@ function eval20FlatRouteGroupingAndDirectPages() {
   assert.deepStrictEqual(groupMapChanged.scanList, plan.scanList);
 }
 
+function eval21InteroperabilityAdapter() {
+  const request = 'a11y-audit/evals/fixtures/eval-21/request.json';
+  const base = 'c'.repeat(40);
+  const head = 'd'.repeat(40);
+  const run = runNode([
+    'a11y-audit/scripts/run-audit.js',
+    '--config', request,
+    '--base', base,
+    '--head', head,
+    '--dry-run',
+  ]);
+  const plan = JSON.parse(run.stdout);
+  assert.strictEqual(plan.schema_version, 1);
+  assert.strictEqual(plan.status, 'planned');
+  assert.deepStrictEqual(plan.stages.map((entry) => entry.name), [
+    'discover', 'select', 'scan', 'report',
+  ]);
+  assert.strictEqual(plan.artifacts.discovery, '.tmp-eval-21/discovery.json');
+  assert.strictEqual(plan.artifacts.selection, '.tmp-eval-21/selection.json');
+  assert.strictEqual(plan.artifacts.scan, '.tmp-eval-21/scan.json');
+  assert.strictEqual(plan.artifacts.run, '.tmp-eval-21/run.json');
+
+  const select = plan.stages.find((entry) => entry.name === 'select').command;
+  assert.strictEqual(select[select.indexOf('--base') + 1], base);
+  assert.strictEqual(select[select.indexOf('--head') + 1], head);
+  assert.match(select[select.indexOf('--map') + 1], /eval-19\/surface-map\.json$/);
+  const scan = plan.stages.find((entry) => entry.name === 'scan').command;
+  assert.strictEqual(scan[scan.indexOf('--discover') + 1], '.tmp-eval-21/selection.json');
+  const report = plan.stages.find((entry) => entry.name === 'report').command;
+  assert.strictEqual(report[report.indexOf('--discover') + 1], '.tmp-eval-21/selection.json');
+
+  const adapter = require(repoPath('a11y-audit/scripts/run-audit.js'));
+  const changedFilesPlan = adapter.buildRunPlan(repoPath(request), {
+    'changed-files': 'a11y-audit/evals/fixtures/eval-19/changed-files.json',
+  });
+  const changedFilesSelect = changedFilesPlan.envelope.stages
+    .find((entry) => entry.name === 'select').command;
+  assert.match(
+    changedFilesSelect[changedFilesSelect.indexOf('--changed-files') + 1],
+    /eval-19\/changed-files\.json$/
+  );
+  assert.strictEqual(changedFilesSelect.includes('--base'), false);
+  assert.throws(
+    () => adapter.buildRunPlan(repoPath(request), {
+      base,
+      'changed-files': 'a11y-audit/evals/fixtures/eval-19/changed-files.json',
+    }),
+    /not both/
+  );
+  assert.throws(
+    () => adapter.buildRunPlan(repoPath(request), { output: '../outside.json' }),
+    /within the workspace/
+  );
+}
+
 function scannerBaselineRegression() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
   const previousResults = [
@@ -997,6 +1054,7 @@ function reusableActionRegression() {
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
   assert.match(starter, /changed-base: \$\{\{ github\.event\.pull_request\.base\.sha \}\}/);
+  assert.match(starter, /changed-head: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
   assert.match(starter, /fetch-depth: 0/);
   assert.doesNotMatch(starter, /curl .*sitemap/);
   assert.match(
@@ -1005,6 +1063,9 @@ function reusableActionRegression() {
   );
   assert.match(validateWorkflow, /routeGrouping\?\.mode!=='mapped'/);
   assert.match(validateWorkflow, /changedSurface\?\.directUrls\?\.\[0\]/);
+  assert.match(validateWorkflow, /github\.event\.pull_request\.base\.sha/);
+  assert.match(validateWorkflow, /github\.event\.pull_request\.head\.sha/);
+  assert.match(validateWorkflow, /changedSurface\?\.changedFiles\?\.length/);
 }
 
 function workflowSecurityRegression() {
@@ -1053,6 +1114,11 @@ function workflowSecurityRegression() {
       entry.expires >= new Date().toISOString().slice(0, 10),
       `allowlist entry ${entry.id} expired on ${entry.expires}`
     );
+    if (entry.provider_variance) {
+      assert.ok(entry.provider_variance.reason);
+      assert.match(entry.provider_variance.evidence, /^https:\/\/github\.com\//);
+      assert.match(entry.provider_variance.checked, /^\d{4}-\d{2}-\d{2}$/);
+    }
   }
   assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
@@ -1133,6 +1199,7 @@ test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'
 test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
 test('eval-19 targets mapped changed surfaces and falls back conservatively', eval19ChangedSurfaceSelection);
 test('eval-20 groups flat routes and always includes directly changed pages', eval20FlatRouteGroupingAndDirectPages);
+test('eval-21 composes portable audit stages and propagates CI base/head objects', eval21InteroperabilityAdapter);
 test('eval-2 plans issues with labels and deduplication', eval2IssuePlanning);
 test('eval-3 quick scan summarizes one plain HTML page', eval3QuickScan);
 test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedLighthouseReport);
