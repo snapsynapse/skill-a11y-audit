@@ -1,15 +1,16 @@
 bundle: a11y-audit
-bundle_version: 34
-bundle_date: 2026-08-09
+bundle_version: 35
+bundle_date: 2026-08-31
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
   template-aware discovery, manual check guidance, accepted accessibility
   baselines, and configurable output:
   markdown report only, markdown plus JSON for CI, or markdown plus issue
-  tracker tickets (GitHub, GitLab, Linear, Jira). Generic for any web
-  project; project-specific standards and output preferences configured via
-  a workspace-local .a11y-audit/PROJECT_CONTEXT.md file.
+  tracker tickets (GitHub, GitLab, Linear, Jira), plus a vendor-neutral JSON
+  process adapter. Generic for any web project; project-specific standards and
+  output preferences configured via a workspace-local
+  .a11y-audit/PROJECT_CONTEXT.md file.
 
 compatibility:
   designed_for:
@@ -190,31 +191,31 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 22
-    hash: sha256:b4fc427ad878e188f167ba5c68d0ec29790856215d50c1ed0fa5d7fb0ae75c55
+    version: 23
+    hash: sha256:da6f30c55c68fe089238e966be364ac84ac8063af8ea0c6c370cf1391f39f592
     note: >
-      v22 documents reviewed route grouping and direct changed-page selection
+      v23 adds the portable adapter and interoperability reference pointers
 
   - path: evals/evals.json
     role: evals
-    version: 20
-    hash: sha256:26e443e9ebbee8d9236c76fb9a98829d0ac04b865dd19467b48544f0c1e285e3
+    version: 21
+    hash: sha256:4d2f9214115d6ab85c4a40554930aa474e569f9c693a24f2c50eb08b8ec2abdf
     note: >
-      20 eval cases including Action-consumer maps and hardened direct routes
+      21 eval cases including the vendor-neutral adapter contract
 
   - path: HANDOFF.md
     role: handoff
-    version: 29
-    hash: sha256:bdf11124fa80136118ac6e2af79295d4c0d0d96e368dec1cbae0e1da4aea5489
+    version: 30
+    hash: sha256:7a57d318c4a2395b75300dff4b36cc36e3499cc8f0a2648f9d5500d9b803cf8a
     note: >
-      v29 records the v2.7.0 release and paused first field pilot
+      v30 reconciles the completed field pilot and current roadmap
 
   - path: CHANGELOG.md
     role: reference
-    version: 34
-    hash: sha256:2ecec3093ccabc0fc0a0b0f56e51f9eb8bbb0c86cc2997760b01db4adaadd1ed
+    version: 35
+    hash: sha256:e7667cf17c14e37e0ec45c59849c91f5c14cdc53ab1a14748a8464c8bb48cd03
     note: >
-      Append-only history; v34 releases the hardened v2.7.0 bundle
+      Append-only history; v35 records the unreleased interoperability candidate
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -224,11 +225,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 18
-    hash: sha256:275daee61bd3ccb28abc8887145efcddfea79da88fbb379a4a12183b05ea31ae
+    version: 19
+    hash: sha256:67780bf80707d3e3284febcb6bf9daa5122c6718949ad4ad3a87229999623c1b
     note: >
-      v18 covers consumer maps, direct-route edge cases, v2.7.0 pins, and the
-      reviewed-allowlist audit gate
+      v19 covers adapter semantics and hosted PR base/head wiring
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -398,6 +398,12 @@ files:
     hash: sha256:70e5dd148b9d92a6d287b513eb76ae352869a22c0fdc3cc53c9e604f284f51e0
     note: Codex-specific workspace and execution guidance
 
+  - path: references/interoperability.md
+    role: reference
+    version: 1
+    hash: sha256:4dd90f134083fb0755aed38ea473afb00cb639b4a58f8ad405f361b99af1b2a9
+    note: Vendor-neutral JSON process adapter contract and examples
+
   - path: references/project-context-template.md
     role: reference
     version: 3
@@ -429,6 +435,12 @@ files:
     hash: sha256:b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
     note: >
       v9 pins tested Node 18-compatible Puppeteer 24.43.1
+
+  - path: scripts/run-audit.js
+    role: script
+    version: 1
+    hash: sha256:677139e79a28d86ae004ad7564d437ad94b0a679b93f199ff6b9ce2870f14191
+    note: Vendor-neutral JSON process adapter for the audit pipeline
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -569,6 +581,12 @@ files:
     hash: sha256:afaeca6fef04624e409e8d1a1237bb667ae0fbc59effb7a152a8979197baf265
     note: Direct changed-page and global fallback fixture
 
+  - path: evals/fixtures/eval-21/request.json
+    role: evals
+    version: 1
+    hash: sha256:d7b52b15b2d55e3fda6729d66760b7ea1db7bb70871613636e183363fecc7eec
+    note: Portable adapter request fixture with base/head propagation
+
   - path: references/standards/wcag21-aa.json
     role: reference
     version: 1
@@ -595,6 +613,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 29
+    version: 30
     hash: null
-    note: This file -- self-referential hash omitted
+    note: v30 tracks the unreleased interoperability candidate; self-hash omitted

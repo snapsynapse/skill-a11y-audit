@@ -1,15 +1,39 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 34
-version_date: 2026-08-09
-previous_version: 33
+version: 35
+version_date: 2026-08-31
+previous_version: 34
 change_summary: >
-  Releases v2.7.0 with reviewed route grouping, direct changed-page selection,
-  consumer-Action execution, and conservative fallback evidence.
+  Records the unreleased interoperability adapter, pull-request event
+  validation lane, and completed v2.7.0 field pilot.
 ---
 
 # Changelog
+
+## Unreleased interoperability candidate -- 2026-08-31
+
+- `scripts/run-audit.js`: add one schema-versioned JSON process boundary that
+  composes discovery, changed-surface selection, scanning, and report
+  generation while preserving every native artifact and stage exit code.
+- `references/interoperability.md`: document strict request fields, dry-run
+  planning, CI base/head overrides, workspace path confinement, and the stable
+  run-envelope contract.
+- eval-21: validate stage composition, pull-request SHA propagation,
+  conflicting-input rejection, workspace confinement, and non-mutating dry-run
+  behavior.
+- Hosted consumer candidate: add a pull-request-only Action invocation using
+  the event's base and head objects with full Git history, then require
+  non-empty changed-file and scan evidence.
+- Dependency gate: remove the obsolete `extract-zip` advisory exception after
+  the current npm advisory report stopped matching it; the fail-closed gate now
+  passes with an empty allowlist.
+- Field evidence: reconcile the completed `sam-rogers.com` v2.7.0 pilot, which
+  reduced 317 discovered pages to 10 representatives across 8 groups plus two
+  additive tag routes and remained active as a regression gate.
+- Direct Community Access extension packaging remains deferred because the
+  upstream packaging and bridge surfaces are still evolving. The JSON process
+  boundary remains portable across agent ecosystems.
 
 ## v2.7.0 -- 2026-08-09
 

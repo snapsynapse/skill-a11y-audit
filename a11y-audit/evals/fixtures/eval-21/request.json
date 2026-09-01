@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "workspace": "../../../..",
+  "artifacts_dir": ".tmp-eval-21",
+  "discovery": {
+    "url": "http://127.0.0.1:8088/",
+    "group_map": "a11y-audit/evals/fixtures/eval-19/route-group-map.json",
+    "max_per_group": 2,
+    "no_sitemap": true
+  },
+  "selection": {
+    "surface_map": "a11y-audit/evals/fixtures/eval-19/surface-map.json",
+    "route_group_map": "a11y-audit/evals/fixtures/eval-19/route-group-map.json",
+    "base": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "head": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "scan": {
+    "fail_on": "none",
+    "summary": true,
+    "axe_version": "4.12.1"
+  },
+  "report": {
+    "enabled": true,
+    "project_name": "Eval 21 Adapter",
+    "standard": "wcag22-aa",
+    "expected_url": "http://127.0.0.1:8088/"
+  }
+}
