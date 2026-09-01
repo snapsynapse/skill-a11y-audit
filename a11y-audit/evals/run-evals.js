@@ -6,8 +6,8 @@ version: 19
 version_date: 2026-08-31
 previous_version: 18
 change_summary: >
-  Validates the vendor-neutral audit adapter and pull-request base/head
-  propagation through the reusable consumer workflow.
+  Validates the vendor-neutral audit adapter, pull-request base/head
+  propagation, and explicit cross-provider advisory evidence.
 */
 
 const assert = require('assert');
@@ -1114,6 +1114,11 @@ function workflowSecurityRegression() {
       entry.expires >= new Date().toISOString().slice(0, 10),
       `allowlist entry ${entry.id} expired on ${entry.expires}`
     );
+    if (entry.provider_variance) {
+      assert.ok(entry.provider_variance.reason);
+      assert.match(entry.provider_variance.evidence, /^https:\/\/github\.com\//);
+      assert.match(entry.provider_variance.checked, /^\d{4}-\d{2}-\d{2}$/);
+    }
   }
   assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));

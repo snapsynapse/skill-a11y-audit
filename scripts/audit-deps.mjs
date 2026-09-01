@@ -50,9 +50,15 @@ function loadAllowlist() {
     const parsed = JSON.parse(fs.readFileSync(resolved, 'utf8'));
     const entries = parsed.advisories ?? [];
     for (const entry of entries) {
-        if (!entry.id || !entry.reason || !entry.expires) {
-            throw new Error(`allowlist entry needs id, reason, and expires: ${JSON.stringify(entry)}`);
+      if (!entry.id || !entry.reason || !entry.expires) {
+        throw new Error(`allowlist entry needs id, reason, and expires: ${JSON.stringify(entry)}`);
+      }
+      if (entry.provider_variance) {
+        const variance = entry.provider_variance;
+        if (!variance.reason || !variance.evidence || !/^\d{4}-\d{2}-\d{2}$/.test(variance.checked ?? '')) {
+          throw new Error(`allowlist provider_variance needs reason, evidence, and checked date: ${entry.id}`);
         }
+      }
     }
     return entries;
 }
@@ -75,9 +81,17 @@ for (const advisory of advisories.values()) {
 }
 
 for (const entry of allowlist) {
-    if (!advisories.has(entry.id)) {
-        failures.push(`AUDIT  allowlist entry ${entry.id} matches no current advisory; remove it`);
+  if (!advisories.has(entry.id)) {
+    if (entry.provider_variance) {
+      console.log(
+        `RETAINED  ${entry.id} absent from this npm audit response; `
+        + `provider variance reviewed ${entry.provider_variance.checked}: `
+        + entry.provider_variance.reason
+      );
+    } else {
+      failures.push(`AUDIT  allowlist entry ${entry.id} matches no current advisory; remove it`);
     }
+  }
 }
 
 for (const failure of failures) console.error(failure);

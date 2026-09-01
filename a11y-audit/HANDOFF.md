@@ -33,6 +33,11 @@ baseline behavior against a loopback fixture.
 The public composite Action is also exercised through its consumer inputs.
 Remote Actions are SHA-pinned, scanner dependency transitive versions are
 locked, and actionlint plus zizmor block workflow delivery regressions.
+GitHub Actions npm audit and GitHub Dependabot currently report
+`GHSA-jmr9-qjv8-65gv` for `extract-zip` while local npm audit omits it. The
+reviewed exception remains bounded by its existing expiry and now records the
+cross-provider evidence explicitly; do not treat a single provider omission as
+proof that the advisory is resolved.
 
 Changed-surface selection is now available through an explicit project-owned
 source-prefix ownership map. The Action accepts either a changed-file JSON

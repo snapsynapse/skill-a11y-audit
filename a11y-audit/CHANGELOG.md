@@ -25,9 +25,10 @@ change_summary: >
 - Hosted consumer candidate: add a pull-request-only Action invocation using
   the event's base and head objects with full Git history, then require
   non-empty changed-file and scan evidence.
-- Dependency gate: remove the obsolete `extract-zip` advisory exception after
-  the current npm advisory report stopped matching it; the fail-closed gate now
-  passes with an empty allowlist.
+- Dependency gate: retain the reviewed `extract-zip` exception while GitHub
+  Actions npm audit and GitHub Dependabot report the advisory but local npm
+  audit omits it. The gate requires explicit provider-variance evidence and
+  retains the existing expiry.
 - Field evidence: reconcile the completed `sam-rogers.com` v2.7.0 pilot, which
   reduced 317 discovered pages to 10 representatives across 8 groups plus two
   additive tag routes and remained active as a regression gate.

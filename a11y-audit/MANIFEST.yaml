@@ -206,14 +206,14 @@ files:
   - path: HANDOFF.md
     role: handoff
     version: 30
-    hash: sha256:7a57d318c4a2395b75300dff4b36cc36e3499cc8f0a2648f9d5500d9b803cf8a
+    hash: sha256:2a13c99a396501e0920a65fe910028396230150438b0666bfc37266fa899ed78
     note: >
       v30 reconciles the completed field pilot and current roadmap
 
   - path: CHANGELOG.md
     role: reference
     version: 35
-    hash: sha256:e7667cf17c14e37e0ec45c59849c91f5c14cdc53ab1a14748a8464c8bb48cd03
+    hash: sha256:9688e0a05c782cc7213a2fb769e880272330ba1ec419aa04672a0f36c39471a4
     note: >
       Append-only history; v35 records the unreleased interoperability candidate
 
@@ -226,7 +226,7 @@ files:
   - path: evals/run-evals.js
     role: evals
     version: 19
-    hash: sha256:67780bf80707d3e3284febcb6bf9daa5122c6718949ad4ad3a87229999623c1b
+    hash: sha256:a5a516ac0d1fb72bbfee5bfd228c310fd670e90d3c3ac64100e9709cd08e3145
     note: >
       v19 covers adapter semantics and hosted PR base/head wiring
 
