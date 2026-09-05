@@ -466,9 +466,9 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-08-04">August 4, 2026</time>
+      Updated <time datetime="2026-09-05">September 5, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.7.0</span>
+      <span class="version">v2.8.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
@@ -506,8 +506,8 @@
         <p>Review and commit the current findings as an accepted baseline, then fail CI only when a change introduces a new rule, route, and selector fingerprint. Existing debt stays visible without blocking adoption.</p>
       </div>
       <div class="pillar">
-        <h3>Zero configuration</h3>
-        <p>Install once with the cross-agent Skills CLI, or use it temporarily without a persistent install. Validated axe-core and Puppeteer versions resolve automatically without changing the target project's dependencies.</p>
+        <h3>Portable process boundary</h3>
+        <p>Invoke discovery, changed-surface selection, scanning, and reporting through one versioned JSON request. Existing CI runners and agent systems can consume the native artifacts without adopting a vendor-specific orchestration layer.</p>
       </div>
     </div>
   </div>
@@ -571,7 +571,7 @@
       </div>
       <div class="code-block">
         <h3>3. Reuse the GitHub Action</h3>
-<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.7.0
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.0
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
@@ -666,6 +666,7 @@ node a11y-audit/scripts/report.js \
   --input /tmp/scan.json \
   --output-dir ./audits</pre>
         <p class="annotation">These paths assume the repository is cloned locally. Each script writes JSON the next step reads.</p>
+        <p class="annotation">External runners can instead invoke <code>scripts/run-audit.js</code> with one reviewed JSON request. <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/interoperability.md" target="_blank" rel="noopener">Read the interoperability contract.</a></p>
       </div>
     </div>
   </div>
@@ -703,7 +704,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-07-13">2026-07-13</time>.
+      Last substantive revision: <time datetime="2026-09-05">2026-09-05</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
   </div>
@@ -735,7 +736,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.7.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v2.8.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>
@@ -744,6 +745,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
         <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Skill</a>
         <a href="/.well-known/assistant-guide.txt">assistant-guide.txt</a>
         <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
         <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revisions</a>
         <a href="https://github.com/sponsors/snapsynapse" target="_blank" rel="noopener">Sponsor</a>
       </div>

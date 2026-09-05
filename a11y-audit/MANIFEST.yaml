@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 35
-bundle_date: 2026-08-31
+bundle_version: 36
+bundle_date: 2026-09-05
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -139,7 +139,7 @@ compatibility:
         section guards cross-version comparisons, and stale no-CI claims
         corrected. Validated via npm run validate (15/15, including new
         eval-11 mismatch assertions and validateAxeVersion hardening
-        regressions). Roadmap logged in HANDOFF.md.
+        regressions). Durable follow-up now lives in ROADMAP.md.
     - platform: OpenAI Codex
       model: GPT-5
       surface: Desktop
@@ -203,19 +203,19 @@ files:
     note: >
       21 eval cases including the vendor-neutral adapter contract
 
-  - path: HANDOFF.md
-    role: handoff
-    version: 30
-    hash: sha256:2a13c99a396501e0920a65fe910028396230150438b0666bfc37266fa899ed78
+  - path: ROADMAP.md
+    role: reference
+    version: 1
+    hash: sha256:8dfe1b8385a1b17ec5d030d0fe6f0d4be5d3186d0ce9bf373b2c54d0134a8c9e
     note: >
-      v30 reconciles the completed field pilot and current roadmap
+      Durable product boundary, priorities, standing validation, and non-goals
 
   - path: CHANGELOG.md
     role: reference
-    version: 35
-    hash: sha256:9688e0a05c782cc7213a2fb769e880272330ba1ec419aa04672a0f36c39471a4
+    version: 36
+    hash: sha256:b381e7ab45f04c3e8bbd1eb4a4202d2483c0566df0a02a09f7260c57e7872d20
     note: >
-      Append-only history; v35 records the unreleased interoperability candidate
+      Append-only history; v36 releases the v2.8.0 interoperability adapter
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -225,10 +225,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 19
-    hash: sha256:a5a516ac0d1fb72bbfee5bfd228c310fd670e90d3c3ac64100e9709cd08e3145
+    version: 20
+    hash: sha256:64f443035facaae56cd9172e788feca6fe5d7aaa4b11d93a1e0496a41e879afd
     note: >
-      v19 covers adapter semantics and hosted PR base/head wiring
+      v20 synchronizes v2.8.0 surfaces and isolates temporary commit signing
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -511,9 +511,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 9
-    hash: sha256:3e4d1753b1d2eea51c0029bbe279c7604db4d580f85124c0dfaa4be2548deac9
-    note: v2.7.0 Action starter with precise fallback terminology
+    version: 10
+    hash: sha256:dce2c2560b5c117a379845c366b133c7b01d5c111d1920ac46bf111a61e252ef
+    note: v2.8.0 Action starter with precise fallback terminology
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -613,6 +613,6 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 30
+    version: 31
     hash: null
-    note: v30 tracks the unreleased interoperability candidate; self-hash omitted
+    note: v31 tracks the v2.8.0 release bundle; self-hash omitted

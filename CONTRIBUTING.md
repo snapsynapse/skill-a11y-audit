@@ -24,7 +24,7 @@ If you update bundle files, also keep these in sync:
 
 - `a11y-audit/MANIFEST.yaml`
 - `a11y-audit/CHANGELOG.md`
-- `a11y-audit/HANDOFF.md`
+- `a11y-audit/ROADMAP.md` when priorities or product boundaries change
 
 ## Editing Rules
 
