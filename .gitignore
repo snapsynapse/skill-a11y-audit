@@ -10,6 +10,8 @@ _site/
 dist/
 coverage/
 tmp/
+.playwright-mcp/
+.search-evidence-private/
 
 # --- baseline additions (automated audit 2026-04-21) ---
 .env
