@@ -112,6 +112,10 @@ inputs:
     description: Node.js version for the scan environment.
     required: false
     default: '20'
+  install-timeout-ms:
+    description: Maximum milliseconds for each scanner dependency install attempt.
+    required: false
+    default: '120000'
   upload-artifact:
     description: '`true` to upload the results JSON as a workflow artifact.'
     required: false
@@ -129,14 +133,24 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
+    - name: Prepare local http-server
+      if: inputs.serve-path != ''
+      shell: bash
+      env:
+        SERVER_ROOT: ${{ runner.temp }}/a11y-audit-http-server
+      run: |
+        mkdir -p "$SERVER_ROOT"
+        npm install --prefix "$SERVER_ROOT" --no-save --package-lock=false --no-audit --no-fund http-server@14.1.1
+
     - name: Start local http-server
       if: inputs.serve-path != ''
       shell: bash
       env:
         SERVE_PATH: ${{ inputs.serve-path }}
         PORT: ${{ inputs.port }}
+        SERVER_ROOT: ${{ runner.temp }}/a11y-audit-http-server
       run: |
-        npx --yes http-server@14.1.1 "$SERVE_PATH" -p "$PORT" -c-1 > /tmp/a11y-http.log 2>&1 &
+        "$SERVER_ROOT/node_modules/.bin/http-server" "$SERVE_PATH" -p "$PORT" -c-1 > /tmp/a11y-http.log 2>&1 &
         echo $! > /tmp/a11y-http.pid
         for i in $(seq 1 30); do
           curl -fs "http://localhost:$PORT/" > /dev/null && break || sleep 0.5
@@ -200,6 +214,7 @@ runs:
         BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
         SUMMARY: ${{ inputs.summary }}
+        INSTALL_TIMEOUT_MS: ${{ inputs.install-timeout-ms }}
       run: |
         ARGS=()
         DISCOVER_PLAN="$DISCOVER_OUTPUT"
@@ -215,6 +230,7 @@ runs:
         [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
         [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
+        [ -n "$INSTALL_TIMEOUT_MS" ] && ARGS+=(--install-timeout-ms "$INSTALL_TIMEOUT_MS")
         ARGS+=(--output "$OUTPUT")
         node "${{ github.action_path }}/../../../a11y-audit/scripts/scan.js" "${ARGS[@]}"
 

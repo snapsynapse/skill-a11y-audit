@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
+version: 2
 version_date: 2026-09-05
-previous_version: 0
+previous_version: 1
 change_summary: >
-  Replaces the processed session handoff with a durable product boundary,
-  prioritized roadmap, non-goals, and standing validation work.
+  Promotes verified scan-time dependency resilience work from the processed
+  handoff into the prioritized durable roadmap.
 ---
 
 # Accessibility Audit Roadmap
@@ -38,13 +38,20 @@ conformance or automatically remediate application code.
 
 ## Next priorities
 
-1. Authenticated deterministic journeys. Accept a Playwright storage state or
+1. Scan-time dependency resilience. Make dependency acquisition atomic and
+   deterministic on fresh runners: distinguish timeouts from non-zero exits,
+   retry transient installs with bounded backoff, avoid rewriting the committed
+   dependency manifest, expose the install timeout as configuration, and fetch
+   `http-server` before starting the readiness clock. Acceptance requires tests
+   for a slow or failing registry, a consumer that supplies only `axe-core`, and
+   an empty `deps/node_modules` consumer run.
+2. Authenticated deterministic journeys. Accept a Playwright storage state or
    bounded journey file as scan input. Do not expand into an unconstrained
    browser agent.
-2. SARIF output. Add a repository-native emitter for organizations using
+3. SARIF output. Add a repository-native emitter for organizations using
    GitHub code scanning while preserving the existing JSON contract as the
    universal CI surface.
-3. First-class Playwright execution. Add it only where it improves
+4. First-class Playwright execution. Add it only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
 ## Standing validation work
@@ -57,6 +64,9 @@ conformance or automatically remediate application code.
   bundle metadata.
 - Continue field validation of ownership-map ergonomics, targeted scan timing,
   and conservative fallback evidence on large production sites.
+- After the upstream resilience work ships, reassess whether consumers still
+  need project-level `http-server` pins. Keep exact `axe-core` pins wherever
+  baseline compatibility depends on the scanner version.
 - Re-review `GHSA-jmr9-qjv8-65gv` by 2026-11-30, when GitHub closes the alert,
   or when the supported Node range permits a fixed browser dependency graph.
 

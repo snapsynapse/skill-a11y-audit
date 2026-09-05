@@ -104,7 +104,7 @@ command: node SKILL_DIR/scripts/scan.js --discover SCAN_PLAN_JSON --output SCAN_
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URLs in SCAN_PLAN_JSON, registry.npmjs.org
-exec-sha256: b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
+exec-sha256: 56f4c10e12b325966a38c91c0572a3f3fec33e658b81f52f4d33fd09b898fff7
 notes: Runs the discovery or selected-surface plan and may install pinned dependencies.
 [/action]
 
@@ -116,7 +116,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --write-baseline BASELIN
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org
-exec-sha256: b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
+exec-sha256: 56f4c10e12b325966a38c91c0572a3f3fec33e658b81f52f4d33fd09b898fff7
 notes: Replaces a baseline only after human review; acceptance is not conformance.
 [/action]
 
@@ -128,7 +128,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --baseline BASELINE_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org
-exec-sha256: b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
+exec-sha256: 56f4c10e12b325966a38c91c0572a3f3fec33e658b81f52f4d33fd09b898fff7
 notes: Stops on axe-core drift and reports accepted, new, and resolved findings.
 [/action]
 
