@@ -1088,9 +1088,10 @@ function reusableActionRegression() {
   ]) {
     assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
   }
-  assert.match(action, /npm install --prefix "\$SERVER_ROOT"[\s\S]*http-server@14\.1\.1/);
+  assert.match(action, /cd "\$SERVER_ROOT"[\s\S]*npm ci --no-audit --no-fund/);
   assert.match(action, /"\$SERVER_ROOT\/node_modules\/\.bin\/http-server"/);
   assert.doesNotMatch(action, /npx --yes http-server/);
+  assert.doesNotMatch(action, /npm install/);
   assert.match(action, /--install-timeout-ms "\$INSTALL_TIMEOUT_MS"/);
   assert.match(action, /scripts\/discover\.js/);
   assert.match(action, /scripts\/select-changed-surfaces\.js/);
@@ -1174,6 +1175,7 @@ function workflowSecurityRegression() {
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
+    'http-server': '14.1.1',
     puppeteer: '24.43.1',
   });
   const depsLock = readJson(repoPath('a11y-audit/deps/package-lock.json'));

@@ -16,8 +16,8 @@ change_summary: >
   lockfile, retry transient failures with bounded backoff, and distinguish
   timeout diagnostics from non-zero npm exits.
 - Add `--install-timeout-ms` and `A11Y_AUDIT_INSTALL_TIMEOUT_MS` controls.
-- Fetch the composite Action's pinned `http-server` dependency before starting
-  the server-readiness clock.
+- Install the composite Action's pinned `http-server` dependency from the
+  committed lockfile before starting the server-readiness clock.
 - Add deterministic regression coverage for slow registries, retries, atomic
   installs, configurable timeouts, and Action fetch/readiness separation.
 

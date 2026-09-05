@@ -85,6 +85,10 @@ committed manifests. Installs make three bounded attempts with backoff and omit
 npm audit and funding network calls. The `deps/node_modules/` directory is
 gitignored.
 
+The same lockfile pins `http-server` for the reusable Action. When `serve-path`
+is set, the Action completes `npm ci` before starting the local server and its
+readiness clock; registry time cannot be misreported as server startup failure.
+
 Each attempt defaults to 120000 milliseconds. Raise it with
 `--install-timeout-ms <milliseconds>` or `A11Y_AUDIT_INSTALL_TIMEOUT_MS` on a
 slow runner. Timeout diagnostics name the dependency set, elapsed time, limit,

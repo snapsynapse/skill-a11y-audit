@@ -192,7 +192,7 @@ files:
   - path: SKILL.md
     role: skill
     version: 24
-    hash: sha256:95f761fac438defd5c942e380f0435f01d6b6b1ed7aa66abd7234288687ee156
+    hash: sha256:189bfa5da410565317f57b741617adc92a056b575d989e679a6328a2584e1da4
     note: >
       v24 documents atomic dependency acquisition, retries, and timeout controls
 
@@ -213,7 +213,7 @@ files:
   - path: CHANGELOG.md
     role: reference
     version: 37
-    hash: sha256:902de04781aa4ea69d3746e4b07ab58d251a0950224630c8c06a583f3e69c794
+    hash: sha256:b61a696ac95e0c538cbc6cefc0172fed096f26ce04c805f92d70a3ef2fb6ad6c
     note: >
       Append-only history; v37 records unreleased dependency resilience work
 
@@ -226,7 +226,7 @@ files:
   - path: evals/run-evals.js
     role: evals
     version: 21
-    hash: sha256:ebceffd43e066bca0859933f45a04966eaeb8bc4d167f6609e635a5b5e33d472
+    hash: sha256:3f30e86d0ac16cd390e2083b89673bff98fb04e8563f8d975c0151283e6df917
     note: >
       v21 adds dependency resilience and Action readiness regression coverage
 
@@ -481,15 +481,15 @@ files:
 
   - path: deps/package.json
     role: config
-    version: 2
-    hash: sha256:ed71cb2f1b09f94a2ba7815f45eb7024a268d9731ec740d37f891f6bb63546bd
-    note: Exact validated axe-core and Puppeteer 24.43.1 scanner dependencies
+    version: 3
+    hash: sha256:c62f30e6a1d47bb45ea44a4bed304886b4bd38704350ff9027a88599faac7d08
+    note: Exact validated axe-core, Puppeteer, and Action http-server dependencies
 
   - path: deps/package-lock.json
     role: config
-    version: 4
-    hash: sha256:1206ce98b61a0b7c8e0c16e6b029692b288db8c5756c8b03679a49c4e1d240de
-    note: Reproducible scanner graph with patched js-yaml 4.3.1
+    version: 5
+    hash: sha256:b9d9b492550ca37227a10456d8762d7db1afb0d2abd1a82428bdaf65d76098dc
+    note: Reproducible scanner and Action server dependency graph
 
   - path: assets/sample-output/audit-sample.md
     role: asset

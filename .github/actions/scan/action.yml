@@ -137,10 +137,10 @@ runs:
       if: inputs.serve-path != ''
       shell: bash
       env:
-        SERVER_ROOT: ${{ runner.temp }}/a11y-audit-http-server
+        SERVER_ROOT: ${{ github.action_path }}/../../../a11y-audit/deps
       run: |
-        mkdir -p "$SERVER_ROOT"
-        npm install --prefix "$SERVER_ROOT" --no-save --package-lock=false --no-audit --no-fund http-server@14.1.1
+        cd "$SERVER_ROOT"
+        npm ci --no-audit --no-fund
 
     - name: Start local http-server
       if: inputs.serve-path != ''
@@ -148,7 +148,7 @@ runs:
       env:
         SERVE_PATH: ${{ inputs.serve-path }}
         PORT: ${{ inputs.port }}
-        SERVER_ROOT: ${{ runner.temp }}/a11y-audit-http-server
+        SERVER_ROOT: ${{ github.action_path }}/../../../a11y-audit/deps
       run: |
         "$SERVER_ROOT/node_modules/.bin/http-server" "$SERVE_PATH" -p "$PORT" -c-1 > /tmp/a11y-http.log 2>&1 &
         echo $! > /tmp/a11y-http.pid
