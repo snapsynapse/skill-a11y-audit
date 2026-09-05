@@ -1,4 +1,4 @@
 interface:
   display_name: "Accessibility Audit"
   short_description: "Gate changed accessibility regressions"
-  default_prompt: "Use $a11y-audit to discover representative site templates with reviewed route groups when available, include safely mapped changed pages, and report or gate newly introduced findings against the accepted baseline."
+  default_prompt: "Use $a11y-audit with Node.js 22.12.0 or later. Confirm scope for dependency installation, stale managed Puppeteer replacement, and browser downloads, then discover representative site templates with reviewed route groups when available, include safely mapped changed pages, and report or gate newly introduced findings against the accepted baseline."

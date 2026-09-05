@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 22
+version: 23
 version_date: 2026-09-05
-previous_version: 21
+previous_version: 22
 change_summary: >
-  Synchronizes v2.8.1 release and assistant-guide version surfaces after the
-  dependency resilience regression coverage landed.
+  Enforces extractor-free lockfiles and supported runtime contracts.
 */
 
 const assert = require('assert');
@@ -1056,7 +1055,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.1/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.0\.0/);
   assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
   assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
   assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
@@ -1100,7 +1099,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.1/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.0\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
@@ -1176,19 +1175,86 @@ function workflowSecurityRegression() {
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
     'http-server': '14.1.1',
-    puppeteer: '24.43.1',
+    puppeteer: '25.10.0',
   });
-  const depsLock = readJson(repoPath('a11y-audit/deps/package-lock.json'));
-  assert.strictEqual(
-    depsLock.packages['node_modules/ip-address'].version,
-    '10.4.0',
-    'scanner lockfile must retain the patched ip-address release'
-  );
-  assert.strictEqual(
-    depsLock.packages['node_modules/js-yaml'].version,
-    '4.3.1',
-    'scanner lockfile must retain the patched js-yaml release'
-  );
+}
+
+function dependencyRuntimePolicy() {
+  function assertNoExtractZip(lock) {
+    assert.ok(lock.packages && Object.keys(lock.packages).length, 'resolved lockfile packages required');
+    for (const [location, pkg] of Object.entries(lock.packages)) {
+      assert.ok(!/(^|\/)node_modules\/extract-zip$/.test(location) && pkg.name !== 'extract-zip',
+        `extract-zip is forbidden in the resolved graph: ${location}`);
+      for (const field of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+        for (const [name, spec] of Object.entries(pkg[field] || {})) {
+          assert.ok(name !== 'extract-zip' && !/^npm:extract-zip(?:@|$)/.test(spec),
+            `extract-zip dependency is forbidden: ${location} ${field}.${name}`);
+        }
+      }
+    }
+  }
+  // Exercise nested, development, optional, and npm-alias reintroduction.
+  for (const packages of [
+    { 'node_modules/a/node_modules/extract-zip': { version: '2.0.1' } },
+    { 'node_modules/alias': { name: 'extract-zip', version: '2.0.1' } },
+    { '': { devDependencies: { 'extract-zip': '2.0.1' } } },
+    { 'node_modules/a': { optionalDependencies: { zip: 'npm:extract-zip@2.0.1' } } },
+  ]) assert.throws(() => assertNoExtractZip({ packages }), /extract-zip/);
+  assertNoExtractZip({ packages: { 'node_modules/safe': { description: 'replaces extract-zip' } } });
+  for (const prefix of ['a11y-audit/deps/', '']) {
+    const pkg = readJson(repoPath(`${prefix}package.json`));
+    const lock = readJson(repoPath(`${prefix}package-lock.json`));
+    assertNoExtractZip(lock);
+    assert.strictEqual(pkg.engines.node, '>=22.12.0');
+    assert.strictEqual(lock.packages[''].engines.node, pkg.engines.node);
+  }
+  const lock = readJson(repoPath('a11y-audit/deps/package-lock.json'));
+  for (const name of ['puppeteer', 'puppeteer-core', '@puppeteer/browsers']) {
+    assert.strictEqual(lock.packages[`node_modules/${name}`].engines.node, '>=22.12.0');
+  }
+  const runtime = require(repoPath('a11y-audit/scripts/check-runtime.js'));
+  for (const version of ['18.20.8', '20.19.0', '22.11.9', '22.12.0-rc.1']) {
+    assert.throws(() => runtime.assertSupportedNode(version), /requires Node.js >=22.12.0/);
+  }
+  for (const version of ['22.12.0', '22.99.0', '24.0.0', '26.7.0']) runtime.assertSupportedNode(version);
+  const shim = tmpPath('unsupported-node.cjs');
+  fs.writeFileSync(shim, "Object.defineProperty(process.versions, 'node', { value: '20.19.0' });\n");
+  const unsupported = spawnSync(process.execPath, ['--require', shim, 'a11y-audit/scripts/scan.js'], {
+    cwd: repoRoot, encoding: 'utf8',
+  });
+  assert.strictEqual(unsupported.status, 1);
+  assert.match(unsupported.stderr, /requires Node.js >=22.12.0/);
+  assert.doesNotMatch(unsupported.stderr, /Missing .*installing/);
+  const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
+  const pinnedBrowser = scanSource.match(/puppeteer: '([\d.]+)'/)?.[1];
+  assert.strictEqual(pinnedBrowser, lock.packages['node_modules/puppeteer'].version,
+    'auto-install and committed Puppeteer versions must agree');
+  const parsed = JSON.parse(runCommand('ruby', ['-rjson', '-ryaml', '-rdate', '-e',
+    'puts JSON.generate(ARGV.map { |f| YAML.safe_load(File.read(f), permitted_classes:[Date]) })',
+    '.github/actions/scan/action.yml', '.github/workflows/validate-skill.yml', '.github/workflows/pages.yml',
+  ]).stdout);
+  const [action, validate, pages] = parsed;
+  assert.strictEqual(action.inputs['node-version'].default, '22');
+  const steps = action.runs.steps;
+  const guardIndex = steps.findIndex(step => step.run?.includes('check-runtime.js'));
+  const installIndex = steps.findIndex(step => step.run?.includes('npm ci'));
+  assert.ok(guardIndex > 0 && guardIndex < installIndex, 'reject unsupported Action runtimes before installation');
+  for (const workflow of [validate, pages]) {
+    for (const job of Object.values(workflow.jobs)) {
+      for (const step of job.steps) {
+        if (!step.uses?.startsWith('actions/setup-node@')) continue;
+        const selector = step.with['node-version'];
+        const versions = selector === '${{ matrix.node }}' ? job.strategy.matrix.node : [selector];
+        for (const value of versions) {
+          const version = String(value);
+          runtime.assertSupportedNode(version.includes('.') ? version : `${version}.12.0`);
+        }
+      }
+    }
+  }
+  assert.ok(validate.jobs.validate.strategy.matrix.node.includes('22.12.0'), 'CI must test the exact floor');
+  assert.ok(pages.jobs.deploy.steps.some(step => step.uses?.startsWith('actions/setup-node@')),
+    'Pages must declare its runtime');
 }
 
 function assistantGuideArtifactRegression() {
@@ -1203,7 +1269,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.11$/m);
+  assert.match(text, /^guide-version: 0\.3\.13$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -1230,7 +1296,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.11$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.13$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -1267,6 +1333,7 @@ test('scan.js dependency auto-install policy is documented', dependencyPolicyChe
 test('public install surfaces stay current and synchronized', installationSurfaceRegression);
 test('reusable Action and workflow starter stay template-aware', reusableActionRegression);
 test('workflow and Action supply-chain controls stay enforced', workflowSecurityRegression);
+test('dependency graph excludes extract-zip and runtimes enforce Node 22.12+', dependencyRuntimePolicy);
 test('assistant guide artifacts stay bounded, pinned, and synchronized', assistantGuideArtifactRegression);
 
 const failed = results.filter((result) => !result.ok);

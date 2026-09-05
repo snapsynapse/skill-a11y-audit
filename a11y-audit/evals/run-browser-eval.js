@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-07-21
-previous_version: null
+version: 2
+version_date: 2026-09-05
+previous_version: 1
 change_summary: >
-  Runs the real Puppeteer and axe-core scanner against a local fixture, then
-  verifies accepted-baseline behavior without external network access.
+  Requires the real browser eval to exercise Puppeteer 25.10.0.
 */
 
 const assert = require('assert');
@@ -64,7 +63,7 @@ async function main() {
       'real axe scan must detect the fixture button-name violation'
     );
     assert.ok(scan.axe_version, 'scan must record the resolved axe-core version');
-    assert.ok(scan.browser_version, 'scan must record the resolved browser version');
+    assert.strictEqual(scan.browser_version, '25.10.0', 'browser eval must exercise the migrated Puppeteer');
 
     const second = await runNode([
       'a11y-audit/scripts/scan.js',

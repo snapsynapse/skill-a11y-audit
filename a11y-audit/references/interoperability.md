@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-08-31
-previous_version: 0
+version: 2
+version_date: 2026-09-05
+previous_version: 1
 change_summary: >
-  Defines the vendor-neutral JSON process adapter for composing discovery,
-  changed-surface selection, scanning, and report generation.
+  Documents scan-stage acquisition and the runtime compatibility contract.
 ---
 
 # Interoperability Adapter
@@ -15,6 +14,14 @@ Use `scripts/run-audit.js` when another agent system, CI runner, or local tool
 needs one process entrypoint instead of coordinating the four helper scripts.
 The adapter preserves their existing JSON contracts and exit codes. It does not
 translate findings into a vendor-specific agent or issue format.
+
+## Runtime and acquisition
+
+Use Node.js 22.12.0 or later. Executing the scan stage can install missing
+dependencies or replace stale skill-local Puppeteer, including a Chrome
+download. Establish that installation scope before execution; `--dry-run`
+remains free of installation and network access. The managed dependency and
+browser-cache contract is in `runtime-compatibility.md`.
 
 ## Request
 

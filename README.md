@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.8.1)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/latest)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -9,6 +9,10 @@ Open, self-hosted accessibility regression evidence for large web
 estates. Discover representative templates, preserve selector-level
 findings, and prevent AI-generated changes from introducing new barriers
 without requiring a legacy site to reach zero violations first.
+
+Version 3.0.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
+GitHub installs fetch main; pin the reusable Action to `v3.0.0` for this release.
+See the [release validation record](ops/v3.0.0-release-preparation.md).
 
 ## Who this is for
 
@@ -38,18 +42,18 @@ https://skilla11y.dev/
 Most accessibility tools require manual setup, produce raw violation
 dumps, and leave you to figure out what to fix first. This skill:
 
-- **Discovers your site structure automatically** — reads your sitemap
+- **Discovers your site structure automatically**: reads your sitemap
   (or crawls navigation links) and identifies which page templates
   exist, so a 700-page site gets audited by scanning ~20 representative
   pages instead of all of them.
-- **Tells you what to fix and where** — groups violations by shared
+- **Tells you what to fix and where**: groups violations by shared
   template, so you know that fixing one `<nav>` element resolves the
   issue across 200 pages, not just the one you scanned.
-- **Installs its own dependencies** — axe-core and Puppeteer are
+- **Installs its own dependencies**: axe-core and Puppeteer are
   resolved automatically. No `npm install` required in your project.
-- **Tracks progress over time** — pass a previous audit and the report
+- **Tracks progress over time**: pass a previous audit and the report
   shows what's fixed, what's new, and what changed.
-- **Maps evidence to the standard you answer to** — WCAG 2.1 AA by
+- **Maps evidence to the standard you answer to**: WCAG 2.1 AA by
   default (cited by ADA Title II and EN 301 549), with WCAG 2.2 AA and
   EN 301 549 clause-9 matrices selectable via `--standard`.
 
@@ -79,36 +83,43 @@ Output modes:
 
 ## Install
 
+Requires Node.js 22.12.0 or later. v3 drops Node 18 and 20 support and pins
+Puppeteer 25.10.0 to remove `extract-zip` from the managed dependency graph.
+The reusable Action defaults to Node 22 and rejects older runtimes before install.
+For browser installation and migration details, see
+[Runtime compatibility](a11y-audit/references/runtime-compatibility.md).
+
 Options in order of end-user simplicity.
 
 **1. Reviewed assistant install (recommended).** Paste this into any coding
 agent:
 
+Literal
 ```text
 Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify), report the achieved
 level and SHA-256, then follow its install action with my approval.
 ```
-
 The guide is a GuideCheck Level 3 plain-text instruction surface: the text
 you review is the text the assistant executes, every action requires your
 approval, and each bundled script it runs is SHA-256 pinned.
 
 **2. Skills CLI.** Install from GitHub with the open Skills CLI:
 
+Literal
 ```sh
 npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit
 ```
-
 To try the skill without a persistent install:
 
+Literal
 ```sh
 npx skills use snapsynapse/skill-a11y-audit --skill a11y-audit
 ```
-
 The interactive flow detects supported agents and lets you choose project or
 global scope. To select an agent non-interactively:
 
+Literal
 ```sh
 # Claude Code, current project (.claude/skills/)
 npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit --agent claude-code --yes
@@ -116,7 +127,6 @@ npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit --agent claude-co
 # Codex, current project (.agents/skills/)
 npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit --agent codex --yes
 ```
-
 Add `--global` for a personal install. Manual fallback locations are
 `~/.claude/skills/a11y-audit/` for Claude Code and
 `~/.agents/skills/a11y-audit/` for Codex. Review the skill before installing.
@@ -125,20 +135,23 @@ Add `--global` for a personal install. Manual fallback locations are
 
 Ask your agent:
 
+Literal
 ```
 Run an accessibility audit on this project.
 ```
-
 The skill will discover your site structure, scan representative pages,
 and generate a report. For large sites, it runs the discover → scan →
 report pipeline automatically.
 
 You can also run the scripts directly:
 
+Replace: TARGET_URL -> reachable URL of the site approved for this audit
+Replace: PROJECT_NAME -> project name to put in the report
+Customize
 ```bash
 # 1. Discover site structure and select pages to scan
 node a11y-audit/scripts/discover.js \
-  --url http://localhost:3000 \
+  --url TARGET_URL \
   --output /tmp/discover.json
 
 # 2. Scan the selected pages
@@ -151,12 +164,13 @@ node a11y-audit/scripts/scan.js \
 node a11y-audit/scripts/report.js \
   --input /tmp/scan.json \
   --output-dir ./audits \
-  --project-name "My Project" \
+  --project-name "PROJECT_NAME" \
   --discover /tmp/discover.json
 ```
-
-No prior setup needed. scan.js auto-installs axe-core and Puppeteer on
-first run if they aren't already available. Add `--standard wcag22-aa`
+Use Node.js 22.12.0 or later and a reachable target URL. With installation
+authorized, scan.js installs the pinned dependency set when packages are missing
+or its managed Puppeteer is stale. Browser installation needs network access;
+skipping downloads requires the matching Chrome already available. Add `--standard wcag22-aa`
 or `--standard en301549` to the report step to switch the evidence
 matrix (default: `wcag21-aa`).
 
@@ -172,7 +186,6 @@ Customize
 ```text
 node a11y-audit/scripts/run-audit.js --config REQUEST_JSON
 ```
-
 Use `--dry-run` to inspect the normalized execution plan without network,
 browser, or artifact writes. The complete request and result contract is in
 [`references/interoperability.md`](a11y-audit/references/interoperability.md).
@@ -181,21 +194,23 @@ browser, or artifact writes. The complete request and result contract is in
 
 Create an accepted baseline after reviewing the current findings:
 
+Replace: TARGET_URL -> reachable URL of the site approved for this audit
+Customize
 ```bash
 node a11y-audit/scripts/scan.js \
-  --urls http://127.0.0.1:3000/ \
+  --urls TARGET_URL \
   --write-baseline .a11y-audit/baseline.json
 ```
-
 Then fail only on newly introduced findings:
 
+Replace: TARGET_URL -> reachable URL of the site approved for this audit
+Customize
 ```bash
 node a11y-audit/scripts/scan.js \
-  --urls http://127.0.0.1:3000/ \
+  --urls TARGET_URL \
   --baseline .a11y-audit/baseline.json \
   --fail-on new
 ```
-
 Baseline changes are explicit acceptance decisions. Review and commit
 them; never refresh the baseline automatically in CI.
 
@@ -206,10 +221,12 @@ apply a reviewed route-group map, prioritize mapped changed surfaces including
 directly changed pages, compare against reviewed debt, and upload the scan,
 discovery plan, and selection evidence:
 
+Replace: BUILD_DIR -> repository-relative directory containing the built site
+Customize
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.1
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
   with:
-    serve-path: dist
+    serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
     discover-group-map: .a11y-audit/route-group-map.json
     surface-map: .a11y-audit/surface-map.json
@@ -222,7 +239,6 @@ discovery plan, and selection evidence:
     discover-output: artifacts/a11y-discover.json
     selection-output: artifacts/a11y-selection.json
 ```
-
 Adapt `serve-path` to the repository's build output. Pin the Action to the
 full release commit SHA where organizational policy requires immutable Action
 references.
@@ -269,7 +285,6 @@ or make audit results a legal conformance certification.
 Large sites have hundreds of pages but only a handful of distinct
 templates. `discover.js` classifies every URL by its path pattern and
 selects representatives from each group:
-
 ```
 746 pages found via sitemap
 → 16 template groups identified
@@ -280,7 +295,6 @@ selects representatives from each group:
   compare/*:                     561 pages → 2 selected (by DOM complexity)
   ...plus all 9 unique top-level pages
 ```
-
 For flat or irregular sites, a reviewed route-group map replaces path-depth
 classification. Invalid, ambiguous, or incomplete maps expand to one exact
 group per discovered URL so configuration errors cannot reduce coverage.
@@ -293,29 +307,33 @@ least complex variants.
 
 After scanning, the report cross-references violation fingerprints with
 template groups:
-
 ```
 Shared issues on `regulation/*`, `requires/*/*`, `authority/*`: dlitem
 → Fix the shared build template once → resolves across 144 pages
 ```
-
 ### Dependency Resolution
 
-scan.js resolves axe-core and Puppeteer in this order. Auto-install uses the
-versions validated by this release; project or global packages can still take
-precedence and their resolved versions are recorded:
+scan.js resolves axe-core and Puppeteer in this order and records the resolved
+versions. Project and global packages are fallbacks when skill-local packages
+are absent:
 
-1. **Skill-local** `deps/` (auto-installed, gitignored)
+1. **Skill-local** `deps/node_modules/` (installed packages are gitignored)
 2. **Target project** `node_modules/`
 3. **Global** npm modules
-4. **Auto-install** to skill-local `deps/` if not found anywhere
+4. **Install the complete set** into skill-local `deps/` if either package is missing
+
+A stale skill-local Puppeteer also triggers replacement with the committed
+locked graph. That graph pins axe-core 4.12.1 and Puppeteer 25.10.0 and excludes
+`extract-zip`; externally managed project/global graphs need their own audit.
+For skip-download behavior and cache configuration, read
+[Runtime compatibility](a11y-audit/references/runtime-compatibility.md).
 
 ### Version Model
 
 This repository has three release identifiers because the published
 surfaces move at different compatibility levels:
 
-- `package.json` uses the public repository release line, currently 2.x.
+- `package.json` uses the public repository release line, 3.0.0 for this release.
 - `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
   incremented whenever the skill bundle changes.
 - `assistant-guide.txt` uses the GuideCheck guide version, incremented
@@ -331,15 +349,15 @@ Current product boundaries and prioritized follow-up work live in
 
 Pass a previous audit JSON to see progress:
 
+Replace: PREVIOUS_AUDIT_JSON -> path to a comparable prior audit JSON file
+Customize
 ```bash
 node a11y-audit/scripts/report.js \
   --input /tmp/scan.json \
-  --previous ./audits/audit-2026-03-01.json \
+  --previous PREVIOUS_AUDIT_JSON \
   --output-dir ./audits
 ```
-
 Output:
-
 ```
 ## Delta from Previous Audit
 | Metric   | Previous | Current | Change |
@@ -349,13 +367,13 @@ Output:
 Fixed: ~~landmark-one-main~~, ~~region~~
 Changed: color-contrast 26 → 2 (↓24)
 ```
-
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
 | `scripts/discover.js` | Sitemap-first discovery with reviewed route grouping and conservative fallback |
 | `scripts/select-changed-surfaces.js` | Maps changed sources to groups and optional direct routes with full-sample fallback |
+| `scripts/check-runtime.js` | Reject unsupported Node versions before scanner dependency installation |
 | `scripts/scan.js` | axe-core scanning with self-contained dependency resolution |
 | `scripts/report.js` | Deterministic report generation (markdown + JSON) |
 | `scripts/run-audit.js` | Vendor-neutral JSON adapter for the complete audit pipeline |
@@ -366,28 +384,32 @@ Detailed map contracts live in
 [`references/route-grouping.md`](a11y-audit/references/route-grouping.md) and
 [`references/changed-surfaces.md`](a11y-audit/references/changed-surfaces.md).
 
-## Tested Against
+## Historical field evidence
+
+These recorded runs predate v3 and are not v3 consumer-validation claims.
+Release validation checks are listed in the
+[release validation record](ops/v3.0.0-release-preparation.md).
 
 | Site | Pages | Groups | Scanned | Violations | Key findings |
 |------|-------|--------|---------|------------|-------------|
-| AI Regulation Reference | 746 | 16 | 22 | 12 | dlitem, nested-interactive, color-contrast on detail templates |
-| Virtual Meeting Reference | 449 | 15 | 20 | 130 | color-contrast on group badges, missing landmarks site-wide |
+| EveryAILaw (formerly AI Regulation Reference) | 746 | 16 | 22 | 12 | dlitem, nested-interactive, color-contrast on detail templates |
+| Virtual Classroom Watch (formerly Virtual Meeting Reference) | 449 | 15 | 20 | 130 | color-contrast on group badges, missing landmarks site-wide |
 | sam-rogers.com (Zola blog) | 206 | 12 | 15 | 33 | list structure in theme nav, landmark-unique on every page |
 
 ## Skill Provenance
 
 This bundle follows the
 [Skill Provenance](https://github.com/snapsynapse/skill-provenance)
-open standard. Every file carries embedded version metadata
+open standard. Versioned helper scripts and references carry embedded metadata
 (`skill_bundle`, `file_role`, `version`, `version_date`,
-`previous_version`, `change_summary`), and `MANIFEST.yaml` tracks the
-full bundle inventory with versioned hashes. This means any agent or
+`previous_version`, `change_summary`). `SKILL.md` retains minimal portable
+frontmatter; JSON, assets, and other files are versioned in `MANIFEST.yaml`,
+which tracks the full bundle inventory with SHA-256 hashes. This means any agent or
 human can verify which version of which file produced a given audit
 report, trace changes across sessions, and detect drift between
 installed copies and the canonical source.
 
 ## Repository Layout
-
 ```
 a11y-audit/
   SKILL.md              # Core skill instructions (read by agents)
@@ -399,14 +421,13 @@ a11y-audit/
   evals/                # Eval definitions and recorded results
   assets/               # Sample outputs, CI starter assets
 ```
-
 ## Sponsor
 
 Skill A11y Audit is free and open. If your team uses this skill, consider [sponsoring its development](https://github.com/sponsors/snapsynapse). See [SPONSORS.md](SPONSORS.md).
 
 ## About
 
-Skill A11y Audit is an open skill under [Snap Synapse LLC](https://snapsynapse.com/) stewardship, authored by [Sam Rogers](https://www.linkedin.com/in/samrogers). It is used in every public web page across the [PAICE portfolio](https://paice.foundation/) and is MIT-licensed for any use.
+Skill A11y Audit is an open skill under [Snap Synapse LLC](https://snapsynapse.com/) stewardship, authored by [Sam Rogers](https://linkedin.com/in/samrogers). It provides repository-native accessibility evidence and is MIT-licensed for any use.
 
 ## License
 

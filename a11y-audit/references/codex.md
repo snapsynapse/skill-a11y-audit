@@ -1,17 +1,24 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-03-03
-previous_version: null
+version: 2
+version_date: 2026-09-05
+previous_version: 1
 change_summary: >
-  Added Codex-specific instructions for workspace-local state,
-  dependency checks, and dev-server discovery without Claude tools.
+  Adds v3 runtime and managed browser installation guidance.
 ---
 
 # Codex Notes
 
 Use this file only when running the skill in Codex.
+
+## Runtime and installation
+
+Verify Node.js 22.12.0 or later before invoking the bundled helpers. Read
+`runtime-compatibility.md` when installing or upgrading the skill, changing
+browser caches, or using skip-download settings. Installation may replace
+stale skill-local Puppeteer and download Chrome; establish that scope before
+running a scan. The bundled scanner supports Puppeteer only.
 
 ## Dev Server Discovery
 
@@ -31,8 +38,8 @@ Use this file only when running the skill in Codex.
 
 ## Practical Guidance
 
-- Ask before installing missing packages such as `axe-core`,
-  `puppeteer`, `playwright`, or `lighthouse`.
+- Use existing installation authority for missing packages or stale managed
+  Puppeteer replacement; ask if that scope is not yet authorized.
 - Prefer project-local commands and dependencies over global tooling.
 - If browser automation is blocked by missing dependencies or a missing
   running app, summarize the blocker and continue with the highest-value

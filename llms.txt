@@ -4,6 +4,11 @@
 > Template-aware sampling, stable finding fingerprints, and accepted
 > baselines let CI block new barriers without requiring zero existing debt.
 
+Documentation version: 3.0.0. Updated: 2026-09-05.
+Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.10.0
+and axe-core 4.12.1. The reusable Action defaults to Node 22.
+GitHub installs fetch main; pin the reusable Action to v3.0.0 for this release.
+
 ## What this skill does
 
 - Scans web projects for accessibility violations using axe-core, with evidence matrices for WCAG 2.1 AA (default), WCAG 2.2 AA, and EN 301 549 clause 9
@@ -12,7 +17,9 @@
 - Produces structured reports with prioritized findings and fix guidance
 - Tracks progress between audits (delta comparison)
 - Creates reviewable accepted baselines and can fail CI only on new findings
-- Auto-installs its own dependencies (axe-core, Puppeteer)
+- Installs the complete managed graph when packages are missing or skill-local Puppeteer is stale
+- Managed graph excludes extract-zip; project/global fallback packages require their own dependency audit
+- Browser downloads need installation authority; skip-download requires a matching preinstalled browser
 
 ## Where it fits
 
@@ -36,20 +43,23 @@ live in `.agents/skills/`.
 
 Prompt: "Run an accessibility audit on this project."
 
-Or run scripts directly:
+Scripts below are relative to the installed skill directory; invoke them with Node.js.
+Argument names describe reviewed inputs, not literal placeholder values:
 
-- `scripts/discover.js --url <base-url> --group-map <route-group-map.json>` — discover pages using reviewed route groups or a conservative exact-page fallback
-- `scripts/select-changed-surfaces.js --discover <plan.json> --map <surface-map.json> --group-map <route-group-map.json> --changed-files <files.json>` — select mapped groups plus direct changed pages or retain the full sample
-- `scripts/scan.js --discover <discover.json>` — scan the representative discovery plan with axe-core
-- `scripts/scan.js --urls <url-list> --baseline <file> --fail-on new` — run a regression gate
-- `scripts/report.js --input <scan.json>` — generate markdown + JSON report
-- `scripts/report.js --input <scan.json> --standard wcag22-aa` — switch the evidence matrix (wcag21-aa, wcag22-aa, en301549)
+- `scripts/check-runtime.js`: verify the supported Node runtime
+- `scripts/run-audit.js`: execute a reviewed JSON request; `--dry-run` inspects it without writes or network
+- `scripts/discover.js`: use `--url` and optional `--group-map` for discovery
+- `scripts/select-changed-surfaces.js`: use `--discover`, `--map`, and `--changed-files` or Git `--base`/`--head`
+- `scripts/scan.js`: use `--discover` or `--urls`; `--baseline` with `--fail-on new` gates new findings
+- `scripts/report.js`: use `--input` and `--output-dir`; `--standard` selects wcag21-aa, wcag22-aa, or en301549
 
 ## Key files
 
 - [Assistant Guide](https://skilla11y.dev/.well-known/assistant-guide.txt): bounded assistant install, audit execution, and maintenance instructions
 - [SKILL.md](a11y-audit/SKILL.md): core skill instructions (agent-readable)
-- [scripts/](a11y-audit/scripts/): discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
+- [scripts/](a11y-audit/scripts/): check-runtime.js, run-audit.js, discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
+- [Runtime compatibility](a11y-audit/references/runtime-compatibility.md): Node floor, managed dependencies, browser acquisition, and upgrade behavior
+- [Interoperability adapter](a11y-audit/references/interoperability.md): strict JSON request, dry-run, stage results, and failure semantics
 - [changed-surface selection](a11y-audit/references/changed-surfaces.md): ownership-map format and conservative fallback contract
 - [route grouping](a11y-audit/references/route-grouping.md): route-pattern specificity and exact-page fallback contract
 - [references/output-contract.md](a11y-audit/references/output-contract.md): report format specification
@@ -60,26 +70,24 @@ Or run scripts directly:
 - [CHANGELOG.md](a11y-audit/CHANGELOG.md): version history
 - [MANIFEST.yaml](a11y-audit/MANIFEST.yaml): bundle inventory
 
-## Report sections
+## Report structure
 
-1. Executive Summary (severity counts)
-2. Findings by Rule (violation details, WCAG mapping)
-3. Quick Fixes (one-liner remediation per rule)
-4. Color Contrast Details (exact ratios and selectors)
-5. Standards Automated Evidence Matrix (WCAG 2.1 AA default, WCAG 2.2 AA, or EN 301 549 via --standard; not certification)
-6. Delta from Previous Audit (fixed, new, changed)
-7. Remediation Priority (ranked by severity)
-8. Sampling Strategy (template groups and coverage)
-9. Shared Template Patterns (which groups share issues)
+The report includes Header, Executive Summary, Automated Scan Results,
+the selected standard's automated evidence matrix, Manual Testing
+Recommendations, Remediation Priority, Issues Created, and Methodology.
+Comparable prior output adds Delta from Previous Audit. Findings, quick fixes,
+color contrast, sampling, and shared-template evidence are subsections when
+available. Empty or unsupported evidence is omitted or explicitly marked skipped.
 
 ## Output modes
 
-- `markdown` — report only
-- `markdown+json` — report + machine-readable data
-- `markdown+issues` — report + GitHub/GitLab/Linear/Jira tickets
+- `markdown`: report only
+- `markdown+json`: report + machine-readable data
+- `markdown+issues`: report + GitHub/GitLab/Linear/Jira tickets
 
-## Compatibility
+## Agent compatibility
 
-- Claude Code (tested, primary target)
-- OpenAI Codex (tested)
-- Any agent that reads markdown skill files
+- Claude Code and OpenAI Codex have bundled platform instructions.
+- Other agents can read the Markdown skill or invoke the JSON adapter.
+- Per-platform historical evidence lives in MANIFEST.yaml; this is not a claim
+  that every agent or model has been tested with v3.

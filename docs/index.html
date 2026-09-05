@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>skill-a11y-audit &mdash; Accessibility regression gates for large web estates</title>
+  <title>skill-a11y-audit: Accessibility regression gates for large web estates</title>
   <meta name="description" content="Open, self-hosted accessibility regression evidence for large web estates. Template-aware sampling and baseline-friendly CI prevent newly introduced barriers without requiring zero existing violations.">
   <meta name="keywords" content="skill-a11y-audit, accessibility audit, a11y, wcag 2.1 aa, wcag 2.2 aa, en 301 549, axe-core, ai agent skill, claude code, wcag audit, accessibility compliance, web accessibility, puppeteer">
   <meta name="author" content="Sam Rogers">
@@ -20,16 +20,16 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="skill-a11y-audit">
-  <meta property="og:title" content="skill-a11y-audit — Accessibility regression gates for large sites">
+  <meta property="og:title" content="skill-a11y-audit: Accessibility regression gates for large sites">
   <meta property="og:description" content="Template-aware accessibility evidence and legacy-friendly CI for large web estates.">
   <meta property="og:image" content="https://skilla11y.dev/imgs/og.png">
-  <meta property="og:image:alt" content="skill-a11y-audit — Zero-setup WCAG audits for AI agents">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="a11y-audit: Accessibility audit skill for Claude Code and Codex; axe-core, WCAG 2.1 AA, and Lighthouse.">
+  <meta property="og:image:width" content="1272">
+  <meta property="og:image:height" content="540">
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-08-09T00:00:00Z">
+  <meta property="article:modified_time" content="2026-09-05T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -41,7 +41,7 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="skill-a11y-audit — Accessibility regression gates for large sites">
+  <meta name="twitter:title" content="skill-a11y-audit: Accessibility regression gates for large sites">
   <meta name="twitter:description" content="Template-aware accessibility evidence and legacy-friendly CI for large web estates.">
   <meta name="twitter:image" content="https://skilla11y.dev/imgs/og.png">
   <meta name="twitter:creator" content="@snapsynapse">
@@ -52,13 +52,13 @@
     "@context": "https://schema.org",
     "@type": "TechArticle",
     "headline": "skill-a11y-audit",
-    "alternativeHeadline": "Zero-setup WCAG audits for AI agents",
+    "alternativeHeadline": "Accessibility regression gates for large web estates",
     "description": "skill-a11y-audit is an open, self-hosted accessibility regression gate for large web estates. It discovers representative templates, records selector-level axe evidence, and can fail CI only on newly introduced findings.",
     "inLanguage": "en",
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-08-09",
+    "dateModified": "2026-09-05",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -93,7 +93,7 @@
     "@type": "DefinedTerm",
     "name": "skill-a11y-audit",
     "alternateName": ["a11y-audit", "skill:a11y-audit", "accessibility audit skill"],
-    "description": "A Claude Code skill that performs accessibility audits on web projects using axe-core, with evidence matrices for WCAG 2.1 AA (default), WCAG 2.2 AA, and EN 301 549, template-aware page sampling, zero-configuration dependency resolution, and actionable remediation hints. Invoked by asking an AI agent to run an accessibility audit.",
+    "description": "A portable agent skill and JSON process adapter for accessibility regression evidence. Uses axe-core, template-aware sampling, accepted baselines, and WCAG or EN 301 549 evidence matrices. Version 3 requires Node.js 22.12.0 or later and uses managed Puppeteer 25.10.0.",
     "url": "https://skilla11y.dev/",
     "inDefinedTermSet": {
       "@type": "DefinedTermSet",
@@ -104,6 +104,24 @@
       "https://github.com/snapsynapse/skill-a11y-audit"
     ]
   }
+  </script>
+
+  <!-- JSON-LD: version and runtime contract -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "@id": "https://skilla11y.dev/#source-code",
+  "name": "skill-a11y-audit",
+  "version": "3.0.0",
+  "creativeWorkStatus": "Published",
+  "codeRepository": "https://github.com/snapsynapse/skill-a11y-audit",
+  "programmingLanguage": "JavaScript",
+  "runtimePlatform": "Node.js >=22.12.0",
+  "description": "Portable accessibility regression evidence with a JSON process adapter, managed Puppeteer 25.10.0, and axe-core 4.12.1.",
+  "license": "https://opensource.org/licenses/MIT",
+  "dateModified": "2026-09-05"
+}
   </script>
 
   <style>
@@ -218,7 +236,7 @@
       justify-content: center;
     }
     .byline .sep { color: var(--border); }
-    /* Underline byline links — accent vs text-muted contrast is too low to rely on color alone */
+    /* Underline byline links: accent vs text-muted contrast is too low to rely on color alone */
     .byline a { color: var(--text); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
     .byline a:hover { color: var(--accent-hover); text-decoration-color: var(--accent-hover); }
     .byline .version {
@@ -243,7 +261,7 @@
       color: var(--text-muted);
     }
     .canonical-note strong { color: var(--text); }
-    /* Underline inline links in canonical note — accent-on-muted contrast is insufficient */
+    /* Underline inline links in canonical note: accent-on-muted contrast is insufficient */
     .canonical-note a { text-decoration: underline; text-underline-offset: 2px; }
 
     /* Sections */
@@ -284,7 +302,7 @@
       border: 1px solid var(--border);
     }
 
-    /* Pipeline display — hero identity element */
+    /* Pipeline display: hero identity element */
     .pipeline {
       font-family: var(--mono);
       font-size: 1.1rem;
@@ -340,7 +358,7 @@
       font-size: 0.95rem;
       transition: background 0.15s, color 0.15s;
     }
-    /* White on #15803d = 4.95:1 — passes WCAG AA */
+    /* White on #15803d = 4.95:1: passes WCAG AA */
     .btn-primary { background: var(--accent); color: #ffffff; }
     .btn-primary:hover { background: var(--accent-hover); text-decoration: none; color: #ffffff; }
     .btn-secondary {
@@ -381,7 +399,7 @@
     }
     pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-    /* Explicit focus rings for buttons — browser default is invisible on blue bg */
+    /* Explicit focus rings for buttons: browser default is invisible on blue bg */
     .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
     .btn-primary:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
     code { font-family: var(--mono); font-size: 0.88em; color: var(--accent); }
@@ -405,7 +423,7 @@
     }
     .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
     .footer-meta p { margin-bottom: 0.25rem; }
-    /* Underline footer links — accent-on-muted contrast is insufficient */
+    /* Underline footer links: accent-on-muted contrast is insufficient */
     .footer-meta a { text-decoration: underline; text-underline-offset: 2px; }
     .footer-links a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--border); }
     .footer-links a:hover { text-decoration-color: var(--accent-hover); }
@@ -462,19 +480,20 @@
     <h1>Prevent new accessibility barriers across large web estates.</h1>
     <p class="subtitle">Open, self-hosted regression evidence for maintainers and coding agents. Template-aware sampling, stable findings, and legacy-friendly CI.</p>
     <p class="byline">
-      By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>
+      By <a href="https://linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
       Updated <time datetime="2026-09-05">September 5, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v2.8.1</span>
+      <span class="version">v3.0.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
+    <p class="annotation">v3.0.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0. <a href="https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.0.0">Read the release notes.</a> GitHub installs fetch main; the Action examples pin this release.</p>
     <p class="hook">Strict accessibility gates are hard to adopt when a site already has debt. skill-a11y-audit discovers representative templates, preserves selector-level evidence, and can block only newly introduced findings instead of demanding a perfect first run.</p>
 
-    <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1200" height="630">
+    <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1272" height="540">
 
     <div class="pipeline" role="img" tabindex="0" aria-label="Example: 746 pages found, identified 16 template groups, 22 pages selected for scanning">
       <span class="pipe-count">746</span><span class="pipe-step">&nbsp;pages found</span>
@@ -552,35 +571,42 @@
 <section class="alt" id="baseline">
   <div class="container">
     <h2>Adopt the gate without fixing everything first</h2>
-    <p class="fit-note">A baseline is an explicit record of accepted findings—not a claim that they are harmless. Review it, commit it, and let CI reject only newly introduced rule, route, and selector fingerprints.</p>
+    <p class="fit-note">A baseline is an explicit record of accepted findings; it is not a claim that they are harmless. Review it, commit it, and let CI reject only newly introduced rule, route, and selector fingerprints.</p>
     <div class="code-grid">
       <div class="code-block">
         <h3>1. Create a reviewed baseline</h3>
+<p class="annotation">Replace: TARGET_URL &rarr; reachable URL approved for this audit.</p>
+<p class="annotation">Customize</p>
 <pre tabindex="0">node a11y-audit/scripts/scan.js \
-  --urls http://127.0.0.1:3000/ \
+  --urls TARGET_URL \
   --write-baseline .a11y-audit/baseline.json</pre>
         <p class="annotation">Create or update this file only after reviewing the current findings.</p>
       </div>
       <div class="code-block">
         <h3>2. Block new barriers</h3>
+<p class="annotation">Replace: TARGET_URL &rarr; reachable URL approved for this audit.</p>
+<p class="annotation">Customize</p>
 <pre tabindex="0">node a11y-audit/scripts/scan.js \
-  --urls http://127.0.0.1:3000/ \
+  --urls TARGET_URL \
   --baseline .a11y-audit/baseline.json \
   --fail-on new</pre>
         <p class="annotation">The scan reports accepted, new, and resolved findings and guards axe-core version drift.</p>
       </div>
       <div class="code-block">
         <h3>3. Reuse the GitHub Action</h3>
-<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.1
+<p class="annotation">Replace: BUILD_DIR &rarr; repository-relative directory containing the built site.</p>
+<p class="annotation">Customize</p>
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
   with:
-    serve-path: dist
+    serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
     discover-group-map: .a11y-audit/route-group-map.json
     surface-map: .a11y-audit/surface-map.json
     changed-base: ${{ github.event.pull_request.base.sha }}
+    changed-head: ${{ github.event.pull_request.head.sha }}
     baseline: .a11y-audit/baseline.json
     fail-on: new</pre>
-        <p class="annotation">Reviewed route patterns group flat or irregular sites, and a schema-v2 ownership map can include the directly changed page when it already appears in discovery. Unsafe route grouping scans every discovered URL. Unsafe ownership, missing history, and shared-code rules retain the complete representative plan.</p>
+        <p class="annotation">Fetch full Git history before supplying base and head SHAs. The <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/assets/ci/github-actions/accessibility-audit.yml">workflow starter</a> includes that checkout setting. Reviewed route patterns group flat or irregular sites, and a schema-v2 ownership map can include the directly changed page when it already appears in discovery. Unsafe route grouping scans every discovered URL. Unsafe ownership, missing history, and shared-code rules retain the complete representative plan.</p>
       </div>
     </div>
   </div>
@@ -589,21 +615,30 @@
 <section id="install">
   <div class="container">
     <h2>Install</h2>
+    <p>Requires Node.js 22.12.0 or later. The v3 Action defaults to Node 22.</p>
+    <div class="canonical-note" id="runtime">
+      <h3>Upgrading from v2</h3>
+      <p>Upgrade Node before installing or scanning. The managed graph pins Puppeteer 25.10.0 and removes <code>extract-zip</code>. Existing stale skill-local Puppeteer is replaced through the committed lockfile. Project and global fallback packages need their own dependency review.</p>
+      <p>axe-core stays at 4.12.1. Review any changed findings before updating an accepted baseline. Browser installation downloads the matching Chrome; <code>PUPPETEER_SKIP_DOWNLOAD=true</code> requires that browser already available in the configured cache.</p>
+      <p><a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/runtime-compatibility.md">Read runtime and browser installation guidance.</a></p>
+    </div>
     <p>Options are listed from simplest to most manual. The recommended path is the reviewed assistant install: a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs.</p>
 
     <div class="code-grid">
       <div class="code-block">
         <h3>1. Reviewed assistant install (recommended)</h3>
+<p class="annotation">Literal</p>
 <pre tabindex="0">Fetch and verify
 https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify),
 report the achieved level and SHA-256,
 then follow its install action with my approval.</pre>
-        <p class="annotation">Paste into any coding agent. The guide is GuideCheck Level 3: the text you review is the text the assistant executes, every action needs your approval, and each script it runs is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first &mdash; it fits on one page.</p>
+        <p class="annotation">Paste into any coding agent. The guide is GuideCheck Level 3: the text you review is the text the assistant executes, every action needs your approval, and each script it runs is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first: it is under 8 KiB.</p>
       </div>
 
       <div class="code-block">
         <h3>2. Interactive install</h3>
+<p class="annotation">Literal</p>
 <pre tabindex="0">npx skills add \
   snapsynapse/skill-a11y-audit \
   --skill a11y-audit</pre>
@@ -612,6 +647,7 @@ then follow its install action with my approval.</pre>
 
       <div class="code-block">
         <h3>Try without installing</h3>
+<p class="annotation">Literal</p>
 <pre tabindex="0">npx skills use \
   snapsynapse/skill-a11y-audit \
   --skill a11y-audit</pre>
@@ -620,6 +656,7 @@ then follow its install action with my approval.</pre>
 
       <div class="code-block">
         <h3>3. Choose an agent</h3>
+<p class="annotation">Literal</p>
 <pre tabindex="0"># Claude Code, current project
 npx skills add \
   snapsynapse/skill-a11y-audit \
@@ -647,14 +684,17 @@ Codex personal: ~/.agents/skills/a11y-audit/</pre>
 
       <div class="code-block">
         <h3>Then: ask your coding agent</h3>
+<p class="annotation">Literal</p>
 <pre>Run an accessibility audit on this project.</pre>
         <p class="annotation">The skill runs discover &rarr; scan &rarr; report automatically.</p>
       </div>
 
       <div class="code-block">
         <h3>5. Run from a repository clone</h3>
+<p class="annotation">Replace: TARGET_URL &rarr; reachable URL approved for this audit.</p>
+<p class="annotation">Customize</p>
 <pre tabindex="0">node a11y-audit/scripts/discover.js \
-  --url http://localhost:3000 \
+  --url TARGET_URL \
   --output /tmp/discover.json
 
 node a11y-audit/scripts/scan.js \
@@ -736,8 +776,8 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v2.8.1 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
-        <p>By <a href="https://www.linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Used in every public web page across the <a href="https://paice.foundation/" target="_blank" rel="noopener">PAICE portfolio</a>.</p>
+        <p>skill-a11y-audit v3.0.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>By <a href="https://linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Open, self-hosted accessibility evidence for maintainers and coding agents.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>
       <div class="footer-links">
