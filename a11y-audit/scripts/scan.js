@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 10
+version: 11
 version_date: 2026-09-05
-previous_version: 9
+previous_version: 10
 change_summary: >
-  Makes scanner dependency acquisition atomic and retryable, adds actionable
-  timeout diagnostics, and exposes a bounded install-timeout control.
+  Enforces Node 22.12+, pins Puppeteer 25.10.0, and loads its ESM entry.
 */
 
 const fs = require('fs');
@@ -15,6 +14,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { execSync, spawnSync } = require('child_process');
+const { assertSupportedNode } = require('./check-runtime.js');
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -89,7 +89,7 @@ function validateBrowserLib(browserLib) {
 // the output JSON either way so report.js can flag cross-version deltas.
 const PINNED_VERSIONS = {
   'axe-core': '4.12.1',
-  puppeteer: '24.43.1',
+  puppeteer: '25.10.0',
 };
 
 const DEFAULT_INSTALL_TIMEOUT_MS = 120000;
@@ -119,10 +119,10 @@ function parsePositiveInteger(value, label) {
 // sitemaps into per-section files). find/replace runs before the recursion
 // fetch so the rewritten host is used for child sitemaps too. The exclude
 // regex applies only to leaf URLs, never to child-sitemap fetches.
-// Requires the global fetch (Node 18+); guards against pathological cycles.
+// Uses global fetch on the supported Node runtime; guards against cycles.
 async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}, _seen = new Set()) {
   if (typeof fetch !== 'function') {
-    throw new Error('Sitemap loading requires Node.js 18+ (global fetch).');
+    throw new Error('Sitemap loading requires global fetch on Node.js >=22.12.0.');
   }
   if (_seen.has(sitemapUrl)) return [];
   _seen.add(sitemapUrl);
@@ -374,10 +374,16 @@ function ensureDependencies(projectRoot, axeVersion, browserLib, timeoutMs) {
   const resolved = Object.fromEntries(
     Object.keys(requested).map((packageName) => [packageName, findPackage(packageName, projectRoot)])
   );
-  if (Object.values(resolved).every(Boolean)) return resolved;
+  const managedBrowser = resolved[browserLib];
+  const staleManagedBrowser = managedBrowser?.source === 'skill-deps' &&
+    readPkgVersion(managedBrowser.root) !== PINNED_VERSIONS[browserLib];
+  if (Object.values(resolved).every(Boolean) && !staleManagedBrowser) return resolved;
 
   const missing = Object.entries(resolved).filter(([, value]) => !value).map(([name]) => name);
-  console.error(`Missing ${missing.join(', ')}; installing the complete scanner dependency set to ${SKILL_DEPS_DIR}...`);
+  const reason = staleManagedBrowser
+    ? `Managed ${browserLib} does not match the pinned ${PINNED_VERSIONS[browserLib]}`
+    : `Missing ${missing.join(', ')}`;
+  console.error(`${reason}; installing the complete scanner dependency set to ${SKILL_DEPS_DIR}...`);
   fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
   installDependencySet({
     axeVersion,
@@ -400,6 +406,10 @@ function ensureDependencies(projectRoot, axeVersion, browserLib, timeoutMs) {
 // ---------------------------------------------------------------------------
 
 async function loadPuppeteer(packageRoot) {
+  const metadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+  if (metadata.type === 'module' && metadata.main) {
+    return import(pathToFileURL(path.join(packageRoot, metadata.main)).href);
+  }
   const entry = path.join(packageRoot, 'lib', 'esm', 'puppeteer', 'puppeteer.js');
   if (fs.existsSync(entry)) {
     return import(pathToFileURL(entry).href);
@@ -433,6 +443,7 @@ function summarizeAxe(axe) {
 // ---------------------------------------------------------------------------
 
 async function run() {
+  assertSupportedNode();
   const args = parseArgs(process.argv.slice(2));
   const rootDir = path.resolve(args.root || process.cwd());
   let urls = splitCsv(args.urls);

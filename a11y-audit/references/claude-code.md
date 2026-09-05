@@ -1,17 +1,24 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-03-03
-previous_version: null
+version: 2
+version_date: 2026-09-05
+previous_version: 1
 change_summary: >
-  Added Claude Code-specific instructions for dev-server discovery,
-  Preview tool usage, and workspace-local audit context storage.
+  Adds v3 runtime and managed browser installation guidance.
 ---
 
 # Claude Code Notes
 
 Use this file only when running the skill in Claude Code.
+
+## Runtime and installation
+
+Verify Node.js 22.12.0 or later before invoking the bundled helpers. Read
+`runtime-compatibility.md` when installing or upgrading the skill, changing
+browser caches, or using skip-download settings. Installation may replace
+stale skill-local Puppeteer and download Chrome; establish that scope before
+running a scan. The bundled scanner supports Puppeteer only.
 
 ## Dev Server Discovery
 

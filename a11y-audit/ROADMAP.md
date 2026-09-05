@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
+version: 4
 version_date: 2026-09-05
-previous_version: 2
+previous_version: 3
 change_summary: >
-  Moves shipped scan-time dependency resilience into the foundation and
-  advances the remaining product priorities.
+  Documents the v3 runtime contract and release validation gates.
 ---
 
 # Accessibility Audit Roadmap
@@ -38,6 +37,15 @@ conformance or automatically remediate application code.
 - Atomic locked scanner and Action dependency acquisition with bounded retries,
   actionable timeout diagnostics, and readiness timing isolated from fetches.
 
+## v3 runtime contract
+
+The Node 22.12+ and Puppeteer 25 migration removes `extract-zip` from the
+managed dependency graph. Existing stale skill-local Puppeteer installations
+are replaced through a locked reinstall before scanning. Project/global
+fallbacks remain externally managed.
+See `references/runtime-compatibility.md` for the compatibility contract and
+`../ops/v3.0.0-release-preparation.md` for validation evidence and release gates.
+
 ## Next priorities
 
 1. Authenticated deterministic journeys. Accept a Playwright storage state or
@@ -62,8 +70,9 @@ conformance or automatically remediate application code.
 - After the upstream resilience work ships, reassess whether consumers still
   need project-level `http-server` pins. Keep exact `axe-core` pins wherever
   baseline compatibility depends on the scanner version.
-- Re-review `GHSA-jmr9-qjv8-65gv` by 2026-11-30, when GitHub closes the alert,
-  or when the supported Node range permits a fixed browser dependency graph.
+- Confirm automatic closure of `GHSA-jmr9-qjv8-65gv` after the migrated
+  dependency graph reaches main. Record stale alert evidence if GitHub has
+  not recalculated; manual dismissal needs separate authorization.
 
 ## Explicit non-goals
 

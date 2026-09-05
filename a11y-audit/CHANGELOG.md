@@ -1,14 +1,58 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 38
+version: 39
 version_date: 2026-09-05
-previous_version: 37
+previous_version: 38
 change_summary: >
-  Releases v2.8.1 with deterministic scan-time dependency resilience.
+  Releases v3.0.0 runtime and browser security migration.
 ---
 
 # Changelog
+
+## v3.0.0 -- 2026-09-05
+
+- Breaking: root and scanner package metadata and lockfiles require Node.js
+  >=22.12.0. Node 18 and 20 support ends with this major version.
+- `deps/package.json`, `deps/package-lock.json`, and `scripts/scan.js`: pin
+  Puppeteer 25.10.0 with puppeteer-core 25.10.0 and browsers 3.2.2. The browser
+  installer uses `modern-tar`; `extract-zip` is absent from the managed graph.
+  Remove the obsolete GHSA-jmr9-qjv8-65gv audit exception from
+  `ops/audit-allowlist.json`. Project/global fallback dependencies remain
+  externally managed and outside this lockfile guarantee.
+- `scripts/check-runtime.js` and `scripts/scan.js`: reject unsupported Node
+  versions before acquisition or scanning and import Puppeteer's ESM entry
+  from package metadata. Replace stale skill-local Puppeteer installations
+  with the pinned locked graph before scanning.
+- `.github/actions/scan/action.yml`: default to Node 22, enforce the runtime
+  floor before npm installation, and isolate server bookkeeping in RUNNER_TEMP.
+- `.github/workflows/validate-skill.yml` and `pages.yml`: explicitly select
+  supported runtimes. Test Node 22.12.0, 22, 24, and 26; exercise real browsers
+  and isolated consumers on the floor, 24, and 26.
+- `scripts/test-action-consumer.mjs` and root package scripts: run the actual
+  Action shell steps from a clean external workspace and package directory,
+  testing fresh browser acquisition and skip-download cache reuse. Hosted
+  setup-node and artifact uploads remain separate CI checks.
+- `evals/run-evals.js`, `evals/run-browser-eval.js`, and `evals/evals.json`:
+  guard nested, optional, development, and aliased extractor reintroduction,
+  runtime boundaries, matching scanner pins, and real Puppeteer 25 execution.
+- `references/runtime-compatibility.md`, `SKILL.md`, `README.md`,
+  `CONTRIBUTING.md`, root and hosted `llms.txt`, `docs/index.html`, and the
+  Action starter: synchronize runtime requirements, migration guidance, and
+  v3 references. The release record documents the validation gates.
+- Root and hosted `assistant-guide.txt` plus its manifest: guide v0.3.13
+  declares the runtime floor and re-pins the changed scanner. Bundle
+  `MANIFEST.yaml` tracks changed file versions and SHA-256 hashes.
+
+- Documentation pass: align README dependency order, release identifiers,
+  historical field evidence, and manifest claims; document adapter acquisition
+  and both platform entry paths. Refresh the Codex prompt and both `llms.txt`
+  indexes, including accurate report structure and runtime/adapter links.
+- Website: add visible v3 upgrade guidance and SoftwareSourceCode metadata,
+  align modification dates and sitemap, complete the PR base/head example,
+  and align human-readable and machine-readable release information.
+- Guide v0.3.13: disclose managed Chrome downloads and stale Puppeteer
+  replacement, retaining the existing action approval and hash contracts.
 
 ## v2.8.1 -- 2026-09-05
 

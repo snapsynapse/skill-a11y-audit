@@ -71,6 +71,11 @@ Prefer bundled helpers over ad hoc generation when they fit:
 
 ### Dependencies
 
+Requires Node.js 22.12.0 or later. Run `node --version` before scanning;
+upgrade unsupported runtimes before dependency installation. The managed
+bundle pins Puppeteer 25.10.0. For browser cache, skip-download, and v3
+migration instructions, read `references/runtime-compatibility.md`.
+
 scan.js requires `axe-core` and `puppeteer`. It resolves these in order:
 
 1. **Skill-local** `deps/` directory (sibling to `scripts/`)
@@ -79,6 +84,8 @@ scan.js requires `axe-core` and `puppeteer`. It resolves these in order:
 
 If either package is not found anywhere, scan.js **auto-installs the complete
 scanner dependency set** to the skill-local `deps/` directory in one operation.
+An existing skill-local Puppeteer that differs from the pinned release also
+triggers this install, so old managed browser packages are replaced.
 The default versions use the committed lockfile through `npm ci`; a deliberate
 `--axe-version` override installs both requested versions without rewriting the
 committed manifests. Installs make three bounded attempts with backoff and omit
@@ -94,9 +101,9 @@ Each attempt defaults to 120000 milliseconds. Raise it with
 slow runner. Timeout diagnostics name the dependency set, elapsed time, limit,
 and setting; non-zero npm exits remain distinct.
 
-Because `scan.js` may auto-install missing dependencies, agents should
-ask before invoking scan.js when the target workspace does not already
-provide `axe-core` and the chosen browser automation package.
+Because `scan.js` may auto-install missing dependencies or replace stale
+skill-local Puppeteer, ask before invoking scan.js when that installation
+scope has not already been authorized. Include browser downloads in that scope.
 
 The bundled scanner supports Puppeteer only. Treat `--browser` as a
 fixed option, not a user-controlled package installer.
@@ -108,7 +115,7 @@ Puppeteer auto-installs to validated versions (`--axe-version
 scan records the resolved `axe_version` and `browser_version` in its
 output JSON, report.js carries `axe_version` into the audit JSON, and
 the Delta from Previous Audit section flags comparisons where the two
-audits ran different axe-core versions — rule-set drift between versions
+audits ran different axe-core versions; rule-set drift between versions
 must not be presented as site regressions or fixes. When a
 project-resolved axe-core wins the dependency lookup, its version is recorded
 the same way. Supplying only one dependency at project level does not suppress
@@ -226,7 +233,8 @@ The user can request a partial run. Common patterns:
    platform-specific references for launch hints. If the app starts on a
    different URL than expected, switch to the live URL, record the
    mismatch, and update the context file.
-5. Ask before installing any missing dependencies.
+5. Confirm Node.js 22.12.0 or later and installation authority for missing
+   dependencies, stale managed Puppeteer replacement, and browser downloads.
 
 **Output:** Structured summary reported to the user before proceeding.
 
@@ -278,12 +286,10 @@ an ad hoc script or run from the frontend directory directly.
 and the `__dirname` workaround in any ad hoc script. If absent,
 `require()` is fine.
 
-**Playwright alternative:** If the project uses Playwright instead of
-Puppeteer, adapt the script: replace `puppeteer.launch()` with
-`chromium.launch()`, use `page.goto()` the same way, and inject
-axe-core via `page.evaluate()`. The axe-core injection pattern is
-identical. Use whichever browser automation library the project already
-has installed.
+**Playwright alternative:** The bundled scanner accepts Puppeteer only. If
+a separately scoped audit uses an existing Playwright installation, write a
+project-local adapter and disclose that it is outside the validated bundled
+scanner path. Keep the installed skill and its pinned manifest intact.
 
 #### Lighthouse Scanning
 

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        node: ['22.12.0', '22', '24', '26']
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -40,7 +40,7 @@ jobs:
         run: npm run check:search
 
       - name: Audit root validation dependencies
-        if: matrix.node == 20
+        if: matrix.node == '22.12.0'
         run: npm run audit:deps
 
   guidecheck:
@@ -64,8 +64,12 @@ jobs:
         run: python3 .guidecheck/scripts/guidecheck_verify.py assistant-guide.txt --pretty
 
   browser-eval:
-    name: Real browser eval
+    name: Real browser eval (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.12.0', '24', '26']
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -75,10 +79,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node }}
 
       - name: Install pinned scanner dependencies
         run: npm ci --prefix a11y-audit/deps
+
+      - name: Test isolated external consumer
+        run: npm run eval:consumer
 
       - name: Audit scanner dependencies against the reviewed allowlist
         run: npm run audit:scanner

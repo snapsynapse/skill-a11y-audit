@@ -14,11 +14,19 @@ focused on:
 
 ## Before Opening a PR
 
-Run the same validation command used in the GitHub Actions workflow:
+Use Node.js 22.12.0 or later. The CI matrix includes the exact minimum.
 
+Run the same validation command used in the GitHub Actions workflow:
+Literal
 ```bash
 npm run validate
 ```
+
+For scanner runtime or dependency changes, also run `npm run eval:browser`
+and `npm run eval:consumer`. The consumer check needs Ruby, npm, network,
+and loopback access; it downloads Chrome into a temporary cache and executes
+the Action shell steps from a separate workspace. Hosted CI still validates
+setup-node, artifact uploads, and actual pull-request base/head objects.
 
 If you update bundle files, also keep these in sync:
 

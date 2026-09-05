@@ -12,16 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
 
       - name: Build site
         run: npm ci && npm run build
 
       - name: Scan affected representative templates
-        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.1
+        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
         with:
           serve-path: dist
           port: '8088'
@@ -37,6 +42,8 @@ jobs:
           selection-output: artifacts/a11y-selection.json
 
 # Adapt the build command, serve-path, and surface map to the target repository.
+# This v3 starter requires the v3.0.0 release tag. The scan runtime must be
+# Node 22.12.0 or later; the Action defaults to Node 22.
 # Copy route-group-map.example.json and surface-map.example.json into
 # .a11y-audit/, then replace their patterns, prefixes, and groups. Unsafe route
 # grouping scans every discovered URL; unsafe ownership keeps all selected

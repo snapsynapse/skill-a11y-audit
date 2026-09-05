@@ -109,9 +109,9 @@ inputs:
     required: false
     default: 'true'
   node-version:
-    description: Node.js version for the scan environment.
+    description: Node.js version for the scan environment (minimum 22.12.0).
     required: false
-    default: '20'
+    default: '22'
   install-timeout-ms:
     description: Maximum milliseconds for each scanner dependency install attempt.
     required: false
@@ -133,6 +133,10 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
+    - name: Check supported Node runtime
+      shell: bash
+      run: node "${{ github.action_path }}/../../../a11y-audit/scripts/check-runtime.js"
+
     - name: Prepare local http-server
       if: inputs.serve-path != ''
       shell: bash
@@ -150,12 +154,12 @@ runs:
         PORT: ${{ inputs.port }}
         SERVER_ROOT: ${{ github.action_path }}/../../../a11y-audit/deps
       run: |
-        "$SERVER_ROOT/node_modules/.bin/http-server" "$SERVE_PATH" -p "$PORT" -c-1 > /tmp/a11y-http.log 2>&1 &
-        echo $! > /tmp/a11y-http.pid
+        "$SERVER_ROOT/node_modules/.bin/http-server" "$SERVE_PATH" -p "$PORT" -c-1 > "$RUNNER_TEMP/a11y-http.log" 2>&1 &
+        echo $! > "$RUNNER_TEMP/a11y-http.pid"
         for i in $(seq 1 30); do
           curl -fs "http://localhost:$PORT/" > /dev/null && break || sleep 0.5
         done
-        curl -fs "http://localhost:$PORT/" > /dev/null || (cat /tmp/a11y-http.log; exit 1)
+        curl -fs "http://localhost:$PORT/" > /dev/null || (cat "$RUNNER_TEMP/a11y-http.log"; exit 1)
 
     - name: Discover representative templates
       if: inputs.discover-url != ''
@@ -238,7 +242,7 @@ runs:
       if: always() && inputs.serve-path != ''
       shell: bash
       run: |
-        if [ -f /tmp/a11y-http.pid ]; then kill "$(cat /tmp/a11y-http.pid)" 2>/dev/null || true; fi
+        if [ -f "$RUNNER_TEMP/a11y-http.pid" ]; then kill "$(cat "$RUNNER_TEMP/a11y-http.pid")" 2>/dev/null || true; fi
 
     - name: Upload results artifact
       if: always() && inputs.upload-artifact == 'true'

@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 38
+bundle_version: 39
 bundle_date: 2026-09-05
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -13,6 +13,7 @@ description: >
   .a11y-audit/PROJECT_CONTEXT.md file.
 
 compatibility:
+  node: ">=22.12.0"
   designed_for:
     platform: Portable skill bundle (Claude Code, Codex)
     surface: Code
@@ -191,31 +192,27 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 24
-    hash: sha256:189bfa5da410565317f57b741617adc92a056b575d989e679a6328a2584e1da4
-    note: >
-      v24 documents atomic dependency acquisition, retries, and timeout controls
+    version: 25
+    hash: sha256:043ab7200e3d78ef34c0da06b1f4ab174fd79643cdde92285b5e1ed14225600e
+    note: Aligns v3 installation authority and the bundled Puppeteer boundary
 
   - path: evals/evals.json
     role: evals
-    version: 21
-    hash: sha256:4d2f9214115d6ab85c4a40554930aa474e569f9c693a24f2c50eb08b8ec2abdf
-    note: >
-      21 eval cases including the vendor-neutral adapter contract
+    version: 22
+    hash: sha256:b0abe443ef30bb85866ba5960f9eee2251ba6866f8874c94014954e232bd0ea9
+    note: 22 eval cases including the runtime and dependency policy migration
 
   - path: ROADMAP.md
     role: reference
-    version: 3
-    hash: sha256:b2efa3b1477b95f076137613427f6f9f4ef5462be317a12f992ca65720fbafd2
-    note: >
-      Durable product boundary, priorities, standing validation, and non-goals
+    version: 4
+    hash: sha256:8a7e91c88097a486fca2b75078a97df86f45b8d3be6305a456bac04271144d9c
+    note: Documents the v3 runtime contract and release validation gates
 
   - path: CHANGELOG.md
     role: reference
-    version: 38
-    hash: sha256:f6cd9a9ba753ccb0b93dd5b4fbf8e9920c7db9f90a957b32ed6605b231d67784
-    note: >
-      Append-only history; v38 releases v2.8.1 dependency resilience
+    version: 39
+    hash: sha256:0ba130ee88a6cc1e89ba5a9f2a2bc42da388653165226f9bd31ae2a0130cf23c
+    note: Releases v3.0.0 runtime and browser security migration
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -225,16 +222,15 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 22
-    hash: sha256:bf519ac68a49af7ef80e1d6dd22f11db3d6a77bad7c0727c12e86cf0be162f42
-    note: >
-      v22 synchronizes v2.8.1 release and assistant-guide surfaces
+    version: 23
+    hash: sha256:2c4bddde2d784a78e672ac86dd5720a2b0069928b29b18db2847aeaa30600d13
+    note: Enforces extractor-free lockfiles and supported runtime contracts
 
   - path: evals/run-browser-eval.js
     role: evals
-    version: 1
-    hash: sha256:f47b024ea7725365a890027da77fac101712a734b9457d11bd5780beb4050bb7
-    note: Real Puppeteer and axe fixture scan with accepted-baseline rescan
+    version: 2
+    hash: sha256:47a45a7320b8b0c0314e7d86dab7cb93018e2cf18a2cae7748949546a9deeef0
+    note: Requires the real browser eval to exercise Puppeteer 25.10.0
 
   - path: evals/fixtures/eval-11/README.md
     role: evals
@@ -388,21 +384,21 @@ files:
 
   - path: references/claude-code.md
     role: reference
-    version: 1
-    hash: sha256:9a2f56eb21200a90653f753d1eeed4bef314f80eaf650b26363a4c3b243f7973
-    note: Claude Code-specific launch and Preview guidance
+    version: 2
+    hash: sha256:e2b2952ccf744a16d2ed9152196c773e6450b7926a6046eb83d08032e3d25dbf
+    note: Adds v3 runtime and managed browser installation guidance
 
   - path: references/codex.md
     role: reference
-    version: 1
-    hash: sha256:70e5dd148b9d92a6d287b513eb76ae352869a22c0fdc3cc53c9e604f284f51e0
-    note: Codex-specific workspace and execution guidance
+    version: 2
+    hash: sha256:b6df6b432b14b783139a57f7fd0cfe1c2adfba3fc05812c02d1116de04a5f0d3
+    note: Adds v3 runtime and managed browser installation guidance
 
   - path: references/interoperability.md
     role: reference
-    version: 1
-    hash: sha256:4dd90f134083fb0755aed38ea473afb00cb639b4a58f8ad405f361b99af1b2a9
-    note: Vendor-neutral JSON process adapter contract and examples
+    version: 2
+    hash: sha256:ba470e5a948404036cd0a1fc7355dabbf253afa8f06ed0bfdbf21a75dc4074e9
+    note: Documents scan-stage acquisition and the runtime compatibility contract
 
   - path: references/project-context-template.md
     role: reference
@@ -431,10 +427,9 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 10
-    hash: sha256:56f4c10e12b325966a38c91c0572a3f3fec33e658b81f52f4d33fd09b898fff7
-    note: >
-      v10 installs the complete dependency set with retries and timeout controls
+    version: 11
+    hash: sha256:ed85cad1714adaf34f02ffe93672bfd92c778c792e68cb35cb91099372cfc0fd
+    note: Enforces Node 22.12+, pins Puppeteer 25.10.0, and loads its ESM entry
 
   - path: scripts/run-audit.js
     role: script
@@ -481,14 +476,14 @@ files:
 
   - path: deps/package.json
     role: config
-    version: 3
-    hash: sha256:c62f30e6a1d47bb45ea44a4bed304886b4bd38704350ff9027a88599faac7d08
+    version: 4
+    hash: sha256:c3a03959c7273e5ed0d69518559083e5d0c985ebfb2753c3d59e13303358ed5f
     note: Exact validated axe-core, Puppeteer, and Action http-server dependencies
 
   - path: deps/package-lock.json
     role: config
-    version: 5
-    hash: sha256:b9d9b492550ca37227a10456d8762d7db1afb0d2abd1a82428bdaf65d76098dc
+    version: 6
+    hash: sha256:c2705d6ac3482da2828960ff7cea96ae4df6ce62386b18618b54b306d915705d
     note: Reproducible scanner and Action server dependency graph
 
   - path: assets/sample-output/audit-sample.md
@@ -511,9 +506,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 11
-    hash: sha256:f29a92a96713951cc3c1299cfa86f5801f71302e693129c6bfaccf8ddc507d84
-    note: v2.8.1 Action starter with dependency install timeout control
+    version: 12
+    hash: sha256:fd5ce1ff2c4f52ed2098d321e83dd5774ab622ed464638d20806187c6889e887
+    note: v3.0.0 Action starter with Node 22.12+ runtime requirement
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -529,9 +524,9 @@ files:
 
   - path: agents/openai.yaml
     role: agents
-    version: 4
-    hash: sha256:ba2ddbf3b7a675c0a2194187893abd67ae7e1bbc70d28eea72325b9900b4fe9b
-    note: Codex UI metadata includes reviewed route groups and changed pages
+    version: 5
+    hash: sha256:e6b9cb50ffe24484c8f1153df26f4c7699b0456fdcce129e1c06f2ff66c030c1
+    note: Prompts for the v3 Node floor and managed browser acquisition scope
 
   - path: references/changed-surfaces.md
     role: reference
@@ -613,6 +608,18 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 31
+    version: 32
     hash: null
-    note: v31 tracks the v2.8.0 release bundle; self-hash omitted
+    note: v32 tracks the v3.0.0 release bundle; self-hash omitted
+
+  - path: scripts/check-runtime.js
+    role: script
+    version: 1
+    hash: sha256:d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d
+    note: Reject unsupported Node before dependency installation
+
+  - path: references/runtime-compatibility.md
+    role: reference
+    version: 1
+    hash: sha256:5f5c88717af508c77b925e8c4478f3fda0016e1829300ad4f9663110e1fae4fc
+    note: v3 runtime, managed browser installation, and validation contract

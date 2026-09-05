@@ -542,5 +542,34 @@
         "The hosted consumer workflow carries a pull-request-only base/head lane for real GitHub event validation"
       ]
     }
+  },
+  {
+    "id": "eval-22",
+    "prompt": "Verify the v3 Node 22.12+ runtime floor and extractor-free managed dependency graph. Run the browser and external consumer evals on the exact minimum runtime.",
+    "expectations": {
+      "structural": [
+        "Root and scanner package metadata and lockfiles declare Node >=22.12.0",
+        "All owned CI setup-node selectors satisfy the floor; Pages declares its runtime",
+        "Neither lockfile contains extract-zip, including nested, optional, development, and aliased dependencies",
+        "The reusable Action defaults to Node 22 and rejects unsupported versions before npm ci"
+      ],
+      "behavioral": [
+        "Unsupported runtime versions fail with an actionable diagnostic",
+        "Puppeteer 25.10.0 detects the real fixture violation and retains accepted-baseline behavior",
+        "The actual Action shell steps run from an isolated consumer without inherited node_modules",
+        "Fresh managed browser installation and skip-download reuse of an already installed browser both pass",
+        "Stale skill-local Puppeteer metadata triggers a locked reinstall before the real scan"
+      ]
+    },
+    "results": {
+      "status": "partial",
+      "date": "2026-09-05",
+      "notes": [
+        "Node 22.12.0 local browser scan and accepted-baseline rescan passed with Puppeteer 25.10.0.",
+        "Isolated external Action shell steps passed fresh-cache acquisition and skip-download cache reuse on Node 22.12.0.",
+        "Stale managed Puppeteer metadata was replaced by a real locked reinstall, then scanned successfully on Node 22.12.0.",
+        "Hosted v3 setup-node, artifact upload, and PR base/head validation are required before release; see the release validation record."
+      ]
+    }
   }
 ]
