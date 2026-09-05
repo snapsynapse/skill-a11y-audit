@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.8.0)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.8.1)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -207,7 +207,7 @@ directly changed pages, compare against reviewed debt, and upload the scan,
 discovery plan, and selection evidence:
 
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.1
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/

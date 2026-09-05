@@ -1,12 +1,12 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 3
 version_date: 2026-09-05
-previous_version: 1
+previous_version: 2
 change_summary: >
-  Promotes verified scan-time dependency resilience work from the processed
-  handoff into the prioritized durable roadmap.
+  Moves shipped scan-time dependency resilience into the foundation and
+  advances the remaining product priorities.
 ---
 
 # Accessibility Audit Roadmap
@@ -35,23 +35,18 @@ conformance or automatically remediate application code.
   base and head objects.
 - A vendor-neutral JSON process adapter that composes discovery, selection,
   scanning, and report generation without changing the native artifacts.
+- Atomic locked scanner and Action dependency acquisition with bounded retries,
+  actionable timeout diagnostics, and readiness timing isolated from fetches.
 
 ## Next priorities
 
-1. Scan-time dependency resilience. Make dependency acquisition atomic and
-   deterministic on fresh runners: distinguish timeouts from non-zero exits,
-   retry transient installs with bounded backoff, avoid rewriting the committed
-   dependency manifest, expose the install timeout as configuration, and fetch
-   `http-server` before starting the readiness clock. Acceptance requires tests
-   for a slow or failing registry, a consumer that supplies only `axe-core`, and
-   an empty `deps/node_modules` consumer run.
-2. Authenticated deterministic journeys. Accept a Playwright storage state or
+1. Authenticated deterministic journeys. Accept a Playwright storage state or
    bounded journey file as scan input. Do not expand into an unconstrained
    browser agent.
-3. SARIF output. Add a repository-native emitter for organizations using
+2. SARIF output. Add a repository-native emitter for organizations using
    GitHub code scanning while preserving the existing JSON contract as the
    universal CI surface.
-4. First-class Playwright execution. Add it only where it improves
+3. First-class Playwright execution. Add it only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
 ## Standing validation work

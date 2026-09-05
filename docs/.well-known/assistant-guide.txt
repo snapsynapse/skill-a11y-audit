@@ -4,12 +4,12 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.10
-applies-to: skill-a11y-audit 2.7.x
+guide-version: 0.3.11
+applies-to: skill-a11y-audit 2.8.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
-last-reviewed: 2026-08-09
+last-reviewed: 2026-09-05
 reviewed-by: Snap Synapse LLC
 status: active
 recommended-verifier: https://guidecheck.org/verify
