@@ -1,16 +1,16 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 37
+version: 38
 version_date: 2026-09-05
-previous_version: 36
+previous_version: 37
 change_summary: >
-  Records unreleased scan-time dependency resilience work.
+  Releases v2.8.1 with deterministic scan-time dependency resilience.
 ---
 
 # Changelog
 
-## Unreleased
+## v2.8.1 -- 2026-09-05
 
 - Resolve the complete scanner dependency set atomically with the committed
   lockfile, retry transient failures with bounded backoff, and distinguish

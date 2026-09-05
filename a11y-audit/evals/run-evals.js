@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 21
+version: 22
 version_date: 2026-09-05
-previous_version: 20
+previous_version: 21
 change_summary: >
-  Adds deterministic scanner dependency resilience and Action fetch/readiness
-  regression coverage.
+  Synchronizes v2.8.1 release and assistant-guide version surfaces after the
+  dependency resilience regression coverage landed.
 */
 
 const assert = require('assert');
@@ -1056,7 +1056,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.1/);
   assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
   assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
   assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
@@ -1100,7 +1100,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.1/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
@@ -1203,7 +1203,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.10$/m);
+  assert.match(text, /^guide-version: 0\.3\.11$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -1230,7 +1230,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.10$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.11$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);

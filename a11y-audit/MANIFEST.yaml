@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 37
+bundle_version: 38
 bundle_date: 2026-09-05
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -205,17 +205,17 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 2
-    hash: sha256:5b55aa8dd039e3a356924dee9f8536c5f7eba5e96d4fc7702dff924181ec2fb8
+    version: 3
+    hash: sha256:b2efa3b1477b95f076137613427f6f9f4ef5462be317a12f992ca65720fbafd2
     note: >
       Durable product boundary, priorities, standing validation, and non-goals
 
   - path: CHANGELOG.md
     role: reference
-    version: 37
-    hash: sha256:b61a696ac95e0c538cbc6cefc0172fed096f26ce04c805f92d70a3ef2fb6ad6c
+    version: 38
+    hash: sha256:f6cd9a9ba753ccb0b93dd5b4fbf8e9920c7db9f90a957b32ed6605b231d67784
     note: >
-      Append-only history; v37 records unreleased dependency resilience work
+      Append-only history; v38 releases v2.8.1 dependency resilience
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -225,10 +225,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 21
-    hash: sha256:3f30e86d0ac16cd390e2083b89673bff98fb04e8563f8d975c0151283e6df917
+    version: 22
+    hash: sha256:bf519ac68a49af7ef80e1d6dd22f11db3d6a77bad7c0727c12e86cf0be162f42
     note: >
-      v21 adds dependency resilience and Action readiness regression coverage
+      v22 synchronizes v2.8.1 release and assistant-guide surfaces
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -511,9 +511,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 10
-    hash: sha256:dce2c2560b5c117a379845c366b133c7b01d5c111d1920ac46bf111a61e252ef
-    note: v2.8.0 Action starter with precise fallback terminology
+    version: 11
+    hash: sha256:f29a92a96713951cc3c1299cfa86f5801f71302e693129c6bfaccf8ddc507d84
+    note: v2.8.1 Action starter with dependency install timeout control
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
