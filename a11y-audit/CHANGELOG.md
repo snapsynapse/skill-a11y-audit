@@ -1,17 +1,17 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 35
-version_date: 2026-08-31
-previous_version: 34
+version: 36
+version_date: 2026-09-05
+previous_version: 35
 change_summary: >
-  Records the unreleased interoperability adapter, pull-request event
-  validation lane, and completed v2.7.0 field pilot.
+  Releases v2.8.0 with the interoperability adapter, hosted pull-request
+  validation, provider-variance evidence, and durable roadmap migration.
 ---
 
 # Changelog
 
-## Unreleased interoperability candidate -- 2026-08-31
+## v2.8.0 -- 2026-09-05
 
 - `scripts/run-audit.js`: add one schema-versioned JSON process boundary that
   composes discovery, changed-surface selection, scanning, and report
@@ -35,6 +35,12 @@ change_summary: >
 - Direct Community Access extension packaging remains deferred because the
   upstream packaging and bridge surfaces are still evolving. The JSON process
   boundary remains portable across agent ecosystems.
+- Hosted validation: PR #7 exercised real pull-request base and head objects;
+  all seven exact-head jobs passed, including the consumer Action, real-browser
+  eval, Node 18/20/22 matrix, GuideCheck, actionlint, and zizmor.
+- Documentation: publish the adapter on the README and canonical site, update
+  every public Action example to `v2.8.0`, migrate durable roadmap content to
+  `ROADMAP.md`, and delete the processed temporary handoff.
 
 ## v2.7.0 -- 2026-08-09
 

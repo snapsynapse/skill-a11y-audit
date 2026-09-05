@@ -1,7 +1,7 @@
 # Skill A11y Audit
 
 [![Validate Skill](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/snapsynapse/skill-a11y-audit/actions/workflows/validate-skill.yml)
-[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.7.0)
+[![Product release](https://img.shields.io/github/v/release/snapsynapse/skill-a11y-audit?filter=v*)](https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v2.8.0)
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -160,6 +160,23 @@ first run if they aren't already available. Add `--standard wcag22-aa`
 or `--standard en301549` to the report step to switch the evidence
 matrix (default: `wcag21-aa`).
 
+### Invoke the complete pipeline through one process
+
+CI runners and external agent systems can use the vendor-neutral JSON adapter
+instead of coordinating each helper separately. It preserves the native
+discovery, selection, scan, and report artifacts and records every stage exit
+code in a stable run envelope.
+
+Replace: REQUEST_JSON -> path to a reviewed adapter request
+Customize
+```text
+node a11y-audit/scripts/run-audit.js --config REQUEST_JSON
+```
+
+Use `--dry-run` to inspect the normalized execution plan without network,
+browser, or artifact writes. The complete request and result contract is in
+[`references/interoperability.md`](a11y-audit/references/interoperability.md).
+
 ### Adopt on a site with existing accessibility debt
 
 Create an accepted baseline after reviewing the current findings:
@@ -190,7 +207,7 @@ directly changed pages, compare against reviewed debt, and upload the scan,
 discovery plan, and selection evidence:
 
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.7.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v2.8.0
   with:
     serve-path: dist
     discover-url: http://127.0.0.1:8088/
@@ -306,6 +323,9 @@ surfaces move at different compatibility levels:
 Release notes should mention each identifier when more than one surface
 changes.
 
+Current product boundaries and prioritized follow-up work live in
+[`a11y-audit/ROADMAP.md`](a11y-audit/ROADMAP.md).
+
 ### Delta Tracking
 
 Pass a previous audit JSON to see progress:
@@ -337,6 +357,7 @@ Changed: color-contrast 26 → 2 (↓24)
 | `scripts/select-changed-surfaces.js` | Maps changed sources to groups and optional direct routes with full-sample fallback |
 | `scripts/scan.js` | axe-core scanning with self-contained dependency resolution |
 | `scripts/report.js` | Deterministic report generation (markdown + JSON) |
+| `scripts/run-audit.js` | Vendor-neutral JSON adapter for the complete audit pipeline |
 | `scripts/bootstrap-context.js` | Create workspace-local project configuration |
 | `scripts/plan-issues.js` | Dry-run issue planning for tracker integration |
 
@@ -371,7 +392,7 @@ a11y-audit/
   SKILL.md              # Core skill instructions (read by agents)
   MANIFEST.yaml         # Bundle inventory with versioned hashes
   CHANGELOG.md          # Version history
-  HANDOFF.md            # Current state and next steps
+  ROADMAP.md            # Durable product boundary and prioritized work
   scripts/              # Reusable Node.js helpers
   references/           # Output contract, platform notes, templates
   evals/                # Eval definitions and recorded results

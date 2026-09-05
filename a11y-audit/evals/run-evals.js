@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 19
-version_date: 2026-08-31
-previous_version: 18
+version: 20
+version_date: 2026-09-05
+previous_version: 19
 change_summary: >
-  Validates the vendor-neutral audit adapter, pull-request base/head
-  propagation, and explicit cross-provider advisory evidence.
+  Synchronizes v2.8.0 public surfaces, validates the durable roadmap, and
+  isolates temporary eval commits from global signing configuration.
 */
 
 const assert = require('assert');
@@ -216,7 +216,7 @@ function validateManifestIntegrity() {
 function validateYamlFiles() {
   const files = [
     'a11y-audit/SKILL.md',
-    'a11y-audit/HANDOFF.md',
+    'a11y-audit/ROADMAP.md',
     'a11y-audit/CHANGELOG.md',
     'a11y-audit/MANIFEST.yaml',
     'a11y-audit/references/claude-code.md',
@@ -593,7 +593,10 @@ function eval19ChangedSurfaceSelection() {
   const gitDir = path.join(dir, 'git-repository');
   fs.mkdirSync(path.join(gitDir, 'src', 'docs'), { recursive: true });
   const runGit = (args) => {
-    const run = spawnSync('git', args, { cwd: gitDir, encoding: 'utf8' });
+    const run = spawnSync('git', ['-c', 'commit.gpgsign=false', ...args], {
+      cwd: gitDir,
+      encoding: 'utf8',
+    });
     assert.strictEqual(run.status, 0, run.stderr || `git ${args.join(' ')} failed`);
     return run.stdout.trim();
   };
@@ -1013,7 +1016,10 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.7\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.0/);
+  assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
+  assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
+  assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
   assert.match(surfaces[2][1], /Prompt: "Run an accessibility audit on this project\."/);
   assert.match(surfaces[3][1], /Prompt: "Run an accessibility audit on this project\."/);
 }
@@ -1049,7 +1055,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.7\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v2\.8\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
