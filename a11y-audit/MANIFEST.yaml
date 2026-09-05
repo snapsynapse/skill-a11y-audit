@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 39
+bundle_version: 40
 bundle_date: 2026-09-05
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -198,8 +198,8 @@ files:
 
   - path: evals/evals.json
     role: evals
-    version: 22
-    hash: sha256:b0abe443ef30bb85866ba5960f9eee2251ba6866f8874c94014954e232bd0ea9
+    version: 23
+    hash: sha256:c3b2ad625ac50ce0ce13acffa87eee2dd5aa7eb155f184b654c3726d97a74819
     note: 22 eval cases including the runtime and dependency policy migration
 
   - path: ROADMAP.md
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 39
-    hash: sha256:0ba130ee88a6cc1e89ba5a9f2a2bc42da388653165226f9bd31ae2a0130cf23c
+    version: 40
+    hash: sha256:f091b2ea12f233e33eba904bdab22795cc3a4196e105d9c7669c6354e2a316cf
     note: Releases v3.0.0 runtime and browser security migration
 
   - path: evals/run-discover-fixture.js
@@ -608,9 +608,9 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 32
+    version: 33
     hash: null
-    note: v32 tracks the v3.0.0 release bundle; self-hash omitted
+    note: v33 tracks the v3.0.0 release bundle and hosted evidence; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script

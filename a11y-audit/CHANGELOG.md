@@ -1,9 +1,9 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 39
+version: 40
 version_date: 2026-09-05
-previous_version: 38
+previous_version: 39
 change_summary: >
   Releases v3.0.0 runtime and browser security migration.
 ---
@@ -53,6 +53,10 @@ change_summary: >
   and align human-readable and machine-readable release information.
 - Guide v0.3.13: disclose managed Chrome downloads and stale Puppeteer
   replacement, retaining the existing action approval and hash contracts.
+
+- Hosted validation: all ten PR jobs passed at candidate `7692920` in
+  run `33989560704`, including the exact Node floor, real browsers and
+  external consumers, and actual Action setup, upload, and PR selection.
 
 ## v2.8.1 -- 2026-09-05
 

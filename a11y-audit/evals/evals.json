@@ -562,13 +562,13 @@
       ]
     },
     "results": {
-      "status": "partial",
+      "status": "pass",
       "date": "2026-09-05",
       "notes": [
         "Node 22.12.0 local browser scan and accepted-baseline rescan passed with Puppeteer 25.10.0.",
         "Isolated external Action shell steps passed fresh-cache acquisition and skip-download cache reuse on Node 22.12.0.",
         "Stale managed Puppeteer metadata was replaced by a real locked reinstall, then scanned successfully on Node 22.12.0.",
-        "Hosted v3 setup-node, artifact upload, and PR base/head validation are required before release; see the release validation record."
+        "Hosted run 33989560704 at 769292060276f65e8ba3cf10400f46d1a8e4ebdc passed all ten jobs: deterministic Node 22.12.0/22/24/26, real browser and isolated consumers on 22.12.0/24/26, actual Action setup-node and artifact upload, PR base/head selection, GuideCheck, and workflow audits."
       ]
     }
   }
