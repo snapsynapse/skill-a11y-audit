@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 36
+bundle_version: 37
 bundle_date: 2026-09-05
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -191,10 +191,10 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 23
-    hash: sha256:da6f30c55c68fe089238e966be364ac84ac8063af8ea0c6c370cf1391f39f592
+    version: 24
+    hash: sha256:189bfa5da410565317f57b741617adc92a056b575d989e679a6328a2584e1da4
     note: >
-      v23 adds the portable adapter and interoperability reference pointers
+      v24 documents atomic dependency acquisition, retries, and timeout controls
 
   - path: evals/evals.json
     role: evals
@@ -205,17 +205,17 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 1
-    hash: sha256:8dfe1b8385a1b17ec5d030d0fe6f0d4be5d3186d0ce9bf373b2c54d0134a8c9e
+    version: 2
+    hash: sha256:5b55aa8dd039e3a356924dee9f8536c5f7eba5e96d4fc7702dff924181ec2fb8
     note: >
       Durable product boundary, priorities, standing validation, and non-goals
 
   - path: CHANGELOG.md
     role: reference
-    version: 36
-    hash: sha256:b381e7ab45f04c3e8bbd1eb4a4202d2483c0566df0a02a09f7260c57e7872d20
+    version: 37
+    hash: sha256:b61a696ac95e0c538cbc6cefc0172fed096f26ce04c805f92d70a3ef2fb6ad6c
     note: >
-      Append-only history; v36 releases the v2.8.0 interoperability adapter
+      Append-only history; v37 records unreleased dependency resilience work
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -225,10 +225,10 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 20
-    hash: sha256:64f443035facaae56cd9172e788feca6fe5d7aaa4b11d93a1e0496a41e879afd
+    version: 21
+    hash: sha256:3f30e86d0ac16cd390e2083b89673bff98fb04e8563f8d975c0151283e6df917
     note: >
-      v20 synchronizes v2.8.0 surfaces and isolates temporary commit signing
+      v21 adds dependency resilience and Action readiness regression coverage
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -431,10 +431,10 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 9
-    hash: sha256:b3dbe1d674cfe8528deb434b669f3a7cb3423754f444cee8787786c6df8a4cae
+    version: 10
+    hash: sha256:56f4c10e12b325966a38c91c0572a3f3fec33e658b81f52f4d33fd09b898fff7
     note: >
-      v9 pins tested Node 18-compatible Puppeteer 24.43.1
+      v10 installs the complete dependency set with retries and timeout controls
 
   - path: scripts/run-audit.js
     role: script
@@ -481,15 +481,15 @@ files:
 
   - path: deps/package.json
     role: config
-    version: 2
-    hash: sha256:ed71cb2f1b09f94a2ba7815f45eb7024a268d9731ec740d37f891f6bb63546bd
-    note: Exact validated axe-core and Puppeteer 24.43.1 scanner dependencies
+    version: 3
+    hash: sha256:c62f30e6a1d47bb45ea44a4bed304886b4bd38704350ff9027a88599faac7d08
+    note: Exact validated axe-core, Puppeteer, and Action http-server dependencies
 
   - path: deps/package-lock.json
     role: config
-    version: 4
-    hash: sha256:1206ce98b61a0b7c8e0c16e6b029692b288db8c5756c8b03679a49c4e1d240de
-    note: Reproducible scanner graph with patched js-yaml 4.3.1
+    version: 5
+    hash: sha256:b9d9b492550ca37227a10456d8762d7db1afb0d2abd1a82428bdaf65d76098dc
+    note: Reproducible scanner and Action server dependency graph
 
   - path: assets/sample-output/audit-sample.md
     role: asset

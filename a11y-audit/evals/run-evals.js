@@ -2,12 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 20
+version: 21
 version_date: 2026-09-05
-previous_version: 19
+previous_version: 20
 change_summary: >
-  Synchronizes v2.8.0 public surfaces, validates the durable roadmap, and
-  isolates temporary eval commits from global signing configuration.
+  Adds deterministic scanner dependency resilience and Action fetch/readiness
+  regression coverage.
 */
 
 const assert = require('assert');
@@ -458,9 +458,46 @@ function scannerBrowserValidation() {
     /Invalid --axe-version/
   );
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
-  assert.match(scanSource, /spawnSync\('npm', \['install', '--prefix', SKILL_DEPS_DIR, installSpec\]/);
+  assert.match(scanSource, /\['ci', '--prefix', SKILL_DEPS_DIR, '--no-audit', '--no-fund'\]/);
   assert.match(scanSource, /const PINNED_VERSIONS = \{[\s\S]*'axe-core': '4\.12\.1'/);
   assert.doesNotMatch(scanSource, /execSync\(`npm install/);
+}
+
+function scannerDependencyResilience() {
+  const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  assert.strictEqual(scan.parsePositiveInteger('240000', '--install-timeout-ms'), 240000);
+  assert.throws(() => scan.parsePositiveInteger('0', '--install-timeout-ms'), /positive integer/);
+
+  const calls = [];
+  const sleeps = [];
+  const outcomes = [
+    { status: null, signal: 'SIGTERM', error: { code: 'ETIMEDOUT' }, stderr: '' },
+    { status: 1, signal: null, stderr: 'registry unavailable' },
+    { status: 0, signal: null, stderr: '' },
+  ];
+  scan.installDependencySet({
+    timeoutMs: 54321,
+    spawn(command, args, options) {
+      calls.push({ command, args, options });
+      return outcomes.shift();
+    },
+    sleep(delay) { sleeps.push(delay); },
+  });
+  assert.strictEqual(calls.length, 3);
+  assert.deepStrictEqual(sleeps, [1000, 2000]);
+  assert.deepStrictEqual(calls[0].args, [
+    'ci', '--prefix', path.resolve(repoPath('a11y-audit/deps')), '--no-audit', '--no-fund',
+  ]);
+  assert.strictEqual(calls[0].options.timeout, 54321);
+
+  assert.throws(() => scan.installDependencySet({
+    timeoutMs: 10,
+    attempts: 1,
+    spawn() {
+      return { status: null, signal: 'SIGTERM', error: { code: 'ETIMEDOUT' }, stderr: '' };
+    },
+    sleep() {},
+  }), /timed out after .*raise --install-timeout-ms or A11Y_AUDIT_INSTALL_TIMEOUT_MS/);
 }
 
 function scannerDiscoverPlanRegression() {
@@ -987,10 +1024,13 @@ function issuePlanEscapingRegression() {
 function dependencyPolicyCheck() {
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
   const skill = fs.readFileSync(repoPath('a11y-audit/SKILL.md'), 'utf8');
-  assert.match(scanSource, /spawnSync\('npm'/);
+  assert.match(scanSource, /spawn\('npm', installArgs/);
+  assert.match(scanSource, /DEFAULT_INSTALL_ATTEMPTS = 3/);
   assert.match(scanSource, /skill-deps \(auto-installed\)/);
   assert.match(skill, /`scan\.js` may auto-install missing dependencies/);
   assert.match(skill, /ask before invoking scan\.js/);
+  assert.match(skill, /--install-timeout-ms/);
+  assert.match(skill, /complete\s+scanner dependency set/);
 }
 
 function installationSurfaceRegression() {
@@ -1044,10 +1084,15 @@ function reusableActionRegression() {
     'selection-output',
     'baseline',
     'fail-on',
+    'install-timeout-ms',
   ]) {
     assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
   }
-  assert.match(action, /http-server@14\.1\.1/);
+  assert.match(action, /cd "\$SERVER_ROOT"[\s\S]*npm ci --no-audit --no-fund/);
+  assert.match(action, /"\$SERVER_ROOT\/node_modules\/\.bin\/http-server"/);
+  assert.doesNotMatch(action, /npx --yes http-server/);
+  assert.doesNotMatch(action, /npm install/);
+  assert.match(action, /--install-timeout-ms "\$INSTALL_TIMEOUT_MS"/);
   assert.match(action, /scripts\/discover\.js/);
   assert.match(action, /scripts\/select-changed-surfaces\.js/);
   assert.match(action, /--discover "\$DISCOVER_OUTPUT"/);
@@ -1130,6 +1175,7 @@ function workflowSecurityRegression() {
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
+    'http-server': '14.1.1',
     puppeteer: '24.43.1',
   });
   const depsLock = readJson(repoPath('a11y-audit/deps/package-lock.json'));
@@ -1212,6 +1258,7 @@ test('eval-4 reports skipped Lighthouse without inventing scores', eval4SkippedL
 test('eval-11 reports page-aware delta movement', eval11ReportDelta);
 test('eval-15 renders matrices from pluggable standards data', eval15PluggableStandards);
 test('scan.js rejects unsupported browser package names before install', scannerBrowserValidation);
+test('scan.js retries atomic dependency installs with actionable timeout diagnostics', scannerDependencyResilience);
 test('scan.js consumes validated, deduplicated discover plans', scannerDiscoverPlanRegression);
 test('scan.js fingerprints and compares accepted accessibility baselines', scannerBaselineRegression);
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);

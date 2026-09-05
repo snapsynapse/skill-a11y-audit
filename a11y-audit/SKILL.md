@@ -77,10 +77,22 @@ scan.js requires `axe-core` and `puppeteer`. It resolves these in order:
 2. **Target project** `node_modules/` (and common workspace subdirs)
 3. **Global** npm modules
 
-If not found anywhere, scan.js **auto-installs** both packages to the
-skill-local `deps/` directory. This means the skill works against any
-project without requiring the target to have accessibility tooling
-installed. The `deps/` directory is gitignored.
+If either package is not found anywhere, scan.js **auto-installs the complete
+scanner dependency set** to the skill-local `deps/` directory in one operation.
+The default versions use the committed lockfile through `npm ci`; a deliberate
+`--axe-version` override installs both requested versions without rewriting the
+committed manifests. Installs make three bounded attempts with backoff and omit
+npm audit and funding network calls. The `deps/node_modules/` directory is
+gitignored.
+
+The same lockfile pins `http-server` for the reusable Action. When `serve-path`
+is set, the Action completes `npm ci` before starting the local server and its
+readiness clock; registry time cannot be misreported as server startup failure.
+
+Each attempt defaults to 120000 milliseconds. Raise it with
+`--install-timeout-ms <milliseconds>` or `A11Y_AUDIT_INSTALL_TIMEOUT_MS` on a
+slow runner. Timeout diagnostics name the dependency set, elapsed time, limit,
+and setting; non-zero npm exits remain distinct.
 
 Because `scan.js` may auto-install missing dependencies, agents should
 ask before invoking scan.js when the target workspace does not already
@@ -98,8 +110,10 @@ output JSON, report.js carries `axe_version` into the audit JSON, and
 the Delta from Previous Audit section flags comparisons where the two
 audits ran different axe-core versions — rule-set drift between versions
 must not be presented as site regressions or fixes. When a
-project-resolved axe-core wins the dependency lookup, its version is
-recorded the same way.
+project-resolved axe-core wins the dependency lookup, its version is recorded
+the same way. Supplying only one dependency at project level does not suppress
+installation of the missing package: the complete pinned set is installed
+skill-locally and used together.
 
 ### Platform-Specific References
 

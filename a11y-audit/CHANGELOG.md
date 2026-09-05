@@ -1,15 +1,25 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 36
+version: 37
 version_date: 2026-09-05
-previous_version: 35
+previous_version: 36
 change_summary: >
-  Releases v2.8.0 with the interoperability adapter, hosted pull-request
-  validation, provider-variance evidence, and durable roadmap migration.
+  Records unreleased scan-time dependency resilience work.
 ---
 
 # Changelog
+
+## Unreleased
+
+- Resolve the complete scanner dependency set atomically with the committed
+  lockfile, retry transient failures with bounded backoff, and distinguish
+  timeout diagnostics from non-zero npm exits.
+- Add `--install-timeout-ms` and `A11Y_AUDIT_INSTALL_TIMEOUT_MS` controls.
+- Install the composite Action's pinned `http-server` dependency from the
+  committed lockfile before starting the server-readiness clock.
+- Add deterministic regression coverage for slow registries, retries, atomic
+  installs, configurable timeouts, and Action fetch/readiness separation.
 
 ## v2.8.0 -- 2026-09-05
 

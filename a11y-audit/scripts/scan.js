@@ -2,13 +2,12 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 9
-version_date: 2026-07-21
-previous_version: 8
+version: 10
+version_date: 2026-09-05
+previous_version: 9
 change_summary: >
-  Synchronizes the tested Puppeteer 24.43.1 fallback while retaining Node 18
-  support and the existing discover-plan, URL-safety, and browser-cleanup
-  contract.
+  Makes scanner dependency acquisition atomic and retryable, adds actionable
+  timeout diagnostics, and exposes a bounded install-timeout control.
 */
 
 const fs = require('fs');
@@ -93,9 +92,20 @@ const PINNED_VERSIONS = {
   puppeteer: '24.43.1',
 };
 
+const DEFAULT_INSTALL_TIMEOUT_MS = 120000;
+const DEFAULT_INSTALL_ATTEMPTS = 3;
+
 function validateAxeVersion(value) {
   if (value === 'latest' || /^\d+\.\d+\.\d+(-[\w.]+)?$/.test(value)) return value;
   throw new Error(`Invalid --axe-version: ${value}. Use an exact version (e.g. 4.12.1) or "latest".`);
+}
+
+function parsePositiveInteger(value, label) {
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid ${label}: ${value}. Use a positive integer.`);
+  }
+  return parsed;
 }
 
 // ---------------------------------------------------------------------------
@@ -307,55 +317,82 @@ function readPkgVersion(packageRoot) {
   }
 }
 
-function ensureDependency(packageName, projectRoot, installVersion) {
-  if (!/^(@[a-z0-9._-]+\/)?[a-z0-9._-]+$/i.test(packageName)) {
-    console.error(`Invalid package name: ${packageName}`);
-    process.exit(1);
-  }
+function sleepSync(delayMs) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+}
 
-  const found = findPackage(packageName, projectRoot);
-  if (found) return found;
+function installDependencySet({
+  axeVersion = PINNED_VERSIONS['axe-core'],
+  browserLib = 'puppeteer',
+  browserVersion = PINNED_VERSIONS.puppeteer,
+  timeoutMs = DEFAULT_INSTALL_TIMEOUT_MS,
+  attempts = DEFAULT_INSTALL_ATTEMPTS,
+  spawn = spawnSync,
+  sleep = sleepSync,
+} = {}) {
+  const useLockfile = axeVersion === PINNED_VERSIONS['axe-core'] &&
+    browserLib === 'puppeteer' && browserVersion === PINNED_VERSIONS.puppeteer;
+  const installArgs = useLockfile
+    ? ['ci', '--prefix', SKILL_DEPS_DIR, '--no-audit', '--no-fund']
+    : [
+      'install', '--prefix', SKILL_DEPS_DIR, '--no-save', '--package-lock=false',
+      '--no-audit', '--no-fund',
+      `axe-core@${axeVersion}`, `${browserLib}@${browserVersion}`,
+    ];
+  const dependencyLabel = `axe-core@${axeVersion} and ${browserLib}@${browserVersion}`;
 
-  // Auto-install to skill-local deps directory, pinned when a known-good
-  // version is defined ("latest" falls through to the npm dist-tag).
-  const installSpec = installVersion && installVersion !== 'latest'
-    ? `${packageName}@${installVersion}`
-    : packageName;
-  console.error(`${packageName} not found — installing ${installSpec} to ${SKILL_DEPS_DIR}...`);
-  fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
-
-  // Create a minimal package.json if it doesn't exist
-  const depsPackageJson = path.join(SKILL_DEPS_DIR, 'package.json');
-  if (!fs.existsSync(depsPackageJson)) {
-    fs.writeFileSync(depsPackageJson, JSON.stringify({
-      name: 'a11y-audit-deps',
-      version: '1.0.0',
-      private: true,
-      description: 'Auto-managed dependencies for a11y-audit skill scripts',
-    }, null, 2));
-  }
-
-  try {
-    const install = spawnSync('npm', ['install', '--prefix', SKILL_DEPS_DIR, installSpec], {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const startedAt = Date.now();
+    const install = spawn('npm', installArgs, {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 120000,
+      timeout: timeoutMs,
     });
-    if (install.status !== 0) {
-      throw new Error(install.stderr || install.stdout || `npm install exited with ${install.status}`);
-    }
-  } catch (err) {
-    console.error(`Failed to install ${packageName}: ${err.message}`);
-    process.exit(1);
-  }
+    const elapsedMs = Date.now() - startedAt;
+    const timedOut = install?.error?.code === 'ETIMEDOUT' || install?.signal === 'SIGTERM';
+    if (install?.status === 0) return;
 
-  const installed = findPackageIn(SKILL_DEPS_DIR, packageName);
-  if (!installed) {
-    console.error(`${packageName} installed but not found at expected path`);
-    process.exit(1);
+    const setting = '--install-timeout-ms or A11Y_AUDIT_INSTALL_TIMEOUT_MS';
+    const detail = timedOut
+      ? `timed out after ${elapsedMs}ms (limit ${timeoutMs}ms; raise ${setting})`
+      : `exited with status ${install?.status ?? 'unknown'} after ${elapsedMs}ms`;
+    const output = String(install?.stderr || install?.stdout || '').trim();
+    if (attempt === attempts) {
+      throw new Error(`Failed to install ${dependencyLabel}: ${detail}${output ? `: ${output}` : ''}`);
+    }
+    const backoffMs = 1000 * (2 ** (attempt - 1));
+    console.error(`Dependency install attempt ${attempt}/${attempts} ${detail}; retrying in ${backoffMs}ms...`);
+    sleep(backoffMs);
   }
-  console.error(`${packageName} installed successfully`);
-  return { root: installed, source: 'skill-deps (auto-installed)' };
+}
+
+function ensureDependencies(projectRoot, axeVersion, browserLib, timeoutMs) {
+  const requested = {
+    'axe-core': axeVersion,
+    [browserLib]: PINNED_VERSIONS[browserLib],
+  };
+  const resolved = Object.fromEntries(
+    Object.keys(requested).map((packageName) => [packageName, findPackage(packageName, projectRoot)])
+  );
+  if (Object.values(resolved).every(Boolean)) return resolved;
+
+  const missing = Object.entries(resolved).filter(([, value]) => !value).map(([name]) => name);
+  console.error(`Missing ${missing.join(', ')}; installing the complete scanner dependency set to ${SKILL_DEPS_DIR}...`);
+  fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
+  installDependencySet({
+    axeVersion,
+    browserLib,
+    browserVersion: PINNED_VERSIONS[browserLib],
+    timeoutMs,
+  });
+
+  for (const packageName of Object.keys(requested)) {
+    const installed = findPackageIn(SKILL_DEPS_DIR, packageName);
+    if (!installed) throw new Error(`${packageName} installed but not found at expected path`);
+    resolved[packageName] = { root: installed, source: 'skill-deps (auto-installed)' };
+  }
+  console.error('Scanner dependency set installed successfully');
+  return resolved;
 }
 
 // ---------------------------------------------------------------------------
@@ -435,6 +472,16 @@ async function run() {
       process.exit(1);
     }
   }
+  let installTimeoutMs;
+  try {
+    installTimeoutMs = parsePositiveInteger(
+      args['install-timeout-ms'] || process.env.A11Y_AUDIT_INSTALL_TIMEOUT_MS || DEFAULT_INSTALL_TIMEOUT_MS,
+      '--install-timeout-ms'
+    );
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
 
   if (args.sitemap && typeof args.sitemap === 'string') {
     try {
@@ -458,13 +505,21 @@ async function run() {
   }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|new|none]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|new|none]');
     process.exit(1);
   }
 
-  // Resolve dependencies (skill-local → project → global → auto-install)
-  const axeDep = ensureDependency('axe-core', rootDir, axeInstallVersion);
-  const browserDep = ensureDependency(browserLib, rootDir, PINNED_VERSIONS[browserLib]);
+  // Resolve the complete set before scanning so one dependency's project-level
+  // availability cannot suppress installation of another.
+  let dependencies;
+  try {
+    dependencies = ensureDependencies(rootDir, axeInstallVersion, browserLib, installTimeoutMs);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+  const axeDep = dependencies['axe-core'];
+  const browserDep = dependencies[browserLib];
 
   const axeVersion = readPkgVersion(axeDep.root);
   const browserVersion = readPkgVersion(browserDep.root);
@@ -615,6 +670,8 @@ module.exports = {
   loadUrlsFromDiscoverPlan,
   validateBrowserLib,
   validateAxeVersion,
+  parsePositiveInteger,
+  installDependencySet,
   loadUrlsFromSitemap,
   countViolations,
   normalizeRoute,

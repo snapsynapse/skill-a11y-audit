@@ -217,6 +217,7 @@ discovery plan, and selection evidence:
     changed-head: ${{ github.event.pull_request.head.sha }}
     baseline: .a11y-audit/baseline.json
     fail-on: new
+    install-timeout-ms: 120000
     output: artifacts/a11y-scan.json
     discover-output: artifacts/a11y-discover.json
     selection-output: artifacts/a11y-selection.json
