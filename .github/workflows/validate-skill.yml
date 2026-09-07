@@ -84,6 +84,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Install CLI consumer validation dependencies
+        run: npm ci --ignore-scripts
+
       - name: Install pinned scanner dependencies
         run: npm ci --prefix a11y-audit/deps
 
