@@ -8,6 +8,7 @@ const root = process.cwd();
 const source = path.join(root, 'docs');
 const output = path.join(root, '_site');
 const schemaSource = path.join(root, 'a11y-audit/references/output-schema.json');
+const cliSchemaSource = path.join(root, 'a11y-audit/references/cli-result-schema.json');
 const allowedHiddenFiles = new Set([
   '.nojekyll',
   '.well-known/assistant-guide-manifest.txt',
@@ -41,5 +42,6 @@ fs.rmSync(output, { recursive: true, force: true });
 fs.cpSync(source, output, { recursive: true });
 fs.mkdirSync(path.join(output, 'schema'), { recursive: true });
 fs.copyFileSync(schemaSource, path.join(output, 'schema/audit-v1.json'));
+fs.copyFileSync(cliSchemaSource, path.join(output, 'schema/cli-result-posix-json-v1.json'));
 
 console.log(`build-site: staged ${path.relative(root, output)} with ${hiddenFiles.length} reviewed hidden files`);

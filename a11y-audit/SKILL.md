@@ -67,7 +67,9 @@ Prefer bundled helpers over ad hoc generation when they fit:
 - `scripts/run-audit.js` is the vendor-neutral process adapter for external
   agent systems and CI runners that need one JSON request to compose discovery,
   selection, scanning, and report generation. Read
-  `references/interoperability.md` when configuring that boundary.
+  `references/interoperability.md` when configuring that boundary. For the
+  opt-in terminal JSON and exit-status pilot, read `references/cli-contract.md`
+  before selecting `--contract posix-json-v1`.
 
 ### Dependencies
 

@@ -37,7 +37,9 @@
     "eval": "node a11y-audit/evals/run-evals.js",
     "eval:browser": "node a11y-audit/evals/run-browser-eval.js",
     "validate": "node a11y-audit/evals/run-evals.js --validate",
-    "eval:consumer": "node scripts/test-action-consumer.mjs"
+    "eval:consumer": "node scripts/test-action-consumer.mjs",
+    "eval:cli": "node a11y-audit/evals/test-cli-contract.js",
+    "eval:cli:consumer": "node scripts/test-cli-contract-consumer.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

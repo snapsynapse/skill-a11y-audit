@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/**'
       - 'a11y-audit/references/output-schema.json'
+      - 'a11y-audit/references/cli-result-schema.json'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

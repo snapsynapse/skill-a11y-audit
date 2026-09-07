@@ -190,6 +190,23 @@ Use `--dry-run` to inspect the normalized execution plan without network,
 browser, or artifact writes. The complete request and result contract is in
 [`references/interoperability.md`](a11y-audit/references/interoperability.md).
 
+### Pilot the machine-readable CLI contract
+
+The adapter has an experimental opt-in contract for automation. Select it
+explicitly with `--contract posix-json-v1`; existing invocations keep their
+current output and exit behavior. The terminal result separates operational
+completion from gate acceptance and retains report evidence when a gate fails.
+
+Replace: REQUEST_JSON -> path to the reviewed adapter request file
+Customize
+```bash
+node a11y-audit/scripts/run-audit.js --config REQUEST_JSON --contract posix-json-v1
+```
+Read the [CLI contract](a11y-audit/references/cli-contract.md) and its
+[result schema](a11y-audit/references/cli-result-schema.json) before consuming
+this pilot interface. A11y is the first pilot; this is not a claim of
+portfolio-wide adoption. Reporting mode does not certify an accessibility pass.
+
 ### Enforce a zero-major-findings bar
 
 Use `--fail-on major` to fail on any current critical or serious standards

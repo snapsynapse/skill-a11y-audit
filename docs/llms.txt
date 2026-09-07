@@ -60,6 +60,8 @@ Argument names describe reviewed inputs, not literal placeholder values:
 - [scripts](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/scripts): check-runtime.js, run-audit.js, discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
 - [Runtime compatibility](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/runtime-compatibility.md): Node floor, managed dependencies, browser acquisition, and upgrade behavior
 - [Interoperability adapter](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/interoperability.md): strict JSON request, dry-run, stage results, and failure semantics
+- [CLI contract pilot](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/cli-contract.md): explicit `--contract posix-json-v1`, terminal JSON, gate outcomes and operational failures; legacy behavior remains available
+- [CLI result schema](https://skilla11y.dev/schema/cli-result-posix-json-v1.json): terminal result schema for the explicitly selected experimental contract
 - [changed-surface selection](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/changed-surfaces.md): ownership-map format and conservative fallback contract
 - [route grouping](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/route-grouping.md): route-pattern specificity and exact-page fallback contract
 - [output contract](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/output-contract.md): report format specification

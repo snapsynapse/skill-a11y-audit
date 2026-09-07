@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 41
+bundle_version: 42
 bundle_date: 2026-09-07
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -192,8 +192,8 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 26
-    hash: sha256:be03015f02634a974b61f4745791e29cab46aefec24b5de6e75132e0b624eefc
+    version: 27
+    hash: sha256:a5dc626fb7d44aa3d2778cf173a2697c1df6c3c127eb5156c296f4b6dbe05973
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
@@ -204,14 +204,14 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 5
-    hash: sha256:0dc64403fa27d4ece72c32d8c99603f312634cd408ee25b9c032657738e612a9
+    version: 6
+    hash: sha256:f13cb89256ca1802e8e9800d09e1f4554e0c21b1c3f355fdc2dc8d3ed32443ca
     note: Reconciles v3 delivery and scopes the v3.1 candidate
 
   - path: CHANGELOG.md
     role: reference
-    version: 41
-    hash: sha256:c22ded53ac0c4f43b1d52698926b43e471181e4c422aadf015ac10483a2fa6e3
+    version: 42
+    hash: sha256:9c7be7a79867eba830ee624f2efddd504da9e7613cd8f49cb71f687ccd7241c9
     note: Records the unreleased major-findings acceptance gate
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 24
-    hash: sha256:092f55534e4a4afecc34bed6372221bc3a49d16ed12747c3f626592fe43abf0b
+    version: 25
+    hash: sha256:988918ecc15951752fbfa95a4b1fbe7c7ab2143b08e6feab4a77ae6e7f895da8
     note: Covers major-gate pass, fail, and inconclusive semantics
 
   - path: evals/run-browser-eval.js
@@ -396,8 +396,8 @@ files:
 
   - path: references/interoperability.md
     role: reference
-    version: 3
-    hash: sha256:6ed738a1d9ad55b8874801e596981c8514b570f3c01988af588ad21e5a867c4e
+    version: 4
+    hash: sha256:943cb57e588ab181e9dafcf09a6290d244bcf0d2a1508c6057d8511ca7dd3096
     note: Documents the additive major-findings acceptance mode
 
   - path: references/project-context-template.md
@@ -432,8 +432,8 @@ files:
 
   - path: scripts/run-audit.js
     role: script
-    version: 2
-    hash: sha256:a75b3001833ee0cdb0973919f9deeccce5e0efdba824ef7ac1350b4c8653fd65
+    version: 3
+    hash: sha256:ce7a6dd36fea7340fd6ccdcb54c35d6f2eebe91c492f3b986bf3478f77fe98da
     note: Forwards the additive major-findings gate
 
   - path: scripts/bootstrap-context.js
@@ -627,3 +627,21 @@ files:
     version: 1
     hash: sha256:5f5c88717af508c77b925e8c4478f3fda0016e1829300ad4f9663110e1fae4fc
     note: v3 runtime, managed browser installation, and validation contract
+
+  - path: references/cli-contract.md
+    role: reference
+    version: 1
+    hash: sha256:8d44bc460bfe8fbce9e099b6919ca085e5fbf89b1cfb2415035fd8f3948b5c11
+    note: Experimental CLI contract and compatibility boundary
+
+  - path: references/cli-result-schema.json
+    role: reference
+    version: 1
+    hash: sha256:3a27a38c5a0d77958615c54f032db986ba1b914602ebd3bbfd8be65c87bc1486
+    note: Terminal CLI result schema
+
+  - path: evals/test-cli-contract.js
+    role: evals
+    version: 1
+    hash: sha256:5d9e55b5f3eac8c574a80c0e122ded99d973151c43114b70c2bb2ef93a3ea922
+    note: Deterministic CLI contract and legacy compatibility cases

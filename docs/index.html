@@ -707,6 +707,7 @@ node a11y-audit/scripts/report.js \
   --output-dir ./audits</pre>
         <p class="annotation">These paths assume the repository is cloned locally. Each script writes JSON the next step reads.</p>
         <p class="annotation">External runners can instead invoke <code>scripts/run-audit.js</code> with one reviewed JSON request. <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/interoperability.md" target="_blank" rel="noopener">Read the interoperability contract.</a></p>
+        <p class="annotation">For automation, the experimental <code>--contract posix-json-v1</code> adapter mode emits one terminal JSON result and keeps operational failures distinct from gate outcomes. Existing commands keep their defaults. <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/cli-contract.md" target="_blank" rel="noopener">Read the opt-in CLI contract.</a></p>
       </div>
     </div>
   </div>

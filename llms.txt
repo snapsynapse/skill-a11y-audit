@@ -60,6 +60,7 @@ Argument names describe reviewed inputs, not literal placeholder values:
 - [scripts/](a11y-audit/scripts/): check-runtime.js, run-audit.js, discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
 - [Runtime compatibility](a11y-audit/references/runtime-compatibility.md): Node floor, managed dependencies, browser acquisition, and upgrade behavior
 - [Interoperability adapter](a11y-audit/references/interoperability.md): strict JSON request, dry-run, stage results, and failure semantics
+- [CLI contract pilot](a11y-audit/references/cli-contract.md): explicit `--contract posix-json-v1`, terminal JSON, gate outcomes and operational failures; legacy behavior remains available
 - [changed-surface selection](a11y-audit/references/changed-surfaces.md): ownership-map format and conservative fallback contract
 - [route grouping](a11y-audit/references/route-grouping.md): route-pattern specificity and exact-page fallback contract
 - [references/output-contract.md](a11y-audit/references/output-contract.md): report format specification

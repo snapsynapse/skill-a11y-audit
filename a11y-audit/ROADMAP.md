@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 5
+version: 6
 version_date: 2026-09-07
-previous_version: 4
+previous_version: 5
 change_summary: >
-  Reconciles the v3 release and scopes the v3.1 major-findings gate.
+  Adds the bounded CLI contract pilot to the v3.1 candidate.
 ---
 
 # Accessibility Audit Roadmap
@@ -58,6 +58,12 @@ reported findings, treats moderate, minor, and explicitly best-practice-only
 rules as nonblocking, and never lets a baseline suppress an existing major
 finding. Unknown severity and high-impact incomplete candidates remain
 inconclusive until reviewed. See `../ops/dependency-readiness-2026-09-07.md`.
+
+The same candidate pilots an explicit `posix-json-v1` adapter contract. It
+separates operational status from gate outcomes, defines terminal JSON, and
+retains legacy behavior. See `references/cli-contract.md`. GuideCheck and
+Portfolio CLI adoption are later consumers of the pilot findings, not release
+prerequisites for A11y.
 
 ## Next priorities
 

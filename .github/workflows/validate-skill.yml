@@ -33,6 +33,9 @@ jobs:
       - name: Validate skill bundle
         run: npm run validate
 
+      - name: Verify opt-in CLI contract
+        run: npm run eval:cli
+
       - name: Stage Pages artifact
         run: npm run build:site
 
@@ -92,6 +95,9 @@ jobs:
 
       - name: Run real browser and baseline eval
         run: npm run eval:browser
+
+      - name: Verify CLI contract through an external consumer
+        run: npm run eval:cli:consumer
 
   action-consumer:
     name: Consumer Action smoke test

@@ -1,16 +1,29 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 41
+version: 42
 version_date: 2026-09-07
-previous_version: 40
+previous_version: 41
 change_summary: >
-  Records the unreleased major-findings acceptance gate.
+  Records the opt-in CLI contract pilot and its compatibility evidence.
 ---
 
 # Changelog
 
 ## Unreleased
+
+- Add an experimental `--contract posix-json-v1` path to `scripts/run-audit.js`
+  while existing invocations preserve their native
+  output and exit behavior. The new mode emits terminal JSON, separates gate
+  outcomes from operational failures, and finishes reports after gate rejection.
+- Define the pilot in `references/cli-contract.md` and
+  `references/cli-result-schema.json`; link it from `SKILL.md`,
+  `references/interoperability.md`, README and `ROADMAP.md`.
+- Add deterministic process, error, stream and legacy cases in
+  `evals/test-cli-contract.js`, syntax coverage in `evals/run-evals.js`, and
+  real external adapter checks in `scripts/test-cli-contract-consumer.mjs`.
+  The existing validation workflow runs both CLI test entrypoints.
+- Refresh `MANIFEST.yaml` inventory, headers and hashes for the pilot files.
 
 - Add `--fail-on major` for a zero-current-critical-or-serious acceptance bar.
   Moderate, minor, and explicitly best-practice-only findings remain visible

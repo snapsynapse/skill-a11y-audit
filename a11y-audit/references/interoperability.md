@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
+version: 4
 version_date: 2026-09-07
-previous_version: 2
+previous_version: 3
 change_summary: >
-  Documents the additive major-findings acceptance mode.
+  Links the explicit experimental CLI result contract while retaining legacy defaults.
 ---
 
 # Interoperability Adapter
@@ -122,3 +122,11 @@ adapter exits with that stage's nonzero status.
 
 This process boundary is the compatibility contract. Integrations should read
 the JSON artifacts or exit status rather than parse terminal prose.
+
+## Experimental terminal JSON contract
+
+For a single machine-readable stdout result, operational error identifiers,
+or report completion after a failed gate, select `--contract posix-json-v1`
+and read [CLI contract](cli-contract.md). The behavior described above remains
+the default. Choosing an output file or using legacy dry-run does not select
+the new contract.

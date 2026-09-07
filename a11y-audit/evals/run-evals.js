@@ -2,9 +2,9 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 24
+version: 25
 version_date: 2026-09-07
-previous_version: 23
+previous_version: 24
 change_summary: >
   Covers major-findings pass, fail, and inconclusive semantics.
 */
@@ -131,6 +131,7 @@ function validateSyntax() {
     'a11y-audit/scripts/scan.js',
     'a11y-audit/scripts/report.js',
     'a11y-audit/scripts/run-audit.js',
+    'a11y-audit/evals/test-cli-contract.js',
     'a11y-audit/scripts/bootstrap-context.js',
     'a11y-audit/scripts/plan-issues.js',
     'a11y-audit/evals/run-discover-fixture.js',
