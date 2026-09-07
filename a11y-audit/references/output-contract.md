@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
-version_date: 2026-07-21
-previous_version: 2
+version: 4
+version_date: 2026-09-07
+previous_version: 3
 change_summary: >
-  Makes the evidence-matrix heading standard-neutral and aligns the JSON
-  contract with the public versioned schema and report.js v6 provenance.
+  Adds major-gate acceptance and incomplete-review evidence.
 ---
 
 # Output Contract
@@ -37,6 +36,13 @@ Rules:
 - If Lighthouse was skipped, say why in both Executive Summary and Methodology.
 - If the runtime URL differs from the expected URL, record both.
 - Phrase compliance status conservatively: this is an automation-assisted audit view, not a conformance certification.
+- When a major-findings gate was evaluated, report `pass`, `fail`, or
+  `inconclusive` separately from the severity table. A pass is scoped automated
+  evidence only.
+- List axe `incomplete` counts as review candidates, not confirmed violations.
+- In the criteria matrix, use `Fail` when confirmed failure evidence exists;
+  otherwise use `Needs review` when axe returned an incomplete candidate, even
+  if another automated rule for that criterion passed.
 
 ## JSON Output
 
@@ -44,6 +50,13 @@ When `output_mode` is `markdown+json` or `markdown+issues`, write a JSON
 file alongside the markdown report. Use the versioned schema in
 `references/output-schema.json`, whose canonical id is
 `https://skilla11y.dev/schema/audit-v1.json`.
+
+The additive `audit_evidence` object retains violation and incomplete counts by
+impact. When `--fail-on major` was used, `acceptance` records the result and its
+reasons. `criterion_review` carries `needs-review` criteria separately so the
+published v1 `matrix` vocabulary remains unchanged; the corresponding v1
+matrix value is `manual`, never an unqualified `pass`. Existing consumers may
+continue to read the original required fields.
 
 ## Delta Section
 

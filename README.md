@@ -190,6 +190,27 @@ Use `--dry-run` to inspect the normalized execution plan without network,
 browser, or artifact writes. The complete request and result contract is in
 [`references/interoperability.md`](a11y-audit/references/interoperability.md).
 
+### Enforce a zero-major-findings bar
+
+Use `--fail-on major` to fail on any current critical or serious standards
+finding, including findings recorded in an accepted baseline. Moderate, minor,
+and explicitly best-practice-only findings stay in the output without failing
+the gate. Unknown violation impact or critical, serious, or unknown-impact axe
+`incomplete` candidates make the result inconclusive and nonzero. Moderate and
+minor incomplete candidates remain advisory. A mixed standards and
+best-practice rule keeps its standards severity, as does a best-practice rule
+with an unrecognized tag. Best-practice-only classification requires the
+explicit `best-practice` tag plus axe `cat.*` tags only.
+
+For this mode, HTTP error and non-HTML responses are missing required coverage,
+so they produce an inconclusive nonzero result rather than a false clean scan.
+Existing failure modes keep their established response behavior.
+
+This pass is scoped to the scanned pages and automated checks. The report keeps
+manual-testing and conformance limits explicit. Its evidence matrix renders
+unresolved axe candidates as `Needs review`, even when another automated check
+for the same criterion passed.
+
 ### Adopt on a site with existing accessibility debt
 
 Create an accepted baseline after reviewing the current findings:

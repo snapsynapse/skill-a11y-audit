@@ -2,16 +2,16 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 6
-version_date: 2026-07-21
-previous_version: 5
+version: 7
+version_date: 2026-09-07
+previous_version: 6
 change_summary: >
-  Aligns generated JSON provenance with report.js v6 and adds an explicit
-  schema version while preserving the pluggable standards contract.
+  Reports major-gate acceptance and incomplete-review evidence.
 */
 
 const fs = require('fs');
 const path = require('path');
+const { buildAuditEvidence } = require('./scan.js');
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -89,6 +89,7 @@ function aggregateScan(scanData) {
   const violationMap = new Map();   // ruleId → merged violation
   const passTags = new Set();
   const failTags = new Set();
+  const incompleteTags = new Set();
   const inapplicableTags = new Set();
   const pageUrls = [];
 
@@ -129,9 +130,13 @@ function aggregateScan(scanData) {
     for (const ia of axe.inapplicable || []) {
       for (const t of ia.tags || []) inapplicableTags.add(t);
     }
+
+    for (const item of axe.incomplete || []) {
+      for (const tag of item.tags || []) incompleteTags.add(tag);
+    }
   }
 
-  return { violationMap, passTags, failTags, inapplicableTags, pageUrls };
+  return { violationMap, passTags, failTags, incompleteTags, inapplicableTags, pageUrls };
 }
 
 // ---------------------------------------------------------------------------
@@ -204,6 +209,17 @@ function buildMatrix(criteria, passTags, failTags, inapplicableTags) {
   return matrix;
 }
 
+function buildCriterionReview(criteria, failTags, incompleteTags) {
+  const review = {};
+  for (const criterion of criteria) {
+    const scTag = `wcag${criterion.sc.replace(/\./g, '')}`;
+    if (!failTags.has(scTag) && incompleteTags.has(scTag)) {
+      review[criterion.sc] = 'needs-review';
+    }
+  }
+  return review;
+}
+
 // ---------------------------------------------------------------------------
 // Color-contrast detail extraction
 // ---------------------------------------------------------------------------
@@ -273,7 +289,10 @@ function pathnameOrDash(value) {
 function buildSummary(violationMap) {
   const summary = { critical: 0, serious: 0, moderate: 0, minor: 0 };
   for (const v of violationMap.values()) {
-    summary[v.impact] = (summary[v.impact] || 0) + v.instances;
+    const impact = ['critical', 'serious', 'moderate', 'minor'].includes(v.impact)
+      ? v.impact
+      : null;
+    if (impact) summary[impact] += v.instances;
   }
   return summary;
 }
@@ -283,7 +302,7 @@ function buildSummary(violationMap) {
 // ---------------------------------------------------------------------------
 
 function buildJson(opts) {
-  const { date, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard } = opts;
+  const { date, pageUrls, violationMap, matrix, criterionReview, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard, auditEvidence, acceptance } = opts;
   const violations = [];
   for (const v of violationMap.values()) {
     const wcag = v.tags.map(axeTagToSC).filter(Boolean);
@@ -305,10 +324,13 @@ function buildJson(opts) {
     summary: buildSummary(violationMap),
     violations,
     matrix,
+    audit_evidence: auditEvidence,
   };
   if (expectedUrl) json.expected_url = expectedUrl;
   if (runtimeUrl) json.runtime_url = runtimeUrl;
   if (axeVersion) json.axe_version = axeVersion;
+  if (acceptance) json.acceptance = acceptance;
+  if (Object.keys(criterionReview).length > 0) json.criterion_review = criterionReview;
   return json;
 }
 
@@ -430,7 +452,7 @@ const REMEDIATION_HINTS = {
 // ---------------------------------------------------------------------------
 
 function buildMarkdown(opts) {
-  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta, standard } = opts;
+  const { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta, standard, auditEvidence, acceptance } = opts;
   const lines = [];
   const ln = (s = '') => lines.push(s);
 
@@ -453,7 +475,7 @@ function buildMarkdown(opts) {
   // 2. Executive Summary
   ln('## Executive Summary');
   ln();
-  const total = summary.critical + summary.serious + summary.moderate + summary.minor;
+  const total = auditEvidence.violations.counts.total;
   const ruleCount = violationMap.size;
   ln(`${normalizeCell(projectName)} was audited across ${pageUrls.length} page(s). Automated scanning found **${total} issue instance(s)** across **${ruleCount} rule(s)**.`);
   ln();
@@ -462,7 +484,27 @@ function buildMarkdown(opts) {
   for (const level of ['critical', 'serious', 'moderate', 'minor']) {
     if (summary[level] > 0) ln(`| ${level} | ${summary[level]} |`);
   }
+  if (auditEvidence.violations.counts.unknown > 0) {
+    ln(`| unknown | ${auditEvidence.violations.counts.unknown} |`);
+  }
   ln();
+  if (acceptance && acceptance.mode === 'major') {
+    const label = acceptance.status.toUpperCase();
+    ln(`**Automated major-findings gate: ${label}.** Critical and serious standards findings block; moderate, minor, and explicitly best-practice-only findings remain reported and nonblocking.`);
+    ln();
+    if (acceptance.status === 'pass') {
+      ln('This is a scoped automated pass. It is not a claim of full accessibility or standards conformance.');
+      ln();
+    } else if (acceptance.status === 'inconclusive') {
+      ln(`The scan cannot claim a pass until these signals are adjudicated: ${acceptance.reasons.join(', ')}.`);
+      ln();
+    }
+  }
+  const incompleteCounts = auditEvidence.incomplete.counts;
+  if (incompleteCounts.total > 0) {
+    ln(`axe reported **${incompleteCounts.total} incomplete candidate instance(s)** requiring review (${incompleteCounts.critical} critical, ${incompleteCounts.serious} serious, ${incompleteCounts.moderate} moderate, ${incompleteCounts.minor} minor, ${incompleteCounts.unknown} unknown impact). These are review candidates, not confirmed violations.`);
+    ln();
+  }
   if (lighthouse && lighthouse.status === 'skipped') {
     ln(`Lighthouse was skipped: ${normalizeCell(lighthouse.reason)}.`);
     ln();
@@ -546,7 +588,7 @@ function buildMarkdown(opts) {
       ln(hasClauses ? `| **${c.principle}** | | | | |` : `| **${c.principle}** | | | |`);
     }
     const status = matrix[c.sc] || 'manual';
-    const icon = status === 'pass' ? 'Pass' : status === 'fail' ? '**Fail**' : status === 'not-applicable' ? 'N/A' : 'Manual';
+    const icon = status === 'pass' ? 'Pass' : status === 'fail' ? '**Fail**' : status === 'needs-review' ? '**Needs review**' : status === 'not-applicable' ? 'N/A' : 'Manual';
     const row = `| SC ${c.sc} | ${c.name} | ${c.level} | ${icon} |`;
     ln(hasClauses ? `| ${normalizeCell(c.clause || '-')} ${row}` : row);
   }
@@ -735,8 +777,11 @@ function main() {
   const date = new Date().toISOString().slice(0, 10);
 
   // Aggregate
-  const { violationMap, passTags, failTags, inapplicableTags, pageUrls } = aggregateScan(scanData);
+  const { violationMap, passTags, failTags, incompleteTags, inapplicableTags, pageUrls } = aggregateScan(scanData);
   const matrix = buildMatrix(standard.criteria, passTags, failTags, inapplicableTags);
+  const criterionReview = buildCriterionReview(standard.criteria, failTags, incompleteTags);
+  for (const sc of Object.keys(criterionReview)) matrix[sc] = 'manual';
+  const displayMatrix = { ...matrix, ...criterionReview };
   const summary = buildSummary(violationMap);
   const contrastDetails = extractContrastDetails(violationMap);
   const lighthouse = scanData.results[0]?.lighthouse || { status: 'skipped', reason: 'Not available' };
@@ -748,9 +793,11 @@ function main() {
   const delta = previousJson ? computeDelta(violationMap, previousJson, axeVersion) : null;
 
   // Generate outputs
-  const mdOpts = { date, projectName, pageUrls, violationMap, matrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta, standard };
+  const auditEvidence = scanData.audit_evidence || buildAuditEvidence(scanData.results);
+  const acceptance = scanData.gate || null;
+  const mdOpts = { date, projectName, pageUrls, violationMap, matrix: displayMatrix, summary, contrastDetails, lighthouse, runtimeUrl, expectedUrl, discoverData, sharedTemplates, delta, standard, auditEvidence, acceptance };
   const markdown = buildMarkdown(mdOpts);
-  const json = buildJson({ date, pageUrls, violationMap, matrix, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard });
+  const json = buildJson({ date, pageUrls, violationMap, matrix, criterionReview, lighthouse, runtimeUrl, expectedUrl, axeVersion, standard, auditEvidence, acceptance });
   if (discoverData) {
     json.sampling = {
       source: discoverData.source,

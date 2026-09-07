@@ -1,14 +1,35 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 40
-version_date: 2026-09-05
-previous_version: 39
+version: 41
+version_date: 2026-09-07
+previous_version: 40
 change_summary: >
-  Releases v3.0.0 runtime and browser security migration.
+  Records the unreleased major-findings acceptance gate.
 ---
 
 # Changelog
+
+## Unreleased
+
+- Add `--fail-on major` for a zero-current-critical-or-serious acceptance bar.
+  Moderate, minor, and explicitly best-practice-only findings remain visible
+  and nonblocking; mixed standards and best-practice rules retain their normal
+  severity.
+- Require best-practice-only rules to contain the explicit `best-practice` tag
+  and otherwise only axe `cat.*` tags. Standards and unrecognized tags prevent
+  advisory downgrading.
+- Treat unknown violation impact and critical, serious, or unknown-impact axe
+  `incomplete` candidates as inconclusive. Preserve operational scan failures
+  as infrastructure errors and moderate/minor incomplete candidates as
+  advisory evidence.
+- Give confirmed failures precedence in the standards matrix, then render
+  unresolved axe candidates as `Needs review` ahead of pass evidence.
+- In major mode, reject HTTP error and non-HTML requested targets as missing
+  coverage so an accessible error page cannot produce a false pass.
+- Forward the mode through the vendor-neutral adapter and reusable Action, and
+  add report/schema evidence plus deterministic pass, fail, inconclusive,
+  best-practice-only, mixed-tag, and published-v1 compatibility coverage.
 
 ## v3.0.0 -- 2026-09-05
 

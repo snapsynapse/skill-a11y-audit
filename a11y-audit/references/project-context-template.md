@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
-version_date: 2026-07-13
-previous_version: 2
+version: 4
+version_date: 2026-09-07
+previous_version: 3
 change_summary: >
-  Documents the bundled standards ids (wcag21-aa, wcag22-aa, en301549)
-  and how the standards field maps to report.js --standard.
+  Documents the major-findings acceptance mode.
 ---
 
 # Project Context Template
@@ -99,7 +98,7 @@ Use this file as the canonical shape for
 - `output_mode`: `markdown`, `markdown+json`, or `markdown+issues`.
 - `report_path`: Workspace-relative markdown report path.
 - `json_path`: Workspace-relative JSON output path when JSON is enabled.
-- `fail_on`: `errors`, `new`, or `none`. Prefer `new` for established sites with accepted debt.
+- `fail_on`: `errors`, `major`, `new`, or `none`. Use `major` for a zero-current-critical-or-serious bar; prefer `new` for accepted-debt regression control.
 - `baseline_path`: Workspace-relative accepted-finding baseline used when `fail_on` is `new`.
 - `baseline_policy`: Human-readable rule for reviewing and updating the accepted baseline.
 - `issue_tracker`: `github`, `gitlab`, `linear`, or `jira`.

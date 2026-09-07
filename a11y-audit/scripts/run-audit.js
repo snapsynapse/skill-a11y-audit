@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-08-31
-previous_version: 0
+version: 2
+version_date: 2026-09-07
+previous_version: 1
 change_summary: >
-  Adds a vendor-neutral JSON process adapter that composes discovery,
-  changed-surface selection, scanning, and report generation.
+  Forwards the additive major-findings acceptance gate.
 */
 
 const fs = require('fs');
@@ -225,8 +224,8 @@ function buildRunPlan(configPath, cliArgs = {}) {
   const scan = config.scan === undefined ? {} : assertObject(config.scan, 'scan');
   assertKeys(scan, new Set(['root', 'baseline', 'fail_on', 'summary', 'axe_version']), 'scan');
   const failOn = scan.fail_on || 'none';
-  if (!['errors', 'new', 'none'].includes(failOn)) {
-    throw new Error('scan.fail_on must be errors, new, or none');
+  if (!['errors', 'major', 'new', 'none'].includes(failOn)) {
+    throw new Error('scan.fail_on must be errors, major, new, or none');
   }
   if (scan.summary !== undefined) assertBoolean(scan.summary, 'scan.summary');
   if (failOn === 'new' && !scan.baseline) {

@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 4
-version_date: 2026-09-05
-previous_version: 3
+version: 5
+version_date: 2026-09-07
+previous_version: 4
 change_summary: >
-  Documents the v3 runtime contract and release validation gates.
+  Reconciles the v3 release and scopes the v3.1 major-findings gate.
 ---
 
 # Accessibility Audit Roadmap
@@ -46,6 +46,19 @@ fallbacks remain externally managed.
 See `references/runtime-compatibility.md` for the compatibility contract and
 `../ops/v3.0.0-release-preparation.md` for validation evidence and release gates.
 
+v3.0.0 shipped on 2026-09-05. GitHub automatically marked Dependabot alert 2
+for `GHSA-jmr9-qjv8-65gv` fixed at 2026-09-05T20:19:03Z after the migrated
+dependency graph reached `main`; no manual dismissal occurred.
+
+## v3.1 candidate
+
+Add an explicit total-current-findings gate for teams whose acceptance bar is
+zero critical or serious standards findings. `--fail-on major` preserves all
+reported findings, treats moderate, minor, and explicitly best-practice-only
+rules as nonblocking, and never lets a baseline suppress an existing major
+finding. Unknown severity and high-impact incomplete candidates remain
+inconclusive until reviewed. See `../ops/dependency-readiness-2026-09-07.md`.
+
 ## Next priorities
 
 1. Authenticated deterministic journeys. Accept a Playwright storage state or
@@ -70,9 +83,6 @@ See `references/runtime-compatibility.md` for the compatibility contract and
 - After the upstream resilience work ships, reassess whether consumers still
   need project-level `http-server` pins. Keep exact `axe-core` pins wherever
   baseline compatibility depends on the scanner version.
-- Confirm automatic closure of `GHSA-jmr9-qjv8-65gv` after the migrated
-  dependency graph reaches main. Record stale alert evidence if GitHub has
-  not recalculated; manual dismissal needs separate authorization.
 
 ## Explicit non-goals
 

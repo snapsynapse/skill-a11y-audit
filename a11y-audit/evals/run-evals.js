@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 23
-version_date: 2026-09-05
-previous_version: 22
+version: 24
+version_date: 2026-09-07
+previous_version: 23
 change_summary: >
-  Enforces extractor-free lockfiles and supported runtime contracts.
+  Covers major-findings pass, fail, and inconclusive semantics.
 */
 
 const assert = require('assert');
@@ -154,6 +154,7 @@ function validateJsonFiles() {
     'a11y-audit/evals/fixtures/eval-20/route-group-map.json',
     'a11y-audit/evals/fixtures/eval-20/surface-map.json',
     'a11y-audit/evals/fixtures/eval-21/request.json',
+    'a11y-audit/evals/fixtures/eval-23/published-audit-v1-schema.json',
   ];
   for (const file of files) readJson(repoPath(file));
   assertAuditJsonShape(readJson(repoPath('a11y-audit/assets/sample-output/audit-sample.json')));
@@ -935,6 +936,125 @@ function scannerBaselineRegression() {
   assert.match(scanSource, /Baseline axe-core version mismatch/);
 }
 
+function scannerMajorGateRegression() {
+  const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  const result = (violations, incomplete = []) => [{
+    url: 'https://example.com/',
+    axe: { violations, incomplete },
+  }];
+  const rule = (id, impact, instances = 1, tags = []) => ({
+    id,
+    impact,
+    tags,
+    nodes: Array.from({ length: instances }, (_, index) => ({ target: [`#n${index}`] })),
+  });
+
+  const failingEvidence = scan.buildAuditEvidence(result([
+    rule('button-name', 'critical', 2),
+    rule('color-contrast', 'serious'),
+    rule('region', 'moderate'),
+    rule('landmark', 'minor'),
+  ]));
+  const failing = scan.evaluateMajorGate(failingEvidence);
+  assert.strictEqual(failing.status, 'fail');
+  assert.strictEqual(failing.confirmed_major_instances, 3);
+  assert.strictEqual(failing.nonblocking_instances, 2);
+
+  const passingEvidence = scan.buildAuditEvidence(result(
+    [rule('region', 'moderate'), rule('landmark', 'minor')],
+    [rule('contrast-review', 'moderate'), rule('heading-review', 'minor')]
+  ));
+  const passing = scan.evaluateMajorGate(passingEvidence);
+  assert.strictEqual(passing.status, 'pass');
+  assert.strictEqual(passing.advisory_incomplete_instances, 2);
+
+  const bestPracticeEvidence = scan.buildAuditEvidence(result([
+    rule('advisory-rule', 'serious', 1, ['cat.structure', 'best-practice']),
+  ], [
+    rule('advisory-review', 'critical', 1, ['best-practice']),
+  ]));
+  const bestPractice = scan.evaluateMajorGate(bestPracticeEvidence);
+  assert.strictEqual(bestPractice.status, 'pass');
+  assert.strictEqual(bestPractice.best_practice_only_instances, 1);
+  assert.strictEqual(bestPractice.advisory_incomplete_instances, 1);
+
+  const mixedStandards = scan.evaluateMajorGate(scan.buildAuditEvidence(result([
+    rule('standards-rule', 'serious', 1, ['best-practice', 'wcag131']),
+  ])));
+  assert.strictEqual(mixedStandards.status, 'fail');
+  const unknownTagged = scan.evaluateMajorGate(scan.buildAuditEvidence(result([
+    rule('unknown-tagged-rule', 'serious', 1, ['best-practice', 'future-standard']),
+  ])));
+  assert.strictEqual(unknownTagged.status, 'fail');
+
+  const unknown = scan.evaluateMajorGate(scan.buildAuditEvidence(result([
+    rule('unclassified', null),
+  ])));
+  assert.strictEqual(unknown.status, 'inconclusive');
+  assert.deepStrictEqual(unknown.reasons, ['unknown-violation-impact']);
+
+  const incomplete = scan.evaluateMajorGate(scan.buildAuditEvidence(result([], [
+    rule('critical-review', 'critical'),
+    rule('unknown-review', null),
+  ])));
+  assert.strictEqual(incomplete.status, 'inconclusive');
+  assert.strictEqual(incomplete.blocking_incomplete_instances, 2);
+
+  const adapter = require(repoPath('a11y-audit/scripts/run-audit.js'));
+  const request = readJson(repoPath('a11y-audit/evals/fixtures/eval-21/request.json'));
+  request.scan = { ...request.scan, fail_on: 'major' };
+  const requestPath = path.join(tmpPath('major-gate'), 'request.json');
+  request.workspace = path.relative(path.dirname(requestPath), repoPath());
+  fs.mkdirSync(path.dirname(requestPath), { recursive: true });
+  fs.writeFileSync(requestPath, JSON.stringify(request));
+  const plan = adapter.buildRunPlan(requestPath);
+  const command = plan.envelope.stages.find((entry) => entry.name === 'scan').command;
+  assert.strictEqual(command[command.indexOf('--fail-on') + 1], 'major');
+
+  const action = fs.readFileSync(repoPath('.github/actions/scan/action.yml'), 'utf8');
+  assert.match(action, /`major` for current critical\/serious findings/);
+  assert.match(action, /--fail-on "\$FAIL_ON"/);
+
+  const reportDir = tmpPath('major-gate-report');
+  resetDir(reportDir);
+  const inputPath = path.join(reportDir, 'scan.json');
+  const reportResults = result(
+    [rule('region', 'moderate')],
+    [rule('contrast-review', 'minor', 1, ['wcag143'])]
+  );
+  reportResults[0].axe.passes = [{ id: 'contrast-pass', tags: ['wcag143'] }];
+  fs.writeFileSync(inputPath, JSON.stringify({
+    axe_version: '4.12.1',
+    results: reportResults,
+    audit_evidence: passingEvidence,
+    gate: passing,
+  }));
+  runNode([
+    'a11y-audit/scripts/report.js',
+    '--input', inputPath,
+    '--output-dir', reportDir,
+  ]);
+  const reportJson = readJson(findGeneratedFile(reportDir, '.json'));
+  const reportMarkdown = fs.readFileSync(findGeneratedFile(reportDir, '.md'), 'utf8');
+  assert.strictEqual(reportJson.acceptance.status, 'pass');
+  assert.strictEqual(reportJson.audit_evidence.incomplete.counts.minor, 1);
+  assert.strictEqual(reportJson.matrix['1.4.3'], 'manual');
+  assert.strictEqual(reportJson.criterion_review['1.4.3'], 'needs-review');
+  assertAuditJsonShape(reportJson);
+  const publishedV1Ajv = new Ajv2020({ allErrors: true });
+  addFormats(publishedV1Ajv);
+  const validatePublishedV1 = publishedV1Ajv.compile(readJson(
+    repoPath('a11y-audit/evals/fixtures/eval-23/published-audit-v1-schema.json')
+  ));
+  assert.ok(
+    validatePublishedV1(reportJson),
+    publishedV1Ajv.errorsText(validatePublishedV1.errors, { separator: '\n' })
+  );
+  assert.match(reportMarkdown, /Automated major-findings gate: PASS/);
+  assert.match(reportMarkdown, /review candidates, not confirmed violations/);
+  assert.match(reportMarkdown, /SC 1\.4\.3[^\n]+Needs review/);
+}
+
 function markdownEscapingRegression() {
   const dir = tmpPath('markdown-escaping');
   resetDir(dir);
@@ -1269,7 +1389,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.13$/m);
+  assert.match(text, /^guide-version: 0\.3\.14$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   const scriptHashes = new Map([
@@ -1296,7 +1416,7 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.13$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.14$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
@@ -1327,6 +1447,7 @@ test('scan.js rejects unsupported browser package names before install', scanner
 test('scan.js retries atomic dependency installs with actionable timeout diagnostics', scannerDependencyResilience);
 test('scan.js consumes validated, deduplicated discover plans', scannerDiscoverPlanRegression);
 test('scan.js fingerprints and compares accepted accessibility baselines', scannerBaselineRegression);
+test('scan.js enforces the total major-findings acceptance contract', scannerMajorGateRegression);
 test('report.js escapes target-derived markdown fields', markdownEscapingRegression);
 test('plan-issues.js escapes target-derived markdown fields', issuePlanEscapingRegression);
 test('scan.js dependency auto-install policy is documented', dependencyPolicyCheck);

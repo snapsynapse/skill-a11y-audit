@@ -179,6 +179,29 @@ context file (see Phase 6).
 
 ### Regression Gate
 
+Use `--fail-on major` when the acceptance bar is zero current critical or
+serious standards findings. This mode evaluates the complete current scan, so
+an accepted baseline cannot suppress an existing major finding. Moderate,
+minor, and explicitly best-practice-only findings remain visible and
+nonblocking. A best-practice tag does not downgrade a rule that also carries a
+WCAG, EN 301 549, Section 508, or unrecognized tag. Best-practice-only status
+requires the explicit `best-practice` tag and otherwise only axe `cat.*` tags.
+
+Unknown violation impact and critical, serious, or unknown-impact axe
+`incomplete` candidates produce an inconclusive nonzero result. Moderate and
+minor incomplete candidates remain advisory. An automated pass applies only to
+the scanned scope and does not establish full conformance.
+
+In major mode, a requested URL that returns an HTTP error or non-HTML response
+is missing required coverage. The scanner records the page error and an
+inconclusive gate instead of auditing the error payload as if it were the
+requested page. Existing modes retain their established response behavior.
+
+In the evidence matrix, confirmed violations take precedence as `Fail`; an axe
+`incomplete` candidate takes precedence over automated passes as
+`Needs review`. Do not show an unqualified pass for a criterion with unresolved
+incomplete evidence.
+
 For an established site with existing accessibility debt, prefer an
 accepted baseline over an all-or-nothing gate:
 

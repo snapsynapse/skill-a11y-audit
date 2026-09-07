@@ -571,5 +571,30 @@
         "Hosted run 33989560704 at 769292060276f65e8ba3cf10400f46d1a8e4ebdc passed all ten jobs: deterministic Node 22.12.0/22/24/26, real browser and isolated consumers on 22.12.0/24/26, actual Action setup-node and artifact upload, PR base/head selection, GuideCheck, and workflow audits."
       ]
     }
+  },
+  {
+    "id": "eval-23",
+    "prompt": "Enforce a zero-major-findings accessibility acceptance bar without suppressing evidence. Critical and serious standards findings must fail even when baselined; moderate, minor, and explicitly best-practice-only findings must remain visible and nonblocking; unknown impact and high-impact incomplete candidates must be inconclusive.",
+    "expectations": {
+      "structural": [
+        "The CLI, process adapter, and reusable Action accept an additive major failure mode without changing existing defaults",
+        "Scan and report JSON retain severity, best-practice classification, incomplete-review evidence, and pass/fail/inconclusive status",
+        "The public report schema remains backward compatible through additive optional fields, proven against a frozen published-v1 validator"
+      ],
+      "behavioral": [
+        "Any current critical or serious standards finding fails independently of baseline membership",
+        "Moderate, minor, and best-practice-only findings are reported without failing",
+        "A rule tagged both best-practice and a supported standard is not downgraded",
+        "Unknown violation impact and critical, serious, or unknown-impact incomplete candidates produce an inconclusive nonzero result"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-09-07",
+      "notes": [
+        "Deterministic coverage validates pass, fail, inconclusive, best-practice-only, mixed-tag, unknown-tag, matrix precedence, adapter, Action, current schema, and frozen published-v1 schema behavior.",
+        "The local Puppeteer fixture validates a real finding, accepted-baseline rescan, and requested HTTP 404 as an inconclusive missing-route result."
+      ]
+    }
   }
 ]

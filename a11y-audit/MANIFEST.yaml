@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 40
-bundle_date: 2026-09-05
+bundle_version: 41
+bundle_date: 2026-09-07
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -192,27 +192,27 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 25
-    hash: sha256:043ab7200e3d78ef34c0da06b1f4ab174fd79643cdde92285b5e1ed14225600e
-    note: Aligns v3 installation authority and the bundled Puppeteer boundary
+    version: 26
+    hash: sha256:be03015f02634a974b61f4745791e29cab46aefec24b5de6e75132e0b624eefc
+    note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
     role: evals
-    version: 23
-    hash: sha256:c3b2ad625ac50ce0ce13acffa87eee2dd5aa7eb155f184b654c3726d97a74819
-    note: 22 eval cases including the runtime and dependency policy migration
+    version: 24
+    hash: sha256:254be455b4ad87c5cf7742361b51b26c6628c4c664747f473c96c49d55177910
+    note: 23 eval cases including the major-findings acceptance contract
 
   - path: ROADMAP.md
     role: reference
-    version: 4
-    hash: sha256:8a7e91c88097a486fca2b75078a97df86f45b8d3be6305a456bac04271144d9c
-    note: Documents the v3 runtime contract and release validation gates
+    version: 5
+    hash: sha256:0dc64403fa27d4ece72c32d8c99603f312634cd408ee25b9c032657738e612a9
+    note: Reconciles v3 delivery and scopes the v3.1 candidate
 
   - path: CHANGELOG.md
     role: reference
-    version: 40
-    hash: sha256:f091b2ea12f233e33eba904bdab22795cc3a4196e105d9c7669c6354e2a316cf
-    note: Releases v3.0.0 runtime and browser security migration
+    version: 41
+    hash: sha256:c22ded53ac0c4f43b1d52698926b43e471181e4c422aadf015ac10483a2fa6e3
+    note: Records the unreleased major-findings acceptance gate
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,15 +222,15 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 23
-    hash: sha256:2c4bddde2d784a78e672ac86dd5720a2b0069928b29b18db2847aeaa30600d13
-    note: Enforces extractor-free lockfiles and supported runtime contracts
+    version: 24
+    hash: sha256:092f55534e4a4afecc34bed6372221bc3a49d16ed12747c3f626592fe43abf0b
+    note: Covers major-gate pass, fail, and inconclusive semantics
 
   - path: evals/run-browser-eval.js
     role: evals
-    version: 2
-    hash: sha256:47a45a7320b8b0c0314e7d86dab7cb93018e2cf18a2cae7748949546a9deeef0
-    note: Requires the real browser eval to exercise Puppeteer 25.10.0
+    version: 3
+    hash: sha256:6f2e3ffc9fc618b0699181cdb660bd031d0dceffd5f9eb70ece92ef9d90e3e4f
+    note: Covers missing required route handling in the major gate
 
   - path: evals/fixtures/eval-11/README.md
     role: evals
@@ -396,22 +396,21 @@ files:
 
   - path: references/interoperability.md
     role: reference
-    version: 2
-    hash: sha256:ba470e5a948404036cd0a1fc7355dabbf253afa8f06ed0bfdbf21a75dc4074e9
-    note: Documents scan-stage acquisition and the runtime compatibility contract
+    version: 3
+    hash: sha256:6ed738a1d9ad55b8874801e596981c8514b570f3c01988af588ad21e5a867c4e
+    note: Documents the additive major-findings acceptance mode
 
   - path: references/project-context-template.md
     role: reference
-    version: 3
-    hash: sha256:e111c28abc2f6b948837649ce5c7270d028ab260f92836fb223706676e5af8a4
-    note: >
-      v3 documents bundled standards ids mapped to report.js --standard
+    version: 4
+    hash: sha256:a39d31f1a166486fb594c4d710525215e05bde696079604a08b22e99fbffda25
+    note: Documents the major-findings project setting
 
   - path: references/output-contract.md
     role: reference
-    version: 3
-    hash: sha256:552e115fbcba4f7ae205449ed8d1c7c795da6c54ad73de3182409c3309cf204f
-    note: Output requirements with versioned JSON Schema identity
+    version: 4
+    hash: sha256:31c374ce9a6032aa033d50e3f227003bfd1c282cffe213155ce54bc96c0e1251
+    note: Adds acceptance and incomplete-review evidence
 
   - path: references/issue-trackers.md
     role: reference
@@ -421,21 +420,21 @@ files:
 
   - path: references/output-schema.json
     role: reference
-    version: 2
-    hash: sha256:b219b4374fa745dfc5e821010b147dd788864d90d8f778d22b8e7b6387c1fa09
-    note: Published Draft 2020-12 schema for audit JSON v1
+    version: 3
+    hash: sha256:4d4c1067844dbb9aeb81092a24afacdca90462b3662887be58fce1e270f66218
+    note: Adds optional audit evidence and acceptance objects
 
   - path: scripts/scan.js
     role: script
-    version: 11
-    hash: sha256:ed85cad1714adaf34f02ffe93672bfd92c778c792e68cb35cb91099372cfc0fd
-    note: Enforces Node 22.12+, pins Puppeteer 25.10.0, and loads its ESM entry
+    version: 12
+    hash: sha256:5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
+    note: Adds major-gate evidence and inconclusive handling
 
   - path: scripts/run-audit.js
     role: script
-    version: 1
-    hash: sha256:677139e79a28d86ae004ad7564d437ad94b0a679b93f199ff6b9ce2870f14191
-    note: Vendor-neutral JSON process adapter for the audit pipeline
+    version: 2
+    hash: sha256:a75b3001833ee0cdb0973919f9deeccce5e0efdba824ef7ac1350b4c8653fd65
+    note: Forwards the additive major-findings gate
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -451,10 +450,9 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 6
-    hash: sha256:ea848df65a3bce9ed721937667626ddc33668e4d4a39080bec57ae7ebfe46f63
-    note: >
-      v6 emits schema_version 1 under the published audit JSON contract
+    version: 7
+    hash: sha256:99489a06d2cdaf6904ea4e0c4563f8d6403cb457fcd5744c99de1a302e818f05
+    note: Reports major-gate acceptance and incomplete-review evidence
 
   - path: scripts/discover.js
     role: script
@@ -581,6 +579,12 @@ files:
     version: 1
     hash: sha256:d7b52b15b2d55e3fda6729d66760b7ea1db7bb70871613636e183363fecc7eec
     note: Portable adapter request fixture with base/head propagation
+
+  - path: evals/fixtures/eval-23/published-audit-v1-schema.json
+    role: evals
+    version: 1
+    hash: sha256:df89205c97f098110d57c6242dad77afb407a41ac320dfd85d344a91e35e954c
+    note: Frozen published audit-v1 validator for compatibility regression
 
   - path: references/standards/wcag21-aa.json
     role: reference
