@@ -86,6 +86,15 @@
         "image/png"
       ],
       "contains": []
+    },
+    {
+      "path": "schema/cli-result-posix-json-v1.json",
+      "contentTypes": [
+        "application/json"
+      ],
+      "contains": [
+        "https://skilla11y.dev/schema/cli-result-posix-json-v1.json"
+      ]
     }
   ],
   "redirects": [

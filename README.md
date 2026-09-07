@@ -10,9 +10,9 @@ estates. Discover representative templates, preserve selector-level
 findings, and prevent AI-generated changes from introducing new barriers
 without requiring a legacy site to reach zero violations first.
 
-Version 3.0.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
-GitHub installs fetch main; pin the reusable Action to `v3.0.0` for this release.
-See the [release validation record](ops/v3.0.0-release-preparation.md).
+Version 3.1.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
+GitHub installs fetch main; pin the reusable Action to `v3.1.0` for this release.
+See the [release validation record](ops/v3.1.0-release-preparation.md).
 
 ## Who this is for
 
@@ -190,6 +190,44 @@ Use `--dry-run` to inspect the normalized execution plan without network,
 browser, or artifact writes. The complete request and result contract is in
 [`references/interoperability.md`](a11y-audit/references/interoperability.md).
 
+### Pilot the machine-readable CLI contract
+
+The adapter has an experimental opt-in contract for automation. Select it
+explicitly with `--contract posix-json-v1`; existing invocations keep their
+current output and exit behavior. The terminal result separates operational
+completion from gate acceptance and retains report evidence when a gate fails.
+
+Replace: REQUEST_JSON -> path to the reviewed adapter request file
+Customize
+```bash
+node a11y-audit/scripts/run-audit.js --config REQUEST_JSON --contract posix-json-v1
+```
+Read the [CLI contract](a11y-audit/references/cli-contract.md) and its
+[result schema](a11y-audit/references/cli-result-schema.json) before consuming
+this pilot interface. A11y is the first pilot; this is not a claim of
+portfolio-wide adoption. Reporting mode does not certify an accessibility pass.
+
+### Enforce a zero-major-findings bar
+
+Use `--fail-on major` to fail on any current critical or serious standards
+finding, including findings recorded in an accepted baseline. Moderate, minor,
+and explicitly best-practice-only findings stay in the output without failing
+the gate. Unknown violation impact or critical, serious, or unknown-impact axe
+`incomplete` candidates make the result inconclusive and nonzero. Moderate and
+minor incomplete candidates remain advisory. A mixed standards and
+best-practice rule keeps its standards severity, as does a best-practice rule
+with an unrecognized tag. Best-practice-only classification requires the
+explicit `best-practice` tag plus axe `cat.*` tags only.
+
+For this mode, HTTP error and non-HTML responses are missing required coverage,
+so they produce an inconclusive nonzero result rather than a false clean scan.
+Existing failure modes keep their established response behavior.
+
+This pass is scoped to the scanned pages and automated checks. The report keeps
+manual-testing and conformance limits explicit. Its evidence matrix renders
+unresolved axe candidates as `Needs review`, even when another automated check
+for the same criterion passed.
+
 ### Adopt on a site with existing accessibility debt
 
 Create an accepted baseline after reviewing the current findings:
@@ -224,7 +262,7 @@ discovery plan, and selection evidence:
 Replace: BUILD_DIR -> repository-relative directory containing the built site
 Customize
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -333,7 +371,7 @@ For skip-download behavior and cache configuration, read
 This repository has three release identifiers because the published
 surfaces move at different compatibility levels:
 
-- `package.json` uses the public repository release line, 3.0.0 for this release.
+- `package.json` uses the public repository release line, 3.1.0 for this release.
 - `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
   incremented whenever the skill bundle changes.
 - `assistant-guide.txt` uses the GuideCheck guide version, incremented
@@ -341,6 +379,8 @@ surfaces move at different compatibility levels:
 
 Release notes should mention each identifier when more than one surface
 changes.
+The experimental CLI selector and its result schema have a separate contract
+identity; selecting `posix-json-v1` does not change the audit-v1 report schema.
 
 Current product boundaries and prioritized follow-up work live in
 [`a11y-audit/ROADMAP.md`](a11y-audit/ROADMAP.md).
@@ -388,7 +428,7 @@ Detailed map contracts live in
 
 These recorded runs predate v3 and are not v3 consumer-validation claims.
 Release validation checks are listed in the
-[release validation record](ops/v3.0.0-release-preparation.md).
+[release validation record](ops/v3.1.0-release-preparation.md).
 
 | Site | Pages | Groups | Scanned | Violations | Key findings |
 |------|-------|--------|---------|------------|-------------|

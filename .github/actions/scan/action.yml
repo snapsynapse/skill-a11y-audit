@@ -1,8 +1,8 @@
 name: 'a11y scan'
 description: >
   Discover representative templates, optionally prioritize groups affected
-  by repository changes, run axe-core via Puppeteer, fail on all or only newly
-  introduced violations, and retain scan and selection evidence as artifacts.
+  by repository changes, run axe-core via Puppeteer, apply all, major, or new
+  finding gates, and retain scan and selection evidence as artifacts.
 
 outputs:
   results-path:
@@ -93,7 +93,7 @@ inputs:
     required: false
     default: 'a11y-selection-plan.json'
   fail-on:
-    description: '`errors` for any violation, `new` for findings outside the accepted baseline, or `none`.'
+    description: '`errors` for any violation, `major` for current critical/serious findings, `new` for findings outside the accepted baseline, or `none`.'
     required: false
     default: 'errors'
   baseline:

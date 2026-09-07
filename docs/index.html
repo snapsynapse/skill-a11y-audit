@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-09-05T00:00:00Z">
+  <meta property="article:modified_time" content="2026-09-07T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -58,7 +58,7 @@
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-07",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -113,14 +113,14 @@
   "@type": "SoftwareSourceCode",
   "@id": "https://skilla11y.dev/#source-code",
   "name": "skill-a11y-audit",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "creativeWorkStatus": "Published",
   "codeRepository": "https://github.com/snapsynapse/skill-a11y-audit",
   "programmingLanguage": "JavaScript",
   "runtimePlatform": "Node.js >=22.12.0",
   "description": "Portable accessibility regression evidence with a JSON process adapter, managed Puppeteer 25.10.0, and axe-core 4.12.1.",
   "license": "https://opensource.org/licenses/MIT",
-  "dateModified": "2026-09-05"
+  "dateModified": "2026-09-07"
 }
   </script>
 
@@ -484,13 +484,13 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-09-05">September 5, 2026</time>
+      Updated <time datetime="2026-09-07">September 7, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v3.0.0</span>
+      <span class="version">v3.1.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
-    <p class="annotation">v3.0.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0. <a href="https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.0.0">Read the release notes.</a> GitHub installs fetch main; the Action examples pin this release.</p>
+    <p class="annotation">v3.1.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0. <a href="https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.1.0">Read the release notes.</a> GitHub installs fetch main; the Action examples pin this release.</p>
     <p class="hook">Strict accessibility gates are hard to adopt when a site already has debt. skill-a11y-audit discovers representative templates, preserves selector-level evidence, and can block only newly introduced findings instead of demanding a perfect first run.</p>
 
     <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1272" height="540">
@@ -596,7 +596,7 @@
         <h3>3. Reuse the GitHub Action</h3>
 <p class="annotation">Replace: BUILD_DIR &rarr; repository-relative directory containing the built site.</p>
 <p class="annotation">Customize</p>
-<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -707,6 +707,7 @@ node a11y-audit/scripts/report.js \
   --output-dir ./audits</pre>
         <p class="annotation">These paths assume the repository is cloned locally. Each script writes JSON the next step reads.</p>
         <p class="annotation">External runners can instead invoke <code>scripts/run-audit.js</code> with one reviewed JSON request. <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/interoperability.md" target="_blank" rel="noopener">Read the interoperability contract.</a></p>
+        <p class="annotation">For automation, the experimental <code>--contract posix-json-v1</code> adapter mode emits one terminal JSON result and keeps operational failures distinct from gate outcomes. Existing commands keep their defaults. <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/cli-contract.md" target="_blank" rel="noopener">Read the opt-in CLI contract.</a></p>
       </div>
     </div>
   </div>
@@ -744,7 +745,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-09-05">2026-09-05</time>.
+      Last substantive revision: <time datetime="2026-09-07">2026-09-07</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
   </div>
@@ -776,7 +777,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v3.0.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v3.1.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Open, self-hosted accessibility evidence for maintainers and coding agents.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>

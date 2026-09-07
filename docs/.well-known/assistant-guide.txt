@@ -4,8 +4,8 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.13
-applies-to: skill-a11y-audit 3.0.x
+guide-version: 0.3.15
+applies-to: skill-a11y-audit 3.1.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
@@ -18,7 +18,7 @@ manifest-url: https://skilla11y.dev/.well-known/assistant-guide-manifest.txt
 [/assistant-guide-metadata]
 
 Task scope
-Requires Node.js 22.12.0 or later. Current release: v3.0.0.
+Requires Node.js 22.12.0 or later. Current release: v3.1.0.
 This guide covers installing skill-a11y-audit and running a bounded local
 accessibility audit, including an optional reviewed baseline for new-finding
 CI gates. It does not authorize production deployment, access to private or
@@ -105,7 +105,7 @@ command: node SKILL_DIR/scripts/scan.js --discover SCAN_PLAN_JSON --output SCAN_
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URLs in SCAN_PLAN_JSON, registry.npmjs.org, storage.googleapis.com
-exec-sha256: ed85cad1714adaf34f02ffe93672bfd92c778c792e68cb35cb91099372cfc0fd
+exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
 notes: May install missing packages, replace stale managed Puppeteer, and download Chrome.
 [/action]
 
@@ -117,7 +117,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --write-baseline BASELIN
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: ed85cad1714adaf34f02ffe93672bfd92c778c792e68cb35cb91099372cfc0fd
+exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
 notes: Replaces a baseline only after human review; acceptance is not conformance.
 [/action]
 
@@ -129,7 +129,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --baseline BASELINE_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: ed85cad1714adaf34f02ffe93672bfd92c778c792e68cb35cb91099372cfc0fd
+exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
 notes: Stops on axe-core drift and reports accepted, new, and resolved findings.
 [/action]
 
@@ -140,7 +140,7 @@ approval: required
 command: node SKILL_DIR/scripts/report.js --input SCAN_JSON --output-dir OUTPUT_DIR
 runner: argv
 cwd: TARGET_WORKSPACE
-exec-sha256: ea848df65a3bce9ed721937667626ddc33668e4d4a39080bec57ae7ebfe46f63
+exec-sha256: 99489a06d2cdaf6904ea4e0c4563f8d6403cb457fcd5744c99de1a302e818f05
 notes: Writes the audit report only under the approved output directory.
 [/action]
 

@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 11
-version_date: 2026-09-05
-previous_version: 10
+version: 12
+version_date: 2026-09-07
+previous_version: 11
 change_summary: >
-  Enforces Node 22.12+, pins Puppeteer 25.10.0, and loads its ESM entry.
+  Adds a major-findings gate with explicit inconclusive evidence handling.
 */
 
 const fs = require('fs');
@@ -170,6 +170,100 @@ function countViolations(results) {
     }
   }
   return count;
+}
+
+const KNOWN_IMPACTS = ['critical', 'serious', 'moderate', 'minor'];
+
+function isBestPracticeOnly(tags) {
+  if (!Array.isArray(tags) || !tags.includes('best-practice')) return false;
+  return tags.every((tag) => tag === 'best-practice' || /^cat\.[a-z0-9-]+$/i.test(String(tag)));
+}
+
+function countRuleInstances(rule) {
+  return Array.isArray(rule?.nodes) && rule.nodes.length > 0 ? rule.nodes.length : 1;
+}
+
+function summarizeImpactEvidence(results, resultType) {
+  const counts = { critical: 0, serious: 0, moderate: 0, minor: 0, unknown: 0 };
+  const rules = [];
+  for (const result of results || []) {
+    for (const rule of result.axe?.[resultType] || []) {
+      const impact = KNOWN_IMPACTS.includes(rule.impact) ? rule.impact : 'unknown';
+      const instances = countRuleInstances(rule);
+      counts[impact] += instances;
+      rules.push({
+        rule: rule.id,
+        impact: rule.impact || null,
+        instances,
+        url: result.url,
+        tags: Array.isArray(rule.tags) ? rule.tags : [],
+        best_practice_only: isBestPracticeOnly(rule.tags),
+      });
+    }
+  }
+  return {
+    counts: { ...counts, total: Object.values(counts).reduce((sum, count) => sum + count, 0) },
+    rules,
+  };
+}
+
+function buildAuditEvidence(results) {
+  return {
+    violations: summarizeImpactEvidence(results, 'violations'),
+    incomplete: summarizeImpactEvidence(results, 'incomplete'),
+  };
+}
+
+function evaluateMajorGate(evidence, operationalErrors = []) {
+  const confirmedMajorInstances = evidence.violations.rules.reduce((sum, rule) => (
+    !rule.best_practice_only && ['critical', 'serious'].includes(rule.impact)
+      ? sum + rule.instances
+      : sum
+  ), 0);
+  const bestPracticeOnlyInstances = evidence.violations.rules.reduce((sum, rule) => (
+    rule.best_practice_only ? sum + rule.instances : sum
+  ), 0);
+  const nonblockingInstances = evidence.violations.rules.reduce((sum, rule) => (
+    rule.best_practice_only || ['moderate', 'minor'].includes(rule.impact)
+      ? sum + rule.instances
+      : sum
+  ), 0);
+  const unknownImpactInstances = evidence.violations.rules.reduce((sum, rule) => (
+    !rule.best_practice_only && !KNOWN_IMPACTS.includes(rule.impact)
+      ? sum + rule.instances
+      : sum
+  ), 0);
+  const blockingIncompleteInstances = evidence.incomplete.rules.reduce((sum, rule) => (
+    !rule.best_practice_only && (!KNOWN_IMPACTS.includes(rule.impact) || ['critical', 'serious'].includes(rule.impact))
+      ? sum + rule.instances
+      : sum
+  ), 0);
+  const advisoryIncompleteInstances = evidence.incomplete.rules.reduce((sum, rule) => (
+    rule.best_practice_only || ['moderate', 'minor'].includes(rule.impact)
+      ? sum + rule.instances
+      : sum
+  ), 0);
+  const reasons = [];
+  if (confirmedMajorInstances > 0) reasons.push('confirmed-major-findings');
+  if (unknownImpactInstances > 0) reasons.push('unknown-violation-impact');
+  if (blockingIncompleteInstances > 0) reasons.push('blocking-incomplete-review');
+  if (operationalErrors.length > 0) reasons.push('scan-errors');
+  const status = confirmedMajorInstances > 0
+    ? 'fail'
+    : reasons.length > 0 ? 'inconclusive' : 'pass';
+  return {
+    mode: 'major',
+    status,
+    major_impacts: ['critical', 'serious'],
+    confirmed_major_instances: confirmedMajorInstances,
+    nonblocking_instances: nonblockingInstances,
+    best_practice_only_instances: bestPracticeOnlyInstances,
+    unknown_impact_instances: unknownImpactInstances,
+    blocking_incomplete_instances: blockingIncompleteInstances,
+    advisory_incomplete_instances: advisoryIncompleteInstances,
+    scan_error_count: operationalErrors.length,
+    reasons,
+  };
 }
 
 function normalizeRoute(urlValue) {
@@ -457,8 +551,8 @@ async function run() {
   }
   const summaryMode = args.summary === true || args.summary === 'true';
   const failOn = typeof args['fail-on'] === 'string' ? args['fail-on'] : null;
-  if (failOn && !['errors', 'new', 'none'].includes(failOn)) {
-    console.error(`Invalid --fail-on value: ${failOn}. Use errors, new, or none.`);
+  if (failOn && !['errors', 'major', 'new', 'none'].includes(failOn)) {
+    console.error(`Invalid --fail-on value: ${failOn}. Use errors, major, new, or none.`);
     process.exit(1);
   }
 
@@ -516,7 +610,7 @@ async function run() {
   }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|new|none]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|major|new|none]');
     process.exit(1);
   }
 
@@ -555,7 +649,18 @@ async function run() {
       try {
         page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
-        await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+        const response = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+        if (failOn === 'major') {
+          if (!response) throw new Error('Required scan target returned no HTTP response.');
+          const status = response.status();
+          const contentType = response.headers()['content-type'] || '';
+          if (!response.ok()) {
+            throw new Error(`Required scan target returned HTTP ${status}.`);
+          }
+          if (!/^(text\/html|application\/xhtml\+xml)(?:;|$)/i.test(contentType)) {
+            throw new Error(`Required scan target returned non-HTML content (${contentType || 'missing content-type'}).`);
+          }
+        }
         await page.evaluate(axeSource);
         const axe = await page.evaluate(async () => {
           return axe.run(document, {
@@ -580,6 +685,8 @@ async function run() {
   }
 
   const findings = collectFindings(results);
+  const auditEvidence = buildAuditEvidence(results);
+  const majorGate = failOn === 'major' ? evaluateMajorGate(auditEvidence, errors) : null;
   const basePayload = {
     generated_at: new Date().toISOString(),
     root_dir: rootDir,
@@ -594,6 +701,8 @@ async function run() {
     urls,
     results,
     findings,
+    audit_evidence: auditEvidence,
+    gate: majorGate,
     errors,
   };
 
@@ -664,6 +773,25 @@ async function run() {
       `a11y scan: 0 new findings; ${baselineComparison.existing_count} accepted; ` +
       `${baselineComparison.resolved_count} resolved.`
     );
+  } else if (failOn === 'major') {
+    if (majorGate.status === 'fail') {
+      console.error(
+        `a11y scan: ${majorGate.confirmed_major_instances} critical/serious violation instance(s); ` +
+        `${majorGate.nonblocking_instances} nonblocking violation instance(s) remain — see ${outputPath}`
+      );
+      process.exit(2);
+    }
+    if (majorGate.status === 'inconclusive') {
+      console.error(
+        `a11y scan: major-findings result inconclusive (${majorGate.reasons.join(', ')}); ` +
+        `review ${outputPath}`
+      );
+      process.exit(3);
+    }
+    console.error(
+      `a11y scan: 0 critical/serious findings; ${majorGate.nonblocking_instances} ` +
+      'nonblocking violation instance(s) reported.'
+    );
   }
 }
 
@@ -685,6 +813,10 @@ module.exports = {
   installDependencySet,
   loadUrlsFromSitemap,
   countViolations,
+  isBestPracticeOnly,
+  summarizeImpactEvidence,
+  buildAuditEvidence,
+  evaluateMajorGate,
   normalizeRoute,
   normalizeTarget,
   findingFingerprint,

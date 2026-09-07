@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
-version_date: 2026-09-05
-previous_version: 1
+version: 4
+version_date: 2026-09-07
+previous_version: 3
 change_summary: >
-  Documents scan-stage acquisition and the runtime compatibility contract.
+  Links the explicit experimental CLI result contract while retaining legacy defaults.
 ---
 
 # Interoperability Adapter
@@ -67,9 +67,17 @@ Customize
 ```
 
 `selection` may instead contain `changed_files`, pointing to a JSON array of
-repository-relative paths. `scan.fail_on` accepts `none`, `errors`, or `new`;
-`new` also requires `scan.baseline`. The adapter defaults to `none` so report
-generation can complete even when findings exist.
+repository-relative paths. `scan.fail_on` accepts `none`, `errors`, `major`, or
+`new`; `new` also requires `scan.baseline`. `major` evaluates all current
+findings, including accepted baseline findings: critical and serious findings
+fail, while moderate and minor findings remain visible and nonblocking. An
+explicitly best-practice-only rule is also nonblocking only when its remaining
+tags are axe `cat.*` tags; standards or unrecognized tags prevent downgrading.
+Unknown
+violation impact or critical, serious, or unknown-impact axe `incomplete`
+candidates produce an inconclusive nonzero result. Moderate and minor
+`incomplete` candidates remain advisory. The adapter defaults to `none` so
+report generation can complete even when findings exist.
 
 ## Invocation
 
@@ -114,3 +122,11 @@ adapter exits with that stage's nonzero status.
 
 This process boundary is the compatibility contract. Integrations should read
 the JSON artifacts or exit status rather than parse terminal prose.
+
+## Experimental terminal JSON contract
+
+For a single machine-readable stdout result, operational error identifiers,
+or report completion after a failed gate, select `--contract posix-json-v1`
+and read [CLI contract](cli-contract.md). The behavior described above remains
+the default. Choosing an output file or using legacy dry-run does not select
+the new contract.

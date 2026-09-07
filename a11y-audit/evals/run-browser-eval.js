@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 2
-version_date: 2026-09-05
-previous_version: 1
+version: 3
+version_date: 2026-09-07
+previous_version: 2
 change_summary: >
-  Requires the real browser eval to exercise Puppeteer 25.10.0.
+  Covers missing required route handling in the major gate.
 */
 
 const assert = require('assert');
@@ -36,6 +36,11 @@ async function main() {
   fs.mkdirSync(tmpDir, { recursive: true });
   const html = fs.readFileSync(fixture);
   const server = http.createServer((request, response) => {
+    if (request.url === '/missing') {
+      response.writeHead(404, { 'content-type': 'text/html; charset=utf-8' });
+      response.end('<h1>Not found</h1>');
+      return;
+    }
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     response.end(html);
   });
@@ -78,7 +83,24 @@ async function main() {
     const rescan = JSON.parse(fs.readFileSync(path.join(tmpDir, 'rescan.json'), 'utf8'));
     assert.strictEqual(rescan.baseline.new_count, 0);
     assert.ok(rescan.baseline.existing_count > 0);
-    console.log('PASS real browser scan and accepted-baseline rescan');
+
+    const missingPath = path.join(tmpDir, 'missing.json');
+    const missing = await runNode([
+      'a11y-audit/scripts/scan.js',
+      '--urls', `${url}missing`,
+      '--root', repoRoot,
+      '--output', missingPath,
+      '--fail-on', 'major',
+      '--summary',
+    ]);
+    assert.strictEqual(missing.status, 1, missing.stderr || missing.stdout);
+    const missingScan = JSON.parse(fs.readFileSync(missingPath, 'utf8'));
+    assert.strictEqual(missingScan.gate.status, 'inconclusive');
+    assert.deepStrictEqual(missingScan.gate.reasons, ['scan-errors']);
+    assert.strictEqual(missingScan.results.length, 0);
+    assert.strictEqual(missingScan.errors.length, 1);
+    assert.match(missingScan.errors[0].error, /HTTP 404/);
+    console.log('PASS real browser scan, accepted-baseline rescan, and missing-route major gate');
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }

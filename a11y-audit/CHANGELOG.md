@@ -1,14 +1,53 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 40
-version_date: 2026-09-05
-previous_version: 39
+version: 43
+version_date: 2026-09-07
+previous_version: 42
 change_summary: >
-  Releases v3.0.0 runtime and browser security migration.
+  Prepares v3.1.0 with the major gate and experimental CLI contract.
 ---
 
 # Changelog
+
+## v3.1.0 -- 2026-09-07
+
+- Prepare package metadata and lockfile for 3.1.0; synchronize README, website,
+  llms discovery, the Action starter, and assistant guide 0.3.15. Publication
+  and hosted verification are tracked separately in the release preparation
+  record.
+
+- Add an experimental `--contract posix-json-v1` path to `scripts/run-audit.js`
+  while existing invocations preserve their native
+  output and exit behavior. The new mode emits terminal JSON, separates gate
+  outcomes from operational failures, and finishes reports after gate rejection.
+- Define the pilot in `references/cli-contract.md` and
+  `references/cli-result-schema.json`; link it from `SKILL.md`,
+  `references/interoperability.md`, README and `ROADMAP.md`.
+- Add deterministic process, error, stream and legacy cases in
+  `evals/test-cli-contract.js`, syntax coverage in `evals/run-evals.js`, and
+  real external adapter checks in `scripts/test-cli-contract-consumer.mjs`.
+  The existing validation workflow runs both CLI test entrypoints.
+- Refresh `MANIFEST.yaml` inventory, headers and hashes for the pilot files.
+
+- Add `--fail-on major` for a zero-current-critical-or-serious acceptance bar.
+  Moderate, minor, and explicitly best-practice-only findings remain visible
+  and nonblocking; mixed standards and best-practice rules retain their normal
+  severity.
+- Require best-practice-only rules to contain the explicit `best-practice` tag
+  and otherwise only axe `cat.*` tags. Standards and unrecognized tags prevent
+  advisory downgrading.
+- Treat unknown violation impact and critical, serious, or unknown-impact axe
+  `incomplete` candidates as inconclusive. Preserve operational scan failures
+  as infrastructure errors and moderate/minor incomplete candidates as
+  advisory evidence.
+- Give confirmed failures precedence in the standards matrix, then render
+  unresolved axe candidates as `Needs review` ahead of pass evidence.
+- In major mode, reject HTTP error and non-HTML requested targets as missing
+  coverage so an accessible error page cannot produce a false pass.
+- Forward the mode through the vendor-neutral adapter and reusable Action, and
+  add report/schema evidence plus deterministic pass, fail, inconclusive,
+  best-practice-only, mixed-tag, and published-v1 compatibility coverage.
 
 ## v3.0.0 -- 2026-09-05
 
