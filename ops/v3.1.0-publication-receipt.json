@@ -1,0 +1,14 @@
+{
+  "release_head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b",
+  "tag_object": "1fccece25b28c99bcbbf26881edc336c586f6d5e",
+  "release_id": "RE_kwDORdFTI84W6NjX",
+  "published_at": "2026-09-07T23:27:23Z",
+  "url": "https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.1.0",
+  "downloaded_assets_verified": true,
+  "archive_files_each": 122,
+  "live_files_matched": 10,
+  "missing_route_status": 404,
+  "pr_ci": 34169686626,
+  "main_ci": 34169809560,
+  "pages_ci": 34169809509
+}

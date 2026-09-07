@@ -4,9 +4,9 @@
   "profile": "versioned-skill",
   "authority": "R2",
   "start_head": "3aba59f6ca726fe155ecf5464c80d547b7d667e0",
-  "candidate_head": "ba4d6cca1057973907d7900da0290902dfafa6e8",
+  "candidate_head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b",
   "candidate_version": "3.1.0",
-  "updated_at": "2026-09-07T23:14:29.115760+00:00",
+  "updated_at": "2026-09-07T23:28:57.914266+00:00",
   "steps": [
     {
       "id": "major_gate_checkpoint",
@@ -22,8 +22,9 @@
     },
     {
       "id": "release_preparation",
-      "status": "ready",
-      "evidence": "Package3.1.0, bundle43, guide0.3.15 prepared. Exact runtime hashes and test evidence in ops/v3.1.0-release-preparation.md; final local commit is captured by the assessment delivery receipt."
+      "status": "completed",
+      "evidence": "Published package3.1.0, bundle43, guide0.3.15. See ops/v3.1.0-publication-receipt.json.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "local_validation",
@@ -32,23 +33,27 @@
     },
     {
       "id": "push_and_pr",
-      "status": "ready",
-      "evidence": "Sam approved the documented publication sequence after local candidate review on 2026-09-07. Branch and PR publication authorized."
+      "status": "completed",
+      "evidence": "PR15 merged. Final PR head3a75fdffb7001c449664e35fde5b94e0497b2c4e; merge commit6af2c95a56ff058cddf0c6febc71512db1d6d19b.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "hosted_candidate_ci",
-      "status": "not_started",
-      "evidence": "Existing Node matrix and actual hosted Action tests must run on exact pushed commit."
+      "status": "completed",
+      "evidence": "All10 jobs passed in PR run34169686626; all10 passed on release main in run34169809560.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "merge_and_pages",
-      "status": "not_started",
-      "evidence": "Qualifying main update deploys Pages; include in publication authority."
+      "status": "completed",
+      "evidence": "PR15 merged; Pages run34169809509 passed at release commit. All10 deployed files match clean release build.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "tag_and_release",
-      "status": "not_started",
-      "evidence": "Authorized signed v3.1.0 tag, GitHub Release, tar.gz, zip and SHA256SUMS after passing hosted checks."
+      "status": "completed",
+      "evidence": "Signed tag v3.1.0 verified against configured public signing key, pushed and resolved remotely to release commit; release published2026-09-07T23:27:23Z with tar.gz, zip and SHA256SUMS.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "npm_publication",
@@ -57,8 +62,9 @@
     },
     {
       "id": "live_verification",
-      "status": "not_started",
-      "evidence": "Verify remote tag, downloaded assets and live bytes after authorized publication."
+      "status": "completed",
+      "evidence": "All3 assets downloaded and verified; both archives match121 Git blobs plus reviewed release notes. All10 live files match; missing route404. Exact archive extraction passes locked install,4real CLI consumers,build/search.",
+      "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     }
   ]
 }
