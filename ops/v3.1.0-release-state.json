@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "repository": "https://github.com/snapsynapse/skill-a11y-audit",
+  "profile": "versioned-skill",
+  "authority": "R1",
+  "start_head": "3aba59f6ca726fe155ecf5464c80d547b7d667e0",
+  "candidate_head": null,
+  "candidate_version": "3.1.0",
+  "updated_at": "2026-09-07T21:42:45.182438+00:00",
+  "steps": [
+    {
+      "id": "major_gate_checkpoint",
+      "status": "completed",
+      "head": "e9ffec4",
+      "evidence": "User-authorized signed local commit; 29/29 checks passed."
+    },
+    {
+      "id": "cli_contract_checkpoint",
+      "status": "completed",
+      "head": "f180997",
+      "evidence": "User-authorized signed local commit; independent bounded review clean; 17/17 CLI checks."
+    },
+    {
+      "id": "release_preparation",
+      "status": "ready",
+      "evidence": "Package3.1.0, bundle43, guide0.3.15 prepared. Exact runtime hashes and test evidence in ops/v3.1.0-release-preparation.md; final local commit is captured by the assessment delivery receipt."
+    },
+    {
+      "id": "local_validation",
+      "status": "completed",
+      "evidence": "29/29 deterministic;17/17 CLI;4/4 real CLI consumers from clean candidate; existing browser and Action consumer; audits and isolated build/search passed."
+    },
+    {
+      "id": "push_and_pr",
+      "status": "not_started",
+      "evidence": "Separate publication approval required; local commits alone authorized."
+    },
+    {
+      "id": "hosted_candidate_ci",
+      "status": "not_started",
+      "evidence": "Existing Node matrix and actual hosted Action tests must run on exact pushed commit."
+    },
+    {
+      "id": "merge_and_pages",
+      "status": "not_started",
+      "evidence": "Qualifying main update deploys Pages; include in publication authority."
+    },
+    {
+      "id": "tag_and_release",
+      "status": "not_started",
+      "evidence": "Proposed signed tag v3.1.0; tar.gz, zip, SHA256SUMS; no upload authorized."
+    },
+    {
+      "id": "npm_publication",
+      "status": "not_applicable",
+      "evidence": "Private package metadata; distribution remains GitHub skill archives."
+    },
+    {
+      "id": "live_verification",
+      "status": "not_started",
+      "evidence": "Verify remote tag, downloaded assets and live bytes after authorized publication."
+    }
+  ]
+}

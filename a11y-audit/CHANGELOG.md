@@ -1,16 +1,21 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 42
+version: 43
 version_date: 2026-09-07
-previous_version: 41
+previous_version: 42
 change_summary: >
-  Records the opt-in CLI contract pilot and its compatibility evidence.
+  Prepares v3.1.0 with the major gate and experimental CLI contract.
 ---
 
 # Changelog
 
-## Unreleased
+## v3.1.0 -- 2026-09-07
+
+- Prepare package metadata and lockfile for 3.1.0; synchronize README, website,
+  llms discovery, the Action starter, and assistant guide 0.3.15. Publication
+  and hosted verification are tracked separately in the release preparation
+  record.
 
 - Add an experimental `--contract posix-json-v1` path to `scripts/run-audit.js`
   while existing invocations preserve their native

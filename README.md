@@ -10,9 +10,9 @@ estates. Discover representative templates, preserve selector-level
 findings, and prevent AI-generated changes from introducing new barriers
 without requiring a legacy site to reach zero violations first.
 
-Version 3.0.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
-GitHub installs fetch main; pin the reusable Action to `v3.0.0` for this release.
-See the [release validation record](ops/v3.0.0-release-preparation.md).
+Version 3.1.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
+GitHub installs fetch main; pin the reusable Action to `v3.1.0` for this release.
+See the [release validation record](ops/v3.1.0-release-preparation.md).
 
 ## Who this is for
 
@@ -262,7 +262,7 @@ discovery plan, and selection evidence:
 Replace: BUILD_DIR -> repository-relative directory containing the built site
 Customize
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -371,7 +371,7 @@ For skip-download behavior and cache configuration, read
 This repository has three release identifiers because the published
 surfaces move at different compatibility levels:
 
-- `package.json` uses the public repository release line, 3.0.0 for this release.
+- `package.json` uses the public repository release line, 3.1.0 for this release.
 - `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
   incremented whenever the skill bundle changes.
 - `assistant-guide.txt` uses the GuideCheck guide version, incremented
@@ -379,6 +379,8 @@ surfaces move at different compatibility levels:
 
 Release notes should mention each identifier when more than one surface
 changes.
+The experimental CLI selector and its result schema have a separate contract
+identity; selecting `posix-json-v1` does not change the audit-v1 report schema.
 
 Current product boundaries and prioritized follow-up work live in
 [`a11y-audit/ROADMAP.md`](a11y-audit/ROADMAP.md).
@@ -426,7 +428,7 @@ Detailed map contracts live in
 
 These recorded runs predate v3 and are not v3 consumer-validation claims.
 Release validation checks are listed in the
-[release validation record](ops/v3.0.0-release-preparation.md).
+[release validation record](ops/v3.1.0-release-preparation.md).
 
 | Site | Pages | Groups | Scanned | Violations | Key findings |
 |------|-------|--------|---------|------------|-------------|

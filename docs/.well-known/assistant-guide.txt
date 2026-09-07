@@ -4,7 +4,7 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.14
+guide-version: 0.3.15
 applies-to: skill-a11y-audit 3.1.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
@@ -18,7 +18,7 @@ manifest-url: https://skilla11y.dev/.well-known/assistant-guide-manifest.txt
 [/assistant-guide-metadata]
 
 Task scope
-Requires Node.js 22.12.0 or later. Current release: v3.0.0.
+Requires Node.js 22.12.0 or later. Current release: v3.1.0.
 This guide covers installing skill-a11y-audit and running a bounded local
 accessibility audit, including an optional reviewed baseline for new-finding
 CI gates. It does not authorize production deployment, access to private or

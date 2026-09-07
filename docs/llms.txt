@@ -4,10 +4,10 @@
 > Template-aware sampling, stable finding fingerprints, and accepted
 > baselines let CI block new barriers without requiring zero existing debt.
 
-Documentation version: 3.0.0. Updated: 2026-09-05.
+Documentation version: 3.1.0. Updated: 2026-09-07.
 Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.10.0
 and axe-core 4.12.1. The reusable Action defaults to Node 22.
-GitHub installs fetch main; pin the reusable Action to v3.0.0 for this release.
+GitHub installs fetch main; pin the reusable Action to v3.1.0 for this release.
 
 ## What this skill does
 

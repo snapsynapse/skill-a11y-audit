@@ -26,7 +26,7 @@ jobs:
         run: npm ci && npm run build
 
       - name: Scan affected representative templates
-        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.0.0
+        uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
         with:
           serve-path: dist
           port: '8088'
@@ -42,7 +42,7 @@ jobs:
           selection-output: artifacts/a11y-selection.json
 
 # Adapt the build command, serve-path, and surface map to the target repository.
-# This v3 starter requires the v3.0.0 release tag. The scan runtime must be
+# This v3 starter requires the v3.1.0 release tag. The scan runtime must be
 # Node 22.12.0 or later; the Action defaults to Node 22.
 # Copy route-group-map.example.json and surface-map.example.json into
 # .a11y-audit/, then replace their patterns, prefixes, and groups. Unsafe route

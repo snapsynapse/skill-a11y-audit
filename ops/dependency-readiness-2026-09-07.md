@@ -3,8 +3,9 @@
 Prepared 2026-09-07 from `main` at v3.0.0. This is a local v3.1.0 candidate
 record. Sam approved scoped local commits on 2026-09-07. Push, release, and
 deployment remain outside the authorized scope.
-The proposed target release is v3.1.0; `package.json` correctly remains 3.0.0
-until a separately authorized release-preparation step.
+The target release is v3.1.0. After Sam approved local pilot preparation and
+commits, package metadata was prepared as 3.1.0. The latest verified published
+release remains v3.0.0; local version preparation is not publication.
 
 ## Acceptance contract
 

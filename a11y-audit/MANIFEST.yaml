@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 42
+bundle_version: 43
 bundle_date: 2026-09-07
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 42
-    hash: sha256:9c7be7a79867eba830ee624f2efddd504da9e7613cd8f49cb71f687ccd7241c9
+    version: 43
+    hash: sha256:1da70cc9fd33f760bb8dcefc188cac809ad415988790ddd14b602ec2920a0a47
     note: Records the unreleased major-findings acceptance gate
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 25
-    hash: sha256:988918ecc15951752fbfa95a4b1fbe7c7ab2143b08e6feab4a77ae6e7f895da8
+    version: 26
+    hash: sha256:d9199801d665b03d0d1971bac3466dbc06e5cb835d1aea831827fa1e43127b51
     note: Covers major-gate pass, fail, and inconclusive semantics
 
   - path: evals/run-browser-eval.js
@@ -504,9 +504,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 12
-    hash: sha256:fd5ce1ff2c4f52ed2098d321e83dd5774ab622ed464638d20806187c6889e887
-    note: v3.0.0 Action starter with Node 22.12+ runtime requirement
+    version: 13
+    hash: sha256:e36241d074554908a2948a59b0f866a08d3cad58ebb634d5c2543dc078fa85ad
+    note: v3.1.0 Action starter with Node 22.12+ runtime requirement
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -612,9 +612,9 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 33
+    version: 34
     hash: null
-    note: v33 tracks the v3.0.0 release bundle and hosted evidence; self-hash omitted
+    note: Tracks the prepared v3.1.0 bundle; hosted evidence remains pending; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script

@@ -1,6 +1,6 @@
 guide-path: /.well-known/assistant-guide.txt
-guide-version: 0.3.14
-guide-sha256: fd3d00059bff8c78493c752719d66176d2c677409254791bfd32b59b3313cd1b
+guide-version: 0.3.15
+guide-sha256: 5336f01caff74893df033b4cfc8676631de24eb2c1c7526ac8523ad1a628ea35
 guide-bytes: 8087
 immutable-release-url: https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.0.0
 profile: human-verifiable-assistant-guide

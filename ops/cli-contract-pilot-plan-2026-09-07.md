@@ -1,6 +1,6 @@
 # CLI contract pilot plan
 
-Date: 2026-09-07. Status: approved local pilot scope, not a published portfolio standard.
+Date: 2026-09-07. Status: local implementation completed and committed; publication pending. This is not a published portfolio standard.
 
 Scope: A11y-owned implementation and delivery planning. Cross-portfolio policy remains a proposal until the pilot provides evidence. The supplied LocalBrain reference is design input, not an executable implementation mandate.
 
@@ -55,3 +55,7 @@ Allow roughly 4-8 hours for a verified published pilot, excluding owner response
 Use one gpt-5.6-sol agent at medium effort for the bounded implementation, with independent review of exit semantics and failure cases. Do not split concurrent writing across this small adapter. GuideCheck and Portfolio CLI adoption follow the A11y pilot; they need not wait for every optional A11y roadmap item.
 
 After A11y delivery, evaluate the contract against GuideCheck and Portfolio CLI before promoting shared fixtures or requiring a portfolio standard. Estimate each follow-on from its own command/consumer inventory rather than multiplying this pilot estimate across repositories.
+
+## Local completion
+
+The major gate is checkpointed at `e9ffec4` and the CLI pilot at `f180997`. Final preparation and remaining publication steps are recorded in `v3.1.0-release-preparation.md` and `v3.1.0-release-state.json`. The locally validated contract is still experimental; GuideCheck and Portfolio CLI adoption remain later work.
