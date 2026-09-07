@@ -23,7 +23,7 @@
     {
       "id": "release_preparation",
       "status": "completed",
-      "evidence": "Published package3.1.0, bundle43, guide0.3.15. See ops/v3.1.0-publication-receipt.json.",
+      "evidence": "Published package 3.1.0, bundle 43, guide 0.3.15. See ops/v3.1.0-publication-receipt.json.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
@@ -34,25 +34,25 @@
     {
       "id": "push_and_pr",
       "status": "completed",
-      "evidence": "PR15 merged. Final PR head3a75fdffb7001c449664e35fde5b94e0497b2c4e; merge commit6af2c95a56ff058cddf0c6febc71512db1d6d19b.",
+      "evidence": "PR #15 merged. Final PR head 3a75fdffb7001c449664e35fde5b94e0497b2c4e; merge commit 6af2c95a56ff058cddf0c6febc71512db1d6d19b.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "hosted_candidate_ci",
       "status": "completed",
-      "evidence": "All10 jobs passed in PR run34169686626; all10 passed on release main in run34169809560.",
+      "evidence": "All ten jobs passed in PR run 34169686626; all ten passed on release main in run 34169809560.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "merge_and_pages",
       "status": "completed",
-      "evidence": "PR15 merged; Pages run34169809509 passed at release commit. All10 deployed files match clean release build.",
+      "evidence": "PR #15 merged; Pages run 34169809509 passed at release commit. All ten deployed files match clean release build.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
       "id": "tag_and_release",
       "status": "completed",
-      "evidence": "Signed tag v3.1.0 verified against configured public signing key, pushed and resolved remotely to release commit; release published2026-09-07T23:27:23Z with tar.gz, zip and SHA256SUMS.",
+      "evidence": "Signed tag v3.1.0 verified against configured public signing key, pushed and resolved remotely to release commit; release published 2026-09-07T23:27:23Z with tar.gz, zip and SHA256SUMS.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     },
     {
@@ -63,7 +63,7 @@
     {
       "id": "live_verification",
       "status": "completed",
-      "evidence": "All3 assets downloaded and verified; both archives match121 Git blobs plus reviewed release notes. All10 live files match; missing route404. Exact archive extraction passes locked install,4real CLI consumers,build/search.",
+      "evidence": "All three assets downloaded and verified; both archives match 121 Git blobs plus reviewed release notes. All ten live files match; missing route 404. Exact archive extraction passes locked install, four real CLI consumers, build and search checks.",
       "head": "6af2c95a56ff058cddf0c6febc71512db1d6d19b"
     }
   ]
