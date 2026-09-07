@@ -2,11 +2,11 @@
   "schema_version": "1.0",
   "repository": "https://github.com/snapsynapse/skill-a11y-audit",
   "profile": "versioned-skill",
-  "authority": "R1",
+  "authority": "R2",
   "start_head": "3aba59f6ca726fe155ecf5464c80d547b7d667e0",
-  "candidate_head": null,
+  "candidate_head": "ba4d6cca1057973907d7900da0290902dfafa6e8",
   "candidate_version": "3.1.0",
-  "updated_at": "2026-09-07T21:42:45.182438+00:00",
+  "updated_at": "2026-09-07T23:14:29.115760+00:00",
   "steps": [
     {
       "id": "major_gate_checkpoint",
@@ -32,8 +32,8 @@
     },
     {
       "id": "push_and_pr",
-      "status": "not_started",
-      "evidence": "Separate publication approval required; local commits alone authorized."
+      "status": "ready",
+      "evidence": "Sam approved the documented publication sequence after local candidate review on 2026-09-07. Branch and PR publication authorized."
     },
     {
       "id": "hosted_candidate_ci",
@@ -48,7 +48,7 @@
     {
       "id": "tag_and_release",
       "status": "not_started",
-      "evidence": "Proposed signed tag v3.1.0; tar.gz, zip, SHA256SUMS; no upload authorized."
+      "evidence": "Authorized signed v3.1.0 tag, GitHub Release, tar.gz, zip and SHA256SUMS after passing hosted checks."
     },
     {
       "id": "npm_publication",
