@@ -1,14 +1,20 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 43
-version_date: 2026-09-07
-previous_version: 42
+version: 44
+version_date: 2026-09-08
+previous_version: 43
 change_summary: >
-  Prepares v3.1.0 with the major gate and experimental CLI contract.
+  Reconciles post-release planning and roadmap status without changing runtime or release identity.
 ---
 
 # Changelog
+
+## Documentation maintenance -- 2026-09-08
+
+- `ROADMAP.md`: mark v3.1.0 as shipped and link the final publication receipt; keep the CLI contract experimental and consumer adoption separately evidenced.
+- `../ops/cli-contract-pilot-plan-2026-09-07.md` and `../ops/dependency-readiness-2026-09-07.md`: reconcile current status while preserving the original plan, candidate hashes and copied-site evidence limits.
+- `MANIFEST.yaml`: refresh roadmap and changelog versions and hashes, bundle revision 44, and release-status notes. This changelog records the documentation change; runtime files, evals, package version and published release remain unchanged.
 
 ## v3.1.0 -- 2026-09-07
 

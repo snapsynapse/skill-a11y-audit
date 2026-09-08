@@ -1,11 +1,8 @@
 # Accessibility dependency readiness
 
-Prepared 2026-09-07 from `main` at v3.0.0. This is a local v3.1.0 candidate
-record. Sam approved scoped local commits on 2026-09-07. Push, release, and
-deployment remain outside the authorized scope.
-The target release is v3.1.0. After Sam approved local pilot preparation and
-commits, package metadata was prepared as 3.1.0. The latest verified published
-release remains v3.0.0; local version preparation is not publication.
+Prepared 2026-09-07 from `main` at v3.0.0; reconciled 2026-09-08 after v3.1.0 publication. The candidate implementation described here shipped in v3.1.0 from `6af2c95a56ff058cddf0c6febc71512db1d6d19b`. See [the publication receipt](v3.1.0-publication-receipt.json) and [release state](v3.1.0-release-state.json) for final delivery evidence.
+
+The original local-only authority applied to candidate preparation and was followed by separate release authorization. The evidence below remains the historical candidate record, including copied-site hashes and its production limits. It is not a fresh scan or acceptance of the source website.
 
 ## Acceptance contract
 
@@ -23,7 +20,7 @@ required scan plan are infrastructure or scope failures and cannot produce a
 pass. A pass is scoped automated evidence, not proof of accessibility or legal
 conformance.
 
-## Shipped state
+## Starting state: v3.0.0
 
 - v3.0.0 provides `--fail-on errors|new|none`. `errors` blocks every violation
   regardless of impact. `new` blocks every fingerprint absent from the reviewed
@@ -35,7 +32,7 @@ conformance.
 - v3.0.0 and the fixed dependency graph shipped 2026-09-05. Dependabot alert 2
   for `GHSA-jmr9-qjv8-65gv` closed automatically at 2026-09-05T20:19:03Z.
 
-## Candidate implementation
+## Candidate implementation shipped in v3.1.0
 
 - Add `--fail-on major` without changing existing modes or defaults. Exit 2
   represents confirmed major findings; exit 3 represents inconclusive evidence;
@@ -63,7 +60,7 @@ execution remain future work. Live issue-tracker validation, broader manual
 adjudication workflow, external scans, issue creation, and accepted-baseline
 rewrites are outside this candidate.
 
-## Validation evidence
+## Historical candidate validation evidence
 
 - `npm run eval`: 24/24 checks passed.
 - `npm run validate`: 29/29 checks passed, including syntax, JSON/YAML,

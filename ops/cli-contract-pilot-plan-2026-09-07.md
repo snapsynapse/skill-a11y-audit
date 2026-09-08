@@ -1,8 +1,10 @@
 # CLI contract pilot plan
 
-Date: 2026-09-07. Status: local implementation completed and committed; publication pending. This is not a published portfolio standard.
+Prepared: 2026-09-07. Reconciled: 2026-09-08. Status: the A11y pilot shipped in v3.1.0 on 2026-09-07. The CLI contract remains experimental, not a published portfolio standard. Final publication evidence is in [the release receipt](v3.1.0-publication-receipt.json).
 
 Scope: A11y-owned implementation and delivery planning. Cross-portfolio policy remains a proposal until the pilot provides evidence. The supplied LocalBrain reference is design input, not an executable implementation mandate.
+
+The proposal and authority sections below preserve the pre-publication plan. They do not describe an outstanding v3.1.0 release queue or authorize another publication. Subsequent consumer adoption remains separate from A11y release acceptance.
 
 ## Objective
 
@@ -29,7 +31,7 @@ Run existing deterministic and browser checks plus a clean consumer smoke. Exerc
 
 An accessibility finding in the fixture can demonstrate a correctly failing gate. It does not require repairing the consumer website or accepting its baseline.
 
-## Delivery and authority
+## Original delivery and authority plan
 
 Local design, implementation and validation can proceed under the agreed pilot approach. Prepare a reviewable release candidate before requesting publication approval.
 
@@ -56,6 +58,6 @@ Use one gpt-5.6-sol agent at medium effort for the bounded implementation, with 
 
 After A11y delivery, evaluate the contract against GuideCheck and Portfolio CLI before promoting shared fixtures or requiring a portfolio standard. Estimate each follow-on from its own command/consumer inventory rather than multiplying this pilot estimate across repositories.
 
-## Local completion
+## Delivery completion
 
-The major gate is checkpointed at `e9ffec4` and the CLI pilot at `f180997`. Final preparation and remaining publication steps are recorded in `v3.1.0-release-preparation.md` and `v3.1.0-release-state.json`. The locally validated contract is still experimental; GuideCheck and Portfolio CLI adoption remain later work.
+The major gate was checkpointed at `e9ffec4` and the CLI pilot at `f180997`. v3.1.0 shipped from `6af2c95a56ff058cddf0c6febc71512db1d6d19b` on 2026-09-07. The [release receipt](v3.1.0-publication-receipt.json) records verified downloaded assets and matching live files; [release state](v3.1.0-release-state.json) retains the delivery record. The original preparation plan remains in `v3.1.0-release-preparation.md`. The shipped contract is still experimental; subsequent GuideCheck and Portfolio CLI adoption must be evaluated against their own evidence.

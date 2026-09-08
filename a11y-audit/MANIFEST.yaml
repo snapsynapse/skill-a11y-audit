@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 43
-bundle_date: 2026-09-07
+bundle_version: 44
+bundle_date: 2026-09-08
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -204,15 +204,15 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 6
-    hash: sha256:f13cb89256ca1802e8e9800d09e1f4554e0c21b1c3f355fdc2dc8d3ed32443ca
-    note: Reconciles v3 delivery and scopes the v3.1 candidate
+    version: 7
+    hash: sha256:b5d88c2a6137b3cf9ba8c3256dc988df64b7488001ee841dbe8b3d5ff3c1e781
+    note: Reconciles shipped v3.1.0 and links final publication evidence
 
   - path: CHANGELOG.md
     role: reference
-    version: 43
-    hash: sha256:1da70cc9fd33f760bb8dcefc188cac809ad415988790ddd14b602ec2920a0a47
-    note: Records the unreleased major-findings acceptance gate
+    version: 44
+    hash: sha256:bdb4afe4ab3ba65e6b06c2a8182d085d3e9280c3b4680de18c3810e8658f4649
+    note: Records post-release documentation maintenance; runtime and release unchanged
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -612,9 +612,9 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 34
+    version: 35
     hash: null
-    note: Tracks the prepared v3.1.0 bundle; hosted evidence remains pending; self-hash omitted
+    note: Tracks post-release documentation revision 44; published v3.1.0 remains immutable; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script

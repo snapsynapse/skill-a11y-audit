@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 6
-version_date: 2026-09-07
-previous_version: 5
+version: 7
+version_date: 2026-09-08
+previous_version: 6
 change_summary: >
-  Adds the bounded CLI contract pilot to the v3.1 candidate.
+  Reconciles the shipped v3.1.0 gate and experimental CLI pilot with final release evidence.
 ---
 
 # Accessibility Audit Roadmap
@@ -50,20 +50,22 @@ v3.0.0 shipped on 2026-09-05. GitHub automatically marked Dependabot alert 2
 for `GHSA-jmr9-qjv8-65gv` fixed at 2026-09-05T20:19:03Z after the migrated
 dependency graph reached `main`; no manual dismissal occurred.
 
-## v3.1 candidate
+## v3.1.0 shipped
 
-Add an explicit total-current-findings gate for teams whose acceptance bar is
+v3.1.0 shipped on 2026-09-07. The [publication receipt](../ops/v3.1.0-publication-receipt.json) identifies the released commit and verified assets and live files.
+
+The release adds an explicit total-current-findings gate for teams whose acceptance bar is
 zero critical or serious standards findings. `--fail-on major` preserves all
 reported findings, treats moderate, minor, and explicitly best-practice-only
 rules as nonblocking, and never lets a baseline suppress an existing major
 finding. Unknown severity and high-impact incomplete candidates remain
 inconclusive until reviewed. See `../ops/dependency-readiness-2026-09-07.md`.
 
-The same candidate pilots an explicit `posix-json-v1` adapter contract. It
+The same release includes an experimental `posix-json-v1` adapter contract. It
 separates operational status from gate outcomes, defines terminal JSON, and
 retains legacy behavior. See `references/cli-contract.md`. GuideCheck and
-Portfolio CLI adoption are later consumers of the pilot findings, not release
-prerequisites for A11y.
+Portfolio CLI adoption remain separate consumer work, evaluated against their
+own evidence rather than inferred from A11y release acceptance.
 
 ## Next priorities
 
