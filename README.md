@@ -283,6 +283,27 @@ Adapt `serve-path` to the repository's build output. Pin the Action to the
 full release commit SHA where organizational policy requires immutable Action
 references.
 
+#### What adoption takes
+
+Adoption time has not been measured. The work is:
+
+1. Required: copy the workflow starter from
+   `a11y-audit/assets/ci/github-actions/accessibility-audit.yml`, then set its
+   build command and `serve-path`. The starter already fetches full Git
+   history.
+2. Required for `fail-on: new`: create `.a11y-audit/baseline.json` outside
+   CI, because the Action does not write baselines. Serve the same build
+   locally, run `discover.js` against it, then run `scan.js --discover` on
+   that plan with `--write-baseline .a11y-audit/baseline.json`. Review the
+   accepted findings and commit the file. Fingerprints use the URL path, not
+   the host, so a local port matches CI.
+3. Optional: add reviewed route-group and surface maps. Without them, omit
+   the `discover-group-map` and `surface-map` inputs. Discovery then groups
+   routes by path pattern, and every pull request scans the full
+   representative plan.
+4. Ongoing: review new findings when the gate fails, and change the baseline
+   only through a reviewed commit.
+
 Discovery reads the site's sitemap by default. Add `discover-no-sitemap: true`
 when the served build has no sitemap and should be crawled from
 `discover-url` instead.
