@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-09-07T00:00:00Z">
+  <meta property="article:modified_time" content="2026-09-23T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -58,7 +58,7 @@
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-09-07",
+    "dateModified": "2026-09-23",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -120,7 +120,7 @@
   "runtimePlatform": "Node.js >=22.12.0",
   "description": "Portable accessibility regression evidence with a JSON process adapter, managed Puppeteer 25.10.0, and axe-core 4.12.1.",
   "license": "https://opensource.org/licenses/MIT",
-  "dateModified": "2026-09-07"
+  "dateModified": "2026-09-23"
 }
   </script>
 
@@ -322,6 +322,7 @@
     .pipeline .pipe-count { color: var(--accent); font-weight: 700; }
     .pipeline .pipe-step { color: var(--text); }
     .pipeline .pipe-arrow { color: var(--text-muted); }
+    .pipeline-note { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin: -0.5rem 0 1.5rem; }
 
     /* Pillars */
     .pillars {
@@ -484,7 +485,7 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-09-07">September 7, 2026</time>
+      Updated <time datetime="2026-09-23">September 23, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
       <span class="version">v3.1.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
@@ -495,13 +496,14 @@
 
     <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1272" height="540">
 
-    <div class="pipeline" role="img" tabindex="0" aria-label="Example: 746 pages found, identified 16 template groups, 22 pages selected for scanning">
+    <div class="pipeline" role="img" tabindex="0" aria-label="Historical example recorded before v3: 746 pages found, identified 16 template groups, 22 pages selected for scanning">
       <span class="pipe-count">746</span><span class="pipe-step">&nbsp;pages found</span>
       <span class="pipe-arrow">&rarr;</span>
       <span class="pipe-count">16</span><span class="pipe-step">&nbsp;templates</span>
       <span class="pipe-arrow">&rarr;</span>
       <span class="pipe-count">22</span><span class="pipe-step">&nbsp;pages scanned</span>
     </div>
+    <p class="pipeline-note">Historical run on the EveryAILaw sitemap, recorded before v3.</p>
 
     <div class="cta-row">
       <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" class="btn btn-primary" target="_blank" rel="noopener">Read the Skill</a>
@@ -622,22 +624,22 @@
       <p>axe-core stays at 4.12.1. Review any changed findings before updating an accepted baseline. Browser installation downloads the matching Chrome; <code>PUPPETEER_SKIP_DOWNLOAD=true</code> requires that browser already available in the configured cache.</p>
       <p><a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/runtime-compatibility.md">Read runtime and browser installation guidance.</a></p>
     </div>
-    <p>Options are listed from simplest to most manual. The recommended path is the reviewed assistant install: a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs.</p>
+    <p>Options are listed from simplest to most manual. The reviewed assistant install uses a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs. The hosted verifier currently reports a blocking finding on its install action, so the Skills CLI in option 2 is the recommended path until the guide is updated.</p>
 
     <div class="code-grid">
       <div class="code-block">
-        <h3>1. Reviewed assistant install (recommended)</h3>
+        <h3>1. Reviewed assistant install</h3>
 <p class="annotation">Literal</p>
 <pre tabindex="0">Fetch and verify
 https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify),
 report the achieved level and SHA-256,
 then follow its install action with my approval.</pre>
-        <p class="annotation">Paste into any coding agent. The guide is GuideCheck Level 3: the text you review is the text the assistant executes, every action needs your approval, and each script it runs is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first: it is under 8 KiB.</p>
+        <p class="annotation">Paste into any coding agent. The pinned GuideCheck 0.7.0 reference verifier reports Level 3. The hosted verifier (0.7.1) currently reports Level 2 with one blocking finding on the install action, so expect your assistant to stop before installing; use option 2 instead. The text you review is the text the assistant executes, every action needs your approval, and each bundled script is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first: it is under 8 KiB.</p>
       </div>
 
       <div class="code-block">
-        <h3>2. Interactive install</h3>
+        <h3>2. Interactive install (recommended)</h3>
 <p class="annotation">Literal</p>
 <pre tabindex="0">npx skills add \
   snapsynapse/skill-a11y-audit \
@@ -717,22 +719,22 @@ node a11y-audit/scripts/report.js \
   <div class="container">
     <div class="report-block">
       <h2>Sample output</h2>
-      <p>A structured markdown report plus versioned JSON. Configure <code>output_mode</code> in <code>.a11y-audit/PROJECT_CONTEXT.md</code>; direct <code>report.js</code> runs write both files.</p>
+      <p>A structured markdown report plus versioned JSON. Configure <code>output_mode</code> in <code>.a11y-audit/PROJECT_CONTEXT.md</code>; direct <code>report.js</code> runs write both files. The excerpt below is illustrative and abridged, not a verbatim report.</p>
 <pre tabindex="0">## Executive Summary
 Pages scanned: 22 of 746  ·  Template groups: 16
-Violations: 3  ·  Severity: 1 critical, 1 serious, 1 moderate
+Violations: 3  ·  Severity: 2 serious, 1 moderate
 Baseline: 27 accepted  ·  1 new  ·  2 resolved
 
 ## Findings by Rule
 
 Rule                  Impact    Instances  Affects
-color-contrast        critical  6          regulation/*, requires/*
+color-contrast        serious   6          regulation/*, requires/*
 aria-required-attr    serious   2          nav, footer
 landmark-one-main     moderate  1          homepage
 
 ## Shared Template Patterns
-Shared issues on regulation/*, requires/*, authority/*: dlitem
-→ Fix the shared build template once → resolves across 144 pages.</pre>
+Shared issues on regulation/*, requires/*: color-contrast
+→ Fix the shared build template once → resolves across 116 pages.</pre>
       <div class="cta-row" style="margin-top: 1.5rem;">
         <a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md" class="btn btn-primary" target="_blank" rel="noopener">Read the full skill spec &rarr;</a>
         <a href="https://github.com/snapsynapse/skill-a11y-audit" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
@@ -745,7 +747,7 @@ Shared issues on regulation/*, requires/*, authority/*: dlitem
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-09-07">2026-09-07</time>.
+      Last substantive revision: <time datetime="2026-09-23">2026-09-23</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
   </div>
