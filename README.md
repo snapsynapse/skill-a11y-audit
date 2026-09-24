@@ -91,8 +91,7 @@ For browser installation and migration details, see
 
 Options in order of end-user simplicity.
 
-**1. Reviewed assistant install (recommended).** Paste this into any coding
-agent:
+**1. Reviewed assistant install.** Paste this into any coding agent:
 
 Literal
 ```text
@@ -100,11 +99,14 @@ Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify), report the achieved
 level and SHA-256, then follow its install action with my approval.
 ```
-The guide is a GuideCheck Level 3 plain-text instruction surface: the text
-you review is the text the assistant executes, every action requires your
+The pinned GuideCheck 0.7.0 reference verifier reports Level 3 for this
+guide. The hosted verifier (0.7.1) currently reports Level 2 with one blocking
+finding on the install action, so expect your assistant to stop before
+installing; use the Skills CLI below until the guide is updated. The text you
+review is the text the assistant executes, every action requires your
 approval, and each bundled script it runs is SHA-256 pinned.
 
-**2. Skills CLI.** Install from GitHub with the open Skills CLI:
+**2. Skills CLI (recommended).** Install from GitHub with the open Skills CLI:
 
 Literal
 ```sh
@@ -312,9 +314,12 @@ assistant use:
 - Repository copy: [assistant-guide.txt](assistant-guide.txt)
 
 The guide is a plain-text instruction surface for installing the skill and
-running bounded audits. The GuideCheck 0.7.0 reference verifier currently
-reports Level 3 with no blockers. This form claim does not make the guide safe
-or make audit results a legal conformance certification.
+running bounded audits. The GuideCheck 0.7.0 reference verifier reports
+Level 3 with no blockers. The hosted 0.7.1 verifier at
+https://guidecheck.org/verify currently reports Level 2 with one blocking
+finding (`action-block.malformed` on `install-skill`). This form claim does
+not make the guide safe or make audit results a legal conformance
+certification.
 
 ## How It Works
 
