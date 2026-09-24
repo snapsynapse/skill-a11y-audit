@@ -6,6 +6,8 @@ Scope: A11y-owned implementation and delivery planning. Cross-portfolio policy r
 
 The proposal and authority sections below preserve the pre-publication plan. They do not describe an outstanding v3.1.0 release queue or authorize another publication. Subsequent consumer adoption remains separate from A11y release acceptance.
 
+Second adoption (recorded 2026-09-23): GuideCheck, then Portfolio CLI, should test portability of the explicit contract selector, gate/operational separation, terminal JSON, raw child outcomes and conservative retry semantics. Bring demonstrated incompatibilities back to this repository before promoting a shared contract. Preserve A11y's legacy defaults and avoid dependencies on LocalBrain or the Project board. Do not require A11y to adopt GuideCheck's corrected profile before GuideCheck can ship; that would create a circular prerequisite. Authenticated journeys, SARIF, Playwright integration, live tracker validation and field ergonomics stay in `../a11y-audit/ROADMAP.md` and are not prerequisites for this rollout. Consumer pins, guide-profile migrations, source-site findings and baseline decisions remain owned by their respective repositories.
+
 ## Objective
 
 Use A11y alone to test a portable, versioned CLI contract without changing existing command behavior or making GuideCheck and Portfolio CLI migration prerequisites.

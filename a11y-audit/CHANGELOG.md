@@ -1,14 +1,21 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 44
-version_date: 2026-09-08
-previous_version: 43
+version: 45
+version_date: 2026-09-23
+previous_version: 44
 change_summary: >
-  Reconciles post-release planning and roadmap status without changing runtime or release identity.
+  Migrates the processed post-release handoff into durable roadmap and ops records.
 ---
 
 # Changelog
+
+## Documentation maintenance -- 2026-09-23
+
+- `ROADMAP.md`: add an open maintenance item for the hosted GuideCheck 0.7.1 Level 2 finding on `install-skill`, with constraints and acceptance criteria. The README and website disclosed that result in a separate change on 2026-09-23.
+- `../ops/cli-contract-pilot-plan-2026-09-07.md`: record the second CLI-contract adoption conditions.
+- `../ops/v3.1.0-release-preparation.md`: record post-release branch state, including the squash-merge tree-equality check.
+- `MANIFEST.yaml`: refresh roadmap and changelog versions and hashes, and set bundle revision 45. Runtime files, evals, assistant guide, package version and published release remain unchanged.
 
 ## Documentation maintenance -- 2026-09-08
 

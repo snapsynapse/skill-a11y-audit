@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 7
-version_date: 2026-09-08
-previous_version: 6
+version: 8
+version_date: 2026-09-23
+previous_version: 7
 change_summary: >
-  Reconciles the shipped v3.1.0 gate and experimental CLI pilot with final release evidence.
+  Adds the open hosted GuideCheck guide finding as maintenance work.
 ---
 
 # Accessibility Audit Roadmap
@@ -77,6 +77,33 @@ own evidence rather than inferred from A11y release acceptance.
    universal CI surface.
 3. First-class Playwright execution. Add it only where it improves
    deterministic state coverage or reuses an existing project dependency.
+
+## Open maintenance
+
+### Assistant guide fails the hosted GuideCheck verifier
+
+Observed 2026-09-07 and reproduced 2026-09-24: the hosted GuideCheck 0.7.1
+verifier, within the guide's declared `>=0.7.0, <0.8.0` range, returns
+Level 2 for guide SHA-256
+`5336f01caff74893df033b4cfc8676631de24eb2c1c7526ac8523ad1a628ea35`.
+The blocking `action-block.malformed` finding says `exec-opaque` is permitted
+only for exempt dependency commands, identifying `install-skill`. An advisory
+also reports a missing `X-Content-Type-Options: nosniff` header, which GitHub
+Pages cannot set. GuideCheck's 2.0.0 candidate preview returned the same
+result, so this is not a corrected-profile regression. The release's pinned
+GuideCheck 0.7.0 Level 3 result remains valid evidence for that evaluator
+only. Since 2026-09-23 the README and website state the hosted result and
+recommend the Skills CLI.
+
+Next step: reproduce the finding, inspect the installer action and the
+versioned opacity rules, then propose either a narrowly scoped guide
+correction or an explicit verifier-compatibility policy. Do not weaken
+GuideCheck, change frozen reports, rotate anchors, or adopt profile 2.0.0
+solely to hide the finding. Changed guide bytes need their own manifest and
+anchor plan, consumer validation, and independent review before publication.
+Acceptance: the hosted verifier reports Level 3 with no blocking findings for
+the published guide hash, and the README and website claims are restored in
+the same change.
 
 ## Standing validation work
 
