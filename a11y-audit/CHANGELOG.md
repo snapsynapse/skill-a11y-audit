@@ -1,14 +1,21 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 48
+version: 49
 version_date: 2026-10-03
-previous_version: 47
+previous_version: 48
 change_summary: >
-  Records v3.2.0 publication preparation and guide acquisition correction.
+  Records verified v3.2.0 publication and hosted guide acceptance.
 ---
 
 # Changelog
+
+## v3.2.0 publication receipt -- 2026-10-03
+
+- `ROADMAP.md`: close the hosted guide compatibility item using the deployed hash and Level 4 result; retain the historical mismatch and nosniff warning.
+- `../ops/v3.2.0-publication-receipt.json` and `../ops/v3.2.0-hosted-guidecheck.json`: retain verified tag, release, assets, CI, live bytes and hosted conformance evidence.
+- `../ops/v3.2.0-release-state.json` and preparation record: reconcile completed delivery separately from the immutable release.
+- `CHANGELOG.md` and `MANIFEST.yaml`: advance documentation bundle revision to 49. Runtime, package version, guide bytes, signed tag and release assets are unchanged.
 
 ## v3.2.0 -- 2026-10-03
 

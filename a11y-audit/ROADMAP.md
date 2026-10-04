@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 11
+version: 12
 version_date: 2026-10-03
-previous_version: 10
+previous_version: 11
 change_summary: >
-  Records local installer correction and pending hosted verification.
+  Closes the hosted guide compatibility item using published v3.2.0 evidence.
 ---
 
 # Accessibility Audit Roadmap
@@ -88,9 +88,9 @@ checkpoints and state-aware baseline identity remain next. Guide 0.3.17 and its 
 local dependencies before loading them. See `../ops/v3.2.0-release-state.json`
 for publication and hosted verification evidence.
 
-## Open maintenance
+## Resolved maintenance
 
-### Assistant guide fails the hosted GuideCheck verifier
+### Assistant guide hosted verifier compatibility
 
 Observed 2026-09-07 and reproduced 2026-09-24: the hosted GuideCheck 0.7.1
 verifier, within the guide's declared `>=0.7.0, <0.8.0` range, returns
@@ -105,16 +105,15 @@ GuideCheck 0.7.0 Level 3 result remains valid evidence for that evaluator
 only. Since 2026-09-23 the README and website state the hosted result and
 recommend the Skills CLI.
 
-Local v3.2.0 preparation replaces the guide installer with release-specific
-source acquisition and retains Skills CLI registration outside the guide.
-Pinned and current local verifier acceptance must be recorded against the
-final candidate hash. Deployment and hosted acceptance remain pending. Do not weaken
-GuideCheck, change frozen reports, rotate anchors, or adopt profile 2.0.0
-solely to hide the finding. Changed guide bytes need their own manifest and
-anchor plan, consumer validation, and independent review before publication.
-Acceptance: the hosted verifier reports Level 3 with no blocking findings for
-the published guide hash, and the README and website claims are restored in
-the same change.
+Resolved with v3.2.0: guide 0.3.17 replaces the installer with release-specific
+source acquisition while keeping Skills CLI registration outside the guide.
+The deployed guide SHA-256 is
+`506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c`.
+Hosted GuideCheck returned Level 4 with zero blocking findings. The remaining
+missing-nosniff header warning is unchanged. Local and hosted acceptance are
+recorded separately in `../ops/v3.2.0-publication-receipt.json` and
+`../ops/v3.2.0-hosted-guidecheck.json`. No verifier was weakened and the prior
+release reports remain unchanged.
 
 ## Standing validation work
 
