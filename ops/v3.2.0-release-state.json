@@ -4,19 +4,21 @@
   "profile": "versioned-skill",
   "authority": "R2",
   "start_head": "07f1d751a42d26371a7ab485750cf19566e5ae77",
-  "candidate_head": null,
+  "candidate_head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3",
   "candidate_version": "3.2.0",
-  "updated_at": "2026-10-04T03:16:10.072371+00:00",
+  "updated_at": "2026-10-04T03:34:05.669557+00:00",
   "steps": [
     {
       "id": "local_preparation",
-      "status": "ready",
-      "evidence": "Working-tree fingerprint e6a9de7b67fee38635f6e5dbf76cdaf0036ef1d5ad4d2a6d7f50a1758dbf1132; see ops/v3.2.0-readiness/candidate-hashes.json."
+      "status": "completed",
+      "evidence": "v3.2.0, bundle 48 and guide 0.3.17 finalized in commit 736766d.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "local_validation",
-      "status": "ready",
-      "evidence": "Final extracted archive: bundle30/30, CLI17/17, authenticated browser/Action, four CLI consumers, full Action fresh/skip-download/stale-install consumers all pass. Both exact verifier lanes Level3 with zero blockers/warnings. See ops/v3.2.0-readiness/artifact-smoke.json."
+      "status": "completed",
+      "evidence": "Exact merged-commit archives: 143 Git blobs each; locked install, bundle 30/30, authenticated browser/Action, four CLI consumers, site build/search pass.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "independent_review",
@@ -25,28 +27,33 @@
     },
     {
       "id": "commit",
-      "status": "not_started",
-      "evidence": "Implementation commit 07f1d75 exists; publication-preparation changes uncommitted."
+      "status": "completed",
+      "evidence": "Signed publication commit 736766d follows implementation 07f1d75; merged through PR #24 as 0ae57353b3857f8bb5e19b51e60b162cea68eac3",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "hosted_candidate_ci",
-      "status": "not_started",
-      "evidence": "Requires authorized branch push and PR; no exact candidate CI yet."
+      "status": "completed",
+      "evidence": "All ten PR checks passed in 37174087878; all ten main checks passed in 37174174664.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "tag_and_release",
-      "status": "not_started",
-      "evidence": "v3.2.0 and named source archives require publication approval."
+      "status": "completed",
+      "evidence": "Signed tag v3.2.0 verified and published at 2026-10-04T03:30:45Z; all three downloaded assets verified against exact Git blobs.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "merge_and_pages",
-      "status": "not_started",
-      "evidence": "Main docs changes trigger deployment; explicit approval required."
+      "status": "completed",
+      "evidence": "PR #24 merged at release head; Pages 37174174624 succeeded. All ten live files match release build.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "live_verification",
-      "status": "not_started",
-      "evidence": "Verify deployed hash, release URL, assets and hosted GuideCheck after publication."
+      "status": "completed",
+      "evidence": "Published guide hash 506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c: hosted Level 4, zero blockers, one existing nosniff warning; missing route 404. See publication receipt.",
+      "head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3"
     },
     {
       "id": "npm_publication",

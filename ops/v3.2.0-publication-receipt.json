@@ -1,0 +1,86 @@
+{
+  "release_head": "0ae57353b3857f8bb5e19b51e60b162cea68eac3",
+  "tag": "v3.2.0",
+  "tag_object": "0348a8d6f3ad2a84ec4bec0b9eae562d1e74e4f4",
+  "signature_verified": true,
+  "release_id": "RE_kwDORdFTI84YAmNB",
+  "url": "https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.2.0",
+  "published_at": "2026-10-04T03:30:45Z",
+  "pr": 24,
+  "pr_ci": 37174087878,
+  "main_ci": 37174174664,
+  "pages_ci": 37174174624,
+  "archive_files_each": 143,
+  "assets_sha256": {
+    "skill-a11y-audit-v3.2.0.tar.gz": "61a2684e424b82a1ac8e981fab54572300bb95d00ef63cc3ab9fc90ed65e87e3",
+    "skill-a11y-audit-v3.2.0.zip": "e9ec5385bdfc4efe4ad05cc32c1e2204c13f00d34605b5e454e05621741a1c41",
+    "SHA256SUMS": "ef6f0b6515a9c74767c4c62ee0846000660945c835b37e7041c0a370f8ae6bf2"
+  },
+  "downloaded_assets_verified": true,
+  "archives_match_git_blobs": true,
+  "extracted_smoke": "locked install, bundle30/30, authenticated browser/Action, four CLI consumers, site build/search passed",
+  "live_files": [
+    {
+      "path": "llms.txt",
+      "status": 200,
+      "sha256": "4c7984be5cdb74a86887f2ae85854bf34b863f86b3160b11fbfe8c05e841c99f"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "ddf36273f1da2f43fcaa92215c5ee17ffe16b74ef929b74337941bd6e4ed21e4"
+    },
+    {
+      "path": "sitemap.xml",
+      "status": 200,
+      "sha256": "37381d910ac413b6fe2fcaf53252b065d933d8d2fa711d2d1082c6611c991805"
+    },
+    {
+      "path": "robots.txt",
+      "status": 200,
+      "sha256": "db0b78e374d83738839d6b55ab6abda1234ab7db3a3f23459c35d74ec48b6f08"
+    },
+    {
+      "path": "favicon.svg",
+      "status": 200,
+      "sha256": "df24ee0f62282967ab9d1e02d339d4189717a44db9af52d1c1366cc96fcef3c8"
+    },
+    {
+      "path": "imgs/og.png",
+      "status": 200,
+      "sha256": "c468c7e05b29a0e5f367a9e49729d3ebea45ce459225634025e300b916e8a79b"
+    },
+    {
+      "path": ".well-known/assistant-guide.txt",
+      "status": 200,
+      "sha256": "506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c"
+    },
+    {
+      "path": ".well-known/assistant-guide-manifest.txt",
+      "status": 200,
+      "sha256": "b125fe63eb88473075147938f165abcf1df0a335335883ee3a83976f9a40fe91"
+    },
+    {
+      "path": "schema/audit-v1.json",
+      "status": 200,
+      "sha256": "4d4c1067844dbb9aeb81092a24afacdca90462b3662887be58fce1e270f66218"
+    },
+    {
+      "path": "schema/cli-result-posix-json-v1.json",
+      "status": 200,
+      "sha256": "3a27a38c5a0d77958615c54f032db986ba1b914602ebd3bbfd8be65c87bc1486"
+    }
+  ],
+  "missing_route_status": 404,
+  "hosted_guide": {
+    "sha256": "506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c",
+    "achieved_level": 4,
+    "summary": {
+      "blocking_findings": 0,
+      "warnings": 1,
+      "infos": 7
+    },
+    "warning": "header.x-content-type-options.missing"
+  },
+  "scope": "Post-release verification receipt. Immutable release and assets unchanged."
+}
