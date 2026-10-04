@@ -1,14 +1,46 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 45
-version_date: 2026-09-23
-previous_version: 44
+version: 48
+version_date: 2026-10-03
+previous_version: 47
 change_summary: >
-  Migrates the processed post-release handoff into durable roadmap and ops records.
+  Records v3.2.0 publication preparation and guide acquisition correction.
 ---
 
 # Changelog
+
+## v3.2.0 -- 2026-10-03
+
+- `SKILL.md`, `references/authenticated-scans.md` and `ROADMAP.md`: expose the authenticated input contract and record publication status without marking journeys complete.
+- `assets/ci/github-actions/accessibility-audit.yml`: prepare the v3.2.0 Action pin.
+- `evals/run-evals.js`: require v3.2.0 examples, guide 0.3.17 acquisition semantics, and the intended release URL.
+- `../assistant-guide.txt` and hosted copy: replace the unresolved third-party installer action with release-specific source acquisition; keep Skills CLI registration outside the guide and preserve public-only scan scope.
+- `../docs/.well-known/assistant-guide-manifest.txt`: bind the new guide hash and intended immutable v3.2.0 URL with publication metadata finalized for the approved release.
+- Root validation lockfile: patch fast-uri for GHSA-hrr3-gc8f-f4qj.
+- Root package and lock metadata, README, website and machine-readable overview: propagate v3.2.0, with local versus hosted acceptance distinguished.
+- `../.github/workflows/validate-skill.yml`: retain the original pinned verifier and add a pinned current-compatibility lane.
+- `CHANGELOG.md` and `MANIFEST.yaml`: advance bundle revision to 48 and refresh changed-file versions and hashes.
+
+## Guide anchor preparation (unreleased) -- 2026-10-03
+
+- `scripts/scan.js`: verify both local executable dependencies before loading them; the guide scanner pin binds their expected hashes.
+- `../assistant-guide.txt` and its hosted source copy: prepare guide 0.3.16, refresh the scanner pins and review date, retaining the public-only action scope and existing installer finding.
+- `../docs/.well-known/assistant-guide-manifest.txt`: synchronize candidate bytes and mark draft; remove stale v3.0.0 publication provenance. Level 4 release anchoring remains pending.
+- `evals/run-evals.js`: test dependency tampering, all three scanner action pins, unchanged authentication exclusions, and draft sidecar identity.
+- `references/authenticated-scans.md`, `ROADMAP.md`, `CHANGELOG.md` and `MANIFEST.yaml`: record local anchor preparation and bundle revision 47; package version and frozen release evidence remain unchanged.
+
+## Authenticated input slice (unreleased) -- 2026-10-03
+
+- `scripts/auth-state.js`: validate bounded storage and target assertions, isolate contexts, redact supplied values, and protect authentication files from output aliases.
+- `scripts/scan.js`: import authentication state and require a successful protected-page assertion before scanning; retain operational failure semantics.
+- `scripts/run-audit.js`: carry paired authentication inputs through both adapter modes and protect them from all artifact outputs.
+- `evals/test-auth-state.js` and `evals/run-evals.js`: add authentication input, isolation, failure, repeatability, and adapter regressions.
+- `references/authenticated-scans.md` and `references/interoperability.md`: document supported state, assertions, network restrictions, and unauthenticated discovery limits.
+- `ROADMAP.md`: record the local input slice while retaining bounded journeys and state-aware baselines as pending.
+- `../.github/actions/scan/action.yml` and `../package.json`: expose paired inputs, protect uploaded paths, and add the real authentication eval command.
+- `../.github/workflows/validate-skill.yml` and `../scripts/test-action-consumer.mjs`: run authenticated browser checks in CI and retain consumer coverage of the artifact guard.
+- `MANIFEST.yaml` and `CHANGELOG.md`: advance bundle revision to 46. Package version stays unchanged. The assistant guide is intentionally stale relative to the new scanner hash; anchor migration and publication remain pending.
 
 ## Documentation maintenance -- 2026-09-23
 

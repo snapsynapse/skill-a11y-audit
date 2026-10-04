@@ -1,0 +1,59 @@
+{
+  "compact_report": "Verifier: guidecheck-reference-local 0.7.0\nGuide: assistant-guide.txt\nLevel: 3\nSHA-256: 87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8\nBlocking findings: 2\nWarnings: 0\nHash pinned: no\nProceed? no",
+  "findings": [
+    {
+      "id": "metadata.last-reviewed.age",
+      "message": "last-reviewed is 1 days old",
+      "severity": "info"
+    },
+    {
+      "evidence": "immutable-release-url",
+      "id": "manifest.missing-required",
+      "message": "manifest lacks required fields",
+      "severity": "error"
+    },
+    {
+      "id": "anchor.independent.missing",
+      "message": "no independent anchor is available for Level 4",
+      "remediation": "publish the guide hash on DNS TXT, package registry metadata, repository file, signed security.txt, or a transparency log",
+      "section": "verifier-conformance.23",
+      "severity": "error"
+    }
+  ],
+  "guide": {
+    "achieved_level": 3,
+    "bytes": 8087,
+    "level5_ready": false,
+    "sha256": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8"
+  },
+  "input": {
+    "evaluation_mode": "local-file",
+    "manifest_path": "docs/.well-known/assistant-guide-manifest.txt",
+    "path": "assistant-guide.txt"
+  },
+  "local_evaluation": {
+    "evaluated_at": "2026-10-04T02:55:56.281304Z"
+  },
+  "manifest": {
+    "bytes_match": true,
+    "fetched": false,
+    "guide_sha256": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8",
+    "hash_match": true,
+    "path": "docs/.well-known/assistant-guide-manifest.txt",
+    "sha256": "26141ed84706896c558de254cb94029994704010865684bb17a1bad6a236e83d",
+    "valid": false
+  },
+  "summary": {
+    "blocking_findings": 2,
+    "infos": 1,
+    "warnings": 0
+  },
+  "verifier": {
+    "guide_profile": "human-verifiable-assistant-guide",
+    "guide_profile_version": "0.7.0",
+    "name": "guidecheck-reference-local",
+    "verifier_profile": "human-verifiable-assistant-guide-verifier",
+    "verifier_profile_version": "0.7.0",
+    "version": "0.7.0"
+  }
+}

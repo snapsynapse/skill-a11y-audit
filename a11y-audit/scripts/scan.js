@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 12
-version_date: 2026-09-07
-previous_version: 11
+version: 14
+version_date: 2026-10-03
+previous_version: 13
 change_summary: >
-  Adds a major-findings gate with explicit inconclusive evidence handling.
+  Binds local executable dependencies before loading them.
 */
 
 const fs = require('fs');
@@ -14,6 +14,13 @@ const path = require('path');
 const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { execSync, spawnSync } = require('child_process');
+// The guide pins this entry point; bind its local executable dependencies too.
+const LOCAL_SCRIPT_HASHES = {"auth-state.js": "4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d"};
+for (const [name, expected] of Object.entries(LOCAL_SCRIPT_HASHES)) {
+  const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, name))).digest('hex');
+  if (actual !== expected) throw new Error(`Scanner dependency integrity mismatch: ${name}`);
+}
+const { loadAuth, prepareAuth, assertAuth } = require('./auth-state.js');
 const { assertSupportedNode } = require('./check-runtime.js');
 
 // ---------------------------------------------------------------------------
@@ -610,9 +617,12 @@ async function run() {
   }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|major|new|none]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--storage-state <path> --auth-targets <path>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|major|new|none]');
     process.exit(1);
   }
+
+  const auth = loadAuth(args['storage-state'], args['auth-targets'], urls,
+    [outputPath, args['write-baseline']]);
 
   // Resolve the complete set before scanning so one dependency's project-level
   // availability cannot suppress installation of another.
@@ -646,10 +656,13 @@ async function run() {
     });
     for (const url of urls) {
       let page;
+      let context;
       try {
-        page = await browser.newPage();
+        if (auth) ({ page, context } = await prepareAuth(browser, auth, url));
+        else page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
         const response = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+        if (auth) await assertAuth(page, response, auth.byUrl.get(url));
         if (failOn === 'major') {
           if (!response) throw new Error('Required scan target returned no HTTP response.');
           const status = response.status();
@@ -662,22 +675,27 @@ async function run() {
           }
         }
         await page.evaluate(axeSource);
-        const axe = await page.evaluate(async () => {
+        let axe = await page.evaluate(async () => {
           return axe.run(document, {
             resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
           });
         });
+        if (auth) {
+          if (page.url() !== auth.byUrl.get(url).expected) throw new Error("Authentication target changed during scan.");
+          axe = auth.redact(axe);
+        }
         results.push({
           url,
           axe: summaryMode ? summarizeAxe(axe) : axe,
           lighthouse: { status: 'skipped', reason: 'Lighthouse is a separate optional audit step' },
         });
       } catch (err) {
-        const failure = { url, error: err.message };
+        const failure = { url, error: auth ? 'Authenticated target failed navigation, readiness, or scanning.' : err.message };
         errors.push(failure);
-        console.error(`Scan failed for ${url}: ${err.message}`);
+        console.error(`Scan failed for ${url}: ${failure.error}`);
       } finally {
-        if (page) await page.close().catch(() => {});
+        if (context) await context.close().catch(() => {});
+        else if (page) await page.close().catch(() => {});
       }
     }
   } finally {

@@ -1,0 +1,78 @@
+{
+  "compact_report": "Verifier: guidecheck-reference-local 0.7.1\nGuide: assistant-guide.txt\nLevel: 2\nSHA-256: 87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8\nBlocking findings: 1\nWarnings: 0\nHash pinned: no\nProceed? no",
+  "findings": [
+    {
+      "id": "metadata.last-reviewed.age",
+      "message": "last-reviewed is 1 days old",
+      "severity": "info"
+    },
+    {
+      "evidence": "install-skill",
+      "id": "action-block.malformed",
+      "message": "exec-opaque is only permitted for exempt dependency commands",
+      "severity": "error"
+    },
+    {
+      "evidence": "discover-site",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "select-changed-surfaces",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "scan-pages",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "write-reviewed-baseline",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "scan-new-findings",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "generate-report",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    }
+  ],
+  "guide": {
+    "achieved_level": 2,
+    "bytes": 8087,
+    "level5_ready": false,
+    "sha256": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8"
+  },
+  "input": {
+    "evaluation_mode": "local-file",
+    "path": "assistant-guide.txt"
+  },
+  "local_evaluation": {
+    "evaluated_at": "2026-10-04T02:56:23.085406Z"
+  },
+  "summary": {
+    "blocking_findings": 1,
+    "infos": 7,
+    "warnings": 0
+  },
+  "verifier": {
+    "guide_profile": "human-verifiable-assistant-guide",
+    "guide_profile_version": "0.7.1",
+    "name": "guidecheck-reference-local",
+    "verifier_profile": "human-verifiable-assistant-guide-verifier",
+    "verifier_profile_version": "0.7.1",
+    "version": "0.7.1"
+  }
+}

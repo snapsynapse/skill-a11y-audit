@@ -10,9 +10,17 @@ estates. Discover representative templates, preserve selector-level
 findings, and prevent AI-generated changes from introducing new barriers
 without requiring a legacy site to reach zero violations first.
 
-Version 3.1.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
-GitHub installs fetch main; pin the reusable Action to `v3.1.0` for this release.
-See the [release validation record](ops/v3.1.0-release-preparation.md).
+Version 3.2.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
+GitHub installs fetch main; pin the reusable Action to `v3.2.0` for this release.
+See the [release validation record](ops/v3.2.0-release-preparation.md).
+
+## Authenticated scan inputs
+
+v3.2.0 adds paired storage-state and URL/readiness assertions to the scanner,
+JSON adapter, and Action. See [authenticated scans](a11y-audit/references/authenticated-scans.md)
+for supported cookies/local storage, isolated contexts, redaction, and limits.
+Discovery remains unauthenticated; bounded journeys are still roadmap work.
+See the release validation record for publication and hosted verification evidence.
 
 ## Who this is for
 
@@ -91,20 +99,18 @@ For browser installation and migration details, see
 
 Options in order of end-user simplicity.
 
-**1. Reviewed assistant install.** Paste this into any coding agent:
+**1. Reviewed assistant acquisition.** Paste this into any coding agent:
 
 Literal
 ```text
 Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify), report the achieved
-level and SHA-256, then follow its install action with my approval.
+level and SHA-256, then follow its acquisition action with my approval.
 ```
-The pinned GuideCheck 0.7.0 reference verifier reports Level 3 for this
-guide. The hosted verifier (0.7.1) currently reports Level 2 with one blocking
-finding on the install action, so expect your assistant to stop before
-installing; use the Skills CLI below until the guide is updated. The text you
-review is the text the assistant executes, every action requires your
-approval, and each bundled script it runs is SHA-256 pinned.
+Guide 0.3.17 passes local evaluation with the CI-pinned 0.7.0
+verifier and the current 0.7.1 implementation. Verify the hosted guide and report its achieved level and exact hash before use.
+The guide clones release-specific source without registering an agent-client
+skill. Use the Skills CLI below for registration. Every action requires approval.
 
 **2. Skills CLI (recommended).** Install from GitHub with the open Skills CLI:
 
@@ -264,7 +270,7 @@ discovery plan, and selection evidence:
 Replace: BUILD_DIR -> repository-relative directory containing the built site
 Customize
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.2.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -334,13 +340,12 @@ assistant use:
 - Web: https://skilla11y.dev/.well-known/assistant-guide.txt
 - Repository copy: [assistant-guide.txt](assistant-guide.txt)
 
-The guide is a plain-text instruction surface for installing the skill and
-running bounded audits. The GuideCheck 0.7.0 reference verifier reports
-Level 3 with no blockers. The hosted 0.7.1 verifier at
-https://guidecheck.org/verify currently reports Level 2 with one blocking
-finding (`action-block.malformed` on `install-skill`). This form claim does
-not make the guide safe or make audit results a legal conformance
-certification.
+The guide is a plain-text instruction surface for acquiring release source and
+running public audits. Guide 0.3.17 replaces the installer with release-specific source
+acquisition; agent-client registration stays outside its action scope.
+Local GuideCheck 0.7.0 and current 0.7.1 evaluation pass at Level 3. Verify
+the hosted result against the deployed guide hash before use.
+This form claim does not establish safety or legal conformance.
 
 ## How It Works
 
@@ -397,7 +402,7 @@ For skip-download behavior and cache configuration, read
 This repository has three release identifiers because the published
 surfaces move at different compatibility levels:
 
-- `package.json` uses the public repository release line, 3.1.0 for this release.
+- `package.json` uses the public repository release line, 3.2.0 for this release.
 - `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
   incremented whenever the skill bundle changes.
 - `assistant-guide.txt` uses the GuideCheck guide version, incremented
@@ -454,7 +459,7 @@ Detailed map contracts live in
 
 These recorded runs predate v3 and are not v3 consumer-validation claims.
 Release validation checks are listed in the
-[release validation record](ops/v3.1.0-release-preparation.md).
+[release validation record](ops/v3.2.0-release-preparation.md).
 
 | Site | Pages | Groups | Scanned | Violations | Key findings |
 |------|-------|--------|---------|------------|-------------|

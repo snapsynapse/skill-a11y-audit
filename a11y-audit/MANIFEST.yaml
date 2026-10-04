@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 45
-bundle_date: 2026-09-23
+bundle_version: 48
+bundle_date: 2026-10-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -192,8 +192,8 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 27
-    hash: sha256:a5dc626fb7d44aa3d2778cf173a2697c1df6c3c127eb5156c296f4b6dbe05973
+    version: 28
+    hash: sha256:52143bbb432a0f390569385e6f1760925cc2afa9008688adaa874b03ef87a2d5
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
@@ -204,15 +204,15 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 8
-    hash: sha256:7ee7ca3cc4c38ee7b28c40803f96bbb6c5b3b2808d5c127449ccc69c08272230
-    note: Adds the open hosted GuideCheck guide finding as maintenance work
+    version: 11
+    hash: sha256:efb1d7d74a43f9d252b3aa31b64afdfea393976e1be2302da6d148e07025775a
+    note: Records local installer correction and pending hosted verification.
 
   - path: CHANGELOG.md
     role: reference
-    version: 45
-    hash: sha256:cdad983788f4fbb0f9e470158019422f3de996de96397f5f368aa24b4ebcf90c
-    note: Records handoff migration into roadmap and ops records; runtime and release unchanged
+    version: 48
+    hash: sha256:ab6c1d0c94337ff6a1961d1e8dd91ca13d2e46b04df3f3f03410fc49acad0bf5
+    note: Records v3.2.0 publication preparation and guide acquisition correction.
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,9 +222,9 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 26
-    hash: sha256:d9199801d665b03d0d1971bac3466dbc06e5cb835d1aea831827fa1e43127b51
-    note: Covers major-gate pass, fail, and inconclusive semantics
+    version: 29
+    hash: sha256:e29d30bf727d47238b03bcbf5d7d585df9669f260d1da7632b6f58de6e28967d
+    note: Checks v3.2.0 candidate surfaces and bounded guide acquisition.
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -396,9 +396,9 @@ files:
 
   - path: references/interoperability.md
     role: reference
-    version: 4
-    hash: sha256:943cb57e588ab181e9dafcf09a6290d244bcf0d2a1508c6057d8511ca7dd3096
-    note: Documents the additive major-findings acceptance mode
+    version: 5
+    hash: sha256:11177c7f2f5b074b75c6b16d2b41797469346eced3acf4bdc9afe2e2fd18846a
+    note: Documents paired authenticated inputs and discovery limits.
 
   - path: references/project-context-template.md
     role: reference
@@ -426,15 +426,15 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 12
-    hash: sha256:5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
-    note: Adds major-gate evidence and inconclusive handling
+    version: 14
+    hash: sha256:db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
+    note: Binds local executable dependencies before loading them.
 
   - path: scripts/run-audit.js
     role: script
-    version: 3
-    hash: sha256:ce7a6dd36fea7340fd6ccdcb54c35d6f2eebe91c492f3b986bf3478f77fe98da
-    note: Forwards the additive major-findings gate
+    version: 4
+    hash: sha256:a3685b5d4a7fc8dd2a3443a78f8c18f6c14f038724af0f7addb811b8dd37f051
+    note: Carries paired authentication inputs and protects their artifact paths.
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -504,9 +504,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 13
-    hash: sha256:e36241d074554908a2948a59b0f866a08d3cad58ebb634d5c2543dc078fa85ad
-    note: v3.1.0 Action starter with Node 22.12+ runtime requirement
+    version: 14
+    hash: sha256:bf936af74c6c133c110d3ae8971efa43d0328f6a4c2314a007b2d3c66b6f6309
+    note: Pins the prepared v3.2.0 Action release.
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -614,7 +614,7 @@ files:
     role: reference
     version: 36
     hash: null
-    note: Tracks documentation revision 45; published v3.1.0 remains immutable; self-hash omitted
+    note: Tracks candidate revision 48; published v3.1.0 remains immutable; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script
@@ -645,3 +645,21 @@ files:
     version: 1
     hash: sha256:5d9e55b5f3eac8c574a80c0e122ded99d973151c43114b70c2bb2ef93a3ea922
     note: Deterministic CLI contract and legacy compatibility cases
+
+  - path: scripts/auth-state.js
+    role: script
+    version: 1
+    hash: sha256:4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a
+    note: Bounded authenticated scan inputs and acceptance coverage
+
+  - path: evals/test-auth-state.js
+    role: evals
+    version: 1
+    hash: sha256:6b25408520fb876d18637a934acc2f5c1714b343600ca4f2dfe8221881016027
+    note: Bounded authenticated scan inputs and acceptance coverage
+
+  - path: references/authenticated-scans.md
+    role: reference
+    version: 3
+    hash: sha256:fc61f38a324034af2a1fa2eed47c9e3041cb042c4da7f90340a97427099d37ad
+    note: Records the intended v3.2.0 release provenance.

@@ -1,6 +1,6 @@
 {
   "name": "skill-a11y-audit",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Open accessibility regression evidence for large web estates, with template-aware sampling and legacy-friendly CI baselines.",
   "keywords": [
     "accessibility",
@@ -39,7 +39,8 @@
     "validate": "node a11y-audit/evals/run-evals.js --validate",
     "eval:consumer": "node scripts/test-action-consumer.mjs",
     "eval:cli": "node a11y-audit/evals/test-cli-contract.js",
-    "eval:cli:consumer": "node scripts/test-cli-contract-consumer.mjs"
+    "eval:cli:consumer": "node scripts/test-cli-contract-consumer.mjs",
+    "eval:auth": "node a11y-audit/evals/test-auth-state.js"
   },
   "engines": {
     "node": ">=22.12.0"

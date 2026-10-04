@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "repository": "https://github.com/snapsynapse/skill-a11y-audit",
+  "profile": "versioned-skill",
+  "authority": "R2",
+  "start_head": "07f1d751a42d26371a7ab485750cf19566e5ae77",
+  "candidate_head": null,
+  "candidate_version": "3.2.0",
+  "updated_at": "2026-10-04T03:16:10.072371+00:00",
+  "steps": [
+    {
+      "id": "local_preparation",
+      "status": "ready",
+      "evidence": "Working-tree fingerprint e6a9de7b67fee38635f6e5dbf76cdaf0036ef1d5ad4d2a6d7f50a1758dbf1132; see ops/v3.2.0-readiness/candidate-hashes.json."
+    },
+    {
+      "id": "local_validation",
+      "status": "ready",
+      "evidence": "Final extracted archive: bundle30/30, CLI17/17, authenticated browser/Action, four CLI consumers, full Action fresh/skip-download/stale-install consumers all pass. Both exact verifier lanes Level3 with zero blockers/warnings. See ops/v3.2.0-readiness/artifact-smoke.json."
+    },
+    {
+      "id": "independent_review",
+      "status": "completed",
+      "evidence": "Read-only final candidate review approved with no remaining blockers; exact hashes recorded in ops/v3.2.0-readiness/README.md."
+    },
+    {
+      "id": "commit",
+      "status": "not_started",
+      "evidence": "Implementation commit 07f1d75 exists; publication-preparation changes uncommitted."
+    },
+    {
+      "id": "hosted_candidate_ci",
+      "status": "not_started",
+      "evidence": "Requires authorized branch push and PR; no exact candidate CI yet."
+    },
+    {
+      "id": "tag_and_release",
+      "status": "not_started",
+      "evidence": "v3.2.0 and named source archives require publication approval."
+    },
+    {
+      "id": "merge_and_pages",
+      "status": "not_started",
+      "evidence": "Main docs changes trigger deployment; explicit approval required."
+    },
+    {
+      "id": "live_verification",
+      "status": "not_started",
+      "evidence": "Verify deployed hash, release URL, assets and hosted GuideCheck after publication."
+    },
+    {
+      "id": "npm_publication",
+      "status": "not_applicable",
+      "evidence": "Private metadata; distribution remains GitHub archives."
+    },
+    {
+      "id": "publication_authority",
+      "status": "completed",
+      "evidence": "User explicitly approved stage, commit, push, PR, merge, package and release; Pages consequence disclosed."
+    }
+  ]
+}

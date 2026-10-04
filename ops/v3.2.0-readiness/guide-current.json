@@ -1,0 +1,72 @@
+{
+  "compact_report": "Verifier: guidecheck-reference-local 0.7.1\nGuide: assistant-guide.txt\nLevel: 3\nSHA-256: 0dc141091020c080717fb03cc3390a83ffae2c99c75ce69abeded7ff0b5f376d\nBlocking findings: 0\nWarnings: 0\nHash pinned: no\nProceed? yes",
+  "findings": [
+    {
+      "id": "metadata.last-reviewed.age",
+      "message": "last-reviewed is 1 days old",
+      "severity": "info"
+    },
+    {
+      "evidence": "discover-site",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "select-changed-surfaces",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "scan-pages",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "write-reviewed-baseline",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "scan-new-findings",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    },
+    {
+      "evidence": "generate-report",
+      "id": "exec-sha256.unverified",
+      "message": "artifact bytes were not read; exec-sha256 is declared, not verified",
+      "severity": "info"
+    }
+  ],
+  "guide": {
+    "achieved_level": 3,
+    "bytes": 8070,
+    "level5_ready": false,
+    "sha256": "0dc141091020c080717fb03cc3390a83ffae2c99c75ce69abeded7ff0b5f376d"
+  },
+  "input": {
+    "evaluation_mode": "local-file",
+    "path": "assistant-guide.txt"
+  },
+  "local_evaluation": {
+    "evaluated_at": "2026-10-04T03:12:58.332700Z"
+  },
+  "summary": {
+    "blocking_findings": 0,
+    "infos": 7,
+    "warnings": 0
+  },
+  "verifier": {
+    "guide_profile": "human-verifiable-assistant-guide",
+    "guide_profile_version": "0.7.1",
+    "name": "guidecheck-reference-local",
+    "verifier_profile": "human-verifiable-assistant-guide-verifier",
+    "verifier_profile_version": "0.7.1",
+    "version": "0.7.1"
+  }
+}

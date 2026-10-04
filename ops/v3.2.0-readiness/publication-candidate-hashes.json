@@ -1,0 +1,15 @@
+{
+  "scope": "Final publication labels under explicit R2 authorization; historical R1 fingerprints remain in candidate-hashes.json",
+  "sha256": {
+    "assistant-guide.txt": "506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c",
+    "docs/.well-known/assistant-guide.txt": "506f4cc5eddbf192484b3599c1050efdec0021484a5d4fd25cb327834432c24c",
+    "docs/.well-known/assistant-guide-manifest.txt": "b125fe63eb88473075147938f165abcf1df0a335335883ee3a83976f9a40fe91",
+    "docs/index.html": "ddf36273f1da2f43fcaa92215c5ee17ffe16b74ef929b74337941bd6e4ed21e4",
+    "llms.txt": "4c7984be5cdb74a86887f2ae85854bf34b863f86b3160b11fbfe8c05e841c99f",
+    "docs/llms.txt": "4c7984be5cdb74a86887f2ae85854bf34b863f86b3160b11fbfe8c05e841c99f",
+    "package.json": "e5155b548182b28679515cf2abcd185b849be32bac3c339a7bfbab63d5a6bea1",
+    "package-lock.json": "05432ce397b0365c188be42aeb0c356c5f439a6c5c89e9f0551f4a93e6390916",
+    "a11y-audit/MANIFEST.yaml": "559cec9628e70fc56b7df89edbf35772ebb4b130b6394cb1fe2ee62e197d8ce9",
+    "a11y-audit/evals/run-evals.js": "e29d30bf727d47238b03bcbf5d7d585df9669f260d1da7632b6f58de6e28967d"
+  }
+}

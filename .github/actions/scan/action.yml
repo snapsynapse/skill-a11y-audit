@@ -96,6 +96,14 @@ inputs:
     description: '`errors` for any violation, `major` for current critical/serious findings, `new` for findings outside the accepted baseline, or `none`.'
     required: false
     default: 'errors'
+  storage-state:
+    description: Path to a local Playwright storage-state file. Requires auth-targets.
+    required: false
+    default: ''
+  auth-targets:
+    description: Path to authenticated target URL and readiness assertions. Requires storage-state.
+    required: false
+    default: ''
   baseline:
     description: Path to an accepted accessibility baseline JSON file. Required when fail-on is `new`.
     required: false
@@ -136,6 +144,18 @@ runs:
     - name: Check supported Node runtime
       shell: bash
       run: node "${{ github.action_path }}/../../../a11y-audit/scripts/check-runtime.js"
+
+    - name: Protect authentication artifacts
+      id: auth-paths
+      shell: bash
+      env:
+        STORAGE_STATE: ${{ inputs.storage-state }}
+        AUTH_TARGETS: ${{ inputs.auth-targets }}
+        OUTPUT: ${{ inputs.output }}
+        DISCOVER_OUTPUT: ${{ inputs.discover-output }}
+        SELECTION_OUTPUT: ${{ inputs.selection-output }}
+      run: |
+        node "${{ github.action_path }}/../../../a11y-audit/scripts/auth-state.js" "$STORAGE_STATE" "$AUTH_TARGETS" "$OUTPUT" "$DISCOVER_OUTPUT" "$SELECTION_OUTPUT"
 
     - name: Prepare local http-server
       if: inputs.serve-path != ''
@@ -215,6 +235,8 @@ runs:
         CHANGED_BASE: ${{ inputs.changed-base }}
         SELECTION_OUTPUT: ${{ inputs.selection-output }}
         FAIL_ON: ${{ inputs.fail-on }}
+        STORAGE_STATE: ${{ inputs.storage-state }}
+        AUTH_TARGETS: ${{ inputs.auth-targets }}
         BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
         SUMMARY: ${{ inputs.summary }}
@@ -235,6 +257,8 @@ runs:
         [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
         [ -n "$INSTALL_TIMEOUT_MS" ] && ARGS+=(--install-timeout-ms "$INSTALL_TIMEOUT_MS")
+        [ -n "$STORAGE_STATE" ] && ARGS+=(--storage-state "$STORAGE_STATE")
+        [ -n "$AUTH_TARGETS" ] && ARGS+=(--auth-targets "$AUTH_TARGETS")
         ARGS+=(--output "$OUTPUT")
         node "${{ github.action_path }}/../../../a11y-audit/scripts/scan.js" "${ARGS[@]}"
 
@@ -245,7 +269,7 @@ runs:
         if [ -f "$RUNNER_TEMP/a11y-http.pid" ]; then kill "$(cat "$RUNNER_TEMP/a11y-http.pid")" 2>/dev/null || true; fi
 
     - name: Upload results artifact
-      if: always() && inputs.upload-artifact == 'true'
+      if: always() && steps.auth-paths.outcome == 'success' && inputs.upload-artifact == 'true'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.artifact-name }}

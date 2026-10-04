@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 4
-version_date: 2026-09-07
-previous_version: 3
+version: 5
+version_date: 2026-10-03
+previous_version: 4
 change_summary: >
-  Links the explicit experimental CLI result contract while retaining legacy defaults.
+  Documents paired authenticated inputs and discovery limits.
 ---
 
 # Interoperability Adapter
@@ -130,3 +130,10 @@ or report completion after a failed gate, select `--contract posix-json-v1`
 and read [CLI contract](cli-contract.md). The behavior described above remains
 the default. Choosing an output file or using legacy dry-run does not select
 the new contract.
+
+## Authenticated scans
+
+Use `scan.storage_state` and `scan.auth_targets` together for bounded authenticated
+scans. Both paths are workspace-relative and protected from artifact overwrites.
+Discovery remains unauthenticated. See [authenticated scan inputs](authenticated-scans.md)
+for supported storage, required readiness assertions, and isolation limits.

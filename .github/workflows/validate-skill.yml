@@ -66,6 +66,17 @@ jobs:
       - name: Verify assistant guide against GuideCheck 0.7.0
         run: python3 .guidecheck/scripts/guidecheck_verify.py assistant-guide.txt --pretty
 
+      - name: Checkout current compatibility verifier
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: snapsynapse/guidecheck
+          ref: 48848bf1b5b48b5ca369a48e1162e7d9b0c1daec
+          path: .guidecheck-current
+          persist-credentials: false
+
+      - name: Verify assistant guide against current 0.7.1 engine
+        run: python3 .guidecheck-current/scripts/guidecheck_verify.py assistant-guide.txt --level 3 --pretty
+
   browser-eval:
     name: Real browser eval (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
@@ -98,6 +109,9 @@ jobs:
 
       - name: Run real browser and baseline eval
         run: npm run eval:browser
+
+      - name: Authenticated browser eval
+        run: npm run eval:auth
 
       - name: Verify CLI contract through an external consumer
         run: npm run eval:cli:consumer

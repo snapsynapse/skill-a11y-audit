@@ -29,7 +29,7 @@
   <meta property="og:url" content="https://skilla11y.dev/">
   <meta property="og:locale" content="en_US">
   <meta property="article:published_time" content="2026-02-06T00:00:00Z">
-  <meta property="article:modified_time" content="2026-09-23T00:00:00Z">
+  <meta property="article:modified_time" content="2026-10-03T00:00:00Z">
   <meta property="article:author" content="Sam Rogers">
   <meta property="article:publisher" content="https://snapsynapse.com/">
   <meta property="article:section" content="Open Patterns">
@@ -58,7 +58,7 @@
     "url": "https://skilla11y.dev/",
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://skilla11y.dev/" },
     "datePublished": "2026-02-06",
-    "dateModified": "2026-09-23",
+    "dateModified": "2026-10-03",
     "author": {
       "@type": "Person",
       "name": "Sam Rogers",
@@ -113,14 +113,14 @@
   "@type": "SoftwareSourceCode",
   "@id": "https://skilla11y.dev/#source-code",
   "name": "skill-a11y-audit",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "creativeWorkStatus": "Published",
   "codeRepository": "https://github.com/snapsynapse/skill-a11y-audit",
   "programmingLanguage": "JavaScript",
   "runtimePlatform": "Node.js >=22.12.0",
   "description": "Portable accessibility regression evidence with a JSON process adapter, managed Puppeteer 25.10.0, and axe-core 4.12.1.",
   "license": "https://opensource.org/licenses/MIT",
-  "dateModified": "2026-09-23"
+  "dateModified": "2026-10-03"
 }
   </script>
 
@@ -485,13 +485,14 @@
       <span class="sep" aria-hidden="true">&middot;</span>
       Published <time datetime="2026-02-06">February 6, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      Updated <time datetime="2026-09-23">September 23, 2026</time>
+      Updated <time datetime="2026-10-03">October 3, 2026</time>
       <span class="sep" aria-hidden="true">&middot;</span>
-      <span class="version">v3.1.0</span>
+      <span class="version">v3.2.0</span>
       <span class="sep" aria-hidden="true">&middot;</span>
       <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a>
     </p>
-    <p class="annotation">v3.1.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0. <a href="https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.1.0">Read the release notes.</a> GitHub installs fetch main; the Action examples pin this release.</p>
+    <p>Authenticated scan inputs support cookies and local storage with explicit URL/readiness assertions. Discovery remains unauthenticated; deterministic journeys remain future work.</p>
+    <p class="annotation">v3.2.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0. <a href="https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.2.0">Read the release notes.</a> GitHub installs fetch main; the Action examples pin this release.</p>
     <p class="hook">Strict accessibility gates are hard to adopt when a site already has debt. skill-a11y-audit discovers representative templates, preserves selector-level evidence, and can block only newly introduced findings instead of demanding a perfect first run.</p>
 
     <img class="hero-img" src="/imgs/og.png" alt="a11y-audit: Accessibility audit skill for Claude Code and Codex. Powered by axe-core, WCAG 2.1 AA, and Lighthouse." width="1272" height="540">
@@ -598,7 +599,7 @@
         <h3>3. Reuse the GitHub Action</h3>
 <p class="annotation">Replace: BUILD_DIR &rarr; repository-relative directory containing the built site.</p>
 <p class="annotation">Customize</p>
-<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.1.0
+<pre tabindex="0">- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.2.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -624,7 +625,7 @@
       <p>axe-core stays at 4.12.1. Review any changed findings before updating an accepted baseline. Browser installation downloads the matching Chrome; <code>PUPPETEER_SKIP_DOWNLOAD=true</code> requires that browser already available in the configured cache.</p>
       <p><a href="https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/runtime-compatibility.md">Read runtime and browser installation guidance.</a></p>
     </div>
-    <p>Options are listed from simplest to most manual. The reviewed assistant install uses a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs. The hosted verifier currently reports a blocking finding on its install action, so the Skills CLI in option 2 is the recommended path until the guide is updated.</p>
+    <p>Options are listed from simplest to most manual. The reviewed assistant acquisition uses a plain-text, hash-pinned <a href="https://guidecheck.org/" target="_blank" rel="noopener">GuideCheck</a> guide your assistant verifies and you approve before anything runs. Guide 0.3.17 uses release-specific source acquisition and passes local verification. Verify the hosted result and exact guide hash before use.</p>
 
     <div class="code-grid">
       <div class="code-block">
@@ -634,8 +635,8 @@
 https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify),
 report the achieved level and SHA-256,
-then follow its install action with my approval.</pre>
-        <p class="annotation">Paste into any coding agent. The pinned GuideCheck 0.7.0 reference verifier reports Level 3. The hosted verifier (0.7.1) currently reports Level 2 with one blocking finding on the install action, so expect your assistant to stop before installing; use option 2 instead. The text you review is the text the assistant executes, every action needs your approval, and each bundled script is SHA-256 pinned. <a href="/.well-known/assistant-guide.txt">Read the guide</a> first: it is under 8 KiB.</p>
+then follow its acquisition action with my approval.</pre>
+        <p class="annotation">Guide 0.3.17 passes local GuideCheck 0.7.0 and current 0.7.1 evaluation at Level 3. Local evaluation is not hosted acceptance; verify the deployed guide and report its exact hash before use. The guide clones source without registering an agent-client skill. Use the Skills CLI for registration. Every action requires approval. <a href="/.well-known/assistant-guide.txt">Read and verify the guide</a> before use.</p>
       </div>
 
       <div class="code-block">
@@ -747,7 +748,7 @@ Shared issues on regulation/*, requires/*: color-contrast
       <a href="https://paice.work/" target="_blank" rel="noopener">paice.work</a> or other platforms
       are derived from this source and should cite
       <a href="https://skilla11y.dev/">skilla11y.dev</a> as canonical.
-      Last substantive revision: <time datetime="2026-09-23">2026-09-23</time>.
+      Last substantive revision: <time datetime="2026-10-03">2026-10-03</time>.
       <a href="https://github.com/snapsynapse/skill-a11y-audit/commits/main/a11y-audit/SKILL.md" target="_blank" rel="noopener">Revision history &rarr;</a>
     </aside>
   </div>
@@ -779,7 +780,7 @@ Shared issues on regulation/*, requires/*: color-contrast
   <div class="container">
     <div class="footer-grid">
       <div class="footer-meta">
-        <p>skill-a11y-audit v3.1.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
+        <p>skill-a11y-audit v3.2.0 &middot; <a href="https://opensource.org/licenses/MIT" rel="license" target="_blank">MIT</a></p>
         <p>By <a href="https://linkedin.com/in/samrogers" target="_blank" rel="noopener author">Sam Rogers</a>, <a href="https://snapsynapse.com/" target="_blank" rel="noopener">Snap Synapse LLC</a>. Open, self-hosted accessibility evidence for maintainers and coding agents.</p>
         <p style="margin-top: 0.5rem;">See also: <a href="https://hardguard25.com/" target="_blank" rel="noopener">HardGuard25</a> &middot; <a href="https://gracefulboundaries.dev/" target="_blank" rel="noopener">Graceful Boundaries</a> &middot; <a href="https://skillprovenance.dev/" target="_blank" rel="noopener">Skill Provenance</a> &middot; <a href="https://knowledge-as-code.com/" target="_blank" rel="noopener">Knowledge as Code</a></p>
       </div>
