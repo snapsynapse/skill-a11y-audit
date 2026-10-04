@@ -1,0 +1,37 @@
+{
+  "candidate_fingerprint": "e6a9de7b67fee38635f6e5dbf76cdaf0036ef1d5ad4d2a6d7f50a1758dbf1132",
+  "archive_readback": "all archive file bytes match candidate source",
+  "file_count": 141,
+  "assets": {
+    "skill-a11y-audit-v3.2.0.tar.gz": "159fd596296feb6926d6c71c82abbef014454c782aeca1eceb27641b93a4be21",
+    "skill-a11y-audit-v3.2.0.zip": "08e538653a3e1e19e12cd3476594db3bd4a0c9be23361f0a73e71bc7c3ebda29"
+  },
+  "extracted_path": "/var/folders/fs/whz53jxd5396cbxxhk9jbgjr0000gn/T/a11y-v320-r116bgsx/extracted/skill-a11y-audit",
+  "build_search": "pass; zero defects/infrastructure failures",
+  "extracted_checks": [
+    {
+      "command": "npm ci --ignore-scripts",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run validate",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run eval:cli",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run eval:auth",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run eval:cli:consumer",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run eval:consumer",
+      "exit_code": 0
+    }
+  ]
+}

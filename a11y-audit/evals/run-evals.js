@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 28
+version: 29
 version_date: 2026-10-03
-previous_version: 27
+previous_version: 28
 change_summary: >
-  Verifies guide candidate identity and dependency tamper rejection.
+  Checks v3.2.0 candidate surfaces and bounded guide acquisition.
 */
 
 const assert = require('assert');
@@ -1176,7 +1176,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.1\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.2\.0/);
   assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
   assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
   assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
@@ -1220,7 +1220,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.1\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.2\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
@@ -1390,7 +1390,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.16$/m);
+  assert.match(text, /^guide-version: 0\.3\.17$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   assert.match(text, /Do not scan\nprivate or authenticated pages\./);
@@ -1439,12 +1439,19 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.16$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.17$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
-  assert.match(manifest, /^release-status: draft$/m);
-  assert.doesNotMatch(manifest, /^(released-at|immutable-release-url):/m);
+  assert.match(manifest, /^release-status: published$/m);
+  assert.doesNotMatch(manifest, /^released-at:/m);
+  assert.match(manifest, /^immutable-release-url: https:\/\/github\.com\/snapsynapse\/skill-a11y-audit\/releases\/tag\/v3\.2\.0$/m);
+  const installer = text.match(/\[action\]\nid: acquire-skill\n([\s\S]*?)\[\/action\]/)[1];
+  assert.doesNotMatch(installer, /exec-opaque:/);
+  assert.match(installer, /approval: required/);
+  assert.match(installer, /git clone --branch v3\.2\.0 --depth 1/);
+  assert.match(installer, /does not register an agent-client skill/);
+  assert.doesNotMatch(installer, /npx|exec-opaque/);
 }
 
 resetDir(tmpRoot);

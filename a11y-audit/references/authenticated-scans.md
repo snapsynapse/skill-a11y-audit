@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 3
 version_date: 2026-10-03
 previous_version: null
 change_summary: >
-  Records local guide preparation and remaining publication boundaries.
+  Records the intended v3.2.0 release provenance.
 ---
 
 # Authenticated scan inputs
@@ -82,7 +82,7 @@ blocked cross-origin requests, and terminal adapter success/failure.
 `npm run validate` includes input-validation and artifact-alias regressions.
 
 Bounded journeys, state-specific baseline identity, and native Playwright
-execution remain separate roadmap work. Guide 0.3.16 is prepared locally with refreshed scanner pins and a draft
-sidecar. The scanner verifies both local executable dependencies before loading
+execution remain separate roadmap work. Guide 0.3.17 carries refreshed scanner pins and a matching sidecar. The scanner verifies both local executable dependencies before loading
 them. Guide actions remain public-only; authenticated scans need separate user
-authorization. Publication and immutable release anchoring remain pending.
+authorization. The manifest names the v3.2.0 release URL. See the release receipt for
+publication and external anchor verification evidence.

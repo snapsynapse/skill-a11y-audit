@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 47
+bundle_version: 48
 bundle_date: 2026-10-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -192,8 +192,8 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 27
-    hash: sha256:a5dc626fb7d44aa3d2778cf173a2697c1df6c3c127eb5156c296f4b6dbe05973
+    version: 28
+    hash: sha256:52143bbb432a0f390569385e6f1760925cc2afa9008688adaa874b03ef87a2d5
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
@@ -204,15 +204,15 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 10
-    hash: sha256:f999de285a24a2dc3f1793218ac11f484f469e56b4e5c7afdeb055568417a027
-    note: Records prepared guide anchors and remaining publication work.
+    version: 11
+    hash: sha256:efb1d7d74a43f9d252b3aa31b64afdfea393976e1be2302da6d148e07025775a
+    note: Records local installer correction and pending hosted verification.
 
   - path: CHANGELOG.md
     role: reference
-    version: 47
-    hash: sha256:2e957c62a6aa9c17909ed6e937405d9cb0a4614793edd55a7fb348e5da7c526c
-    note: Records approved local guide-anchor preparation.
+    version: 48
+    hash: sha256:ab6c1d0c94337ff6a1961d1e8dd91ca13d2e46b04df3f3f03410fc49acad0bf5
+    note: Records v3.2.0 publication preparation and guide acquisition correction.
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,9 +222,9 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 28
-    hash: sha256:00596cb927b313a0e076651ab3dff84e0c7c7797452cbe36174c20f45a239eb4
-    note: Verifies guide candidate identity and dependency tamper rejection.
+    version: 29
+    hash: sha256:e29d30bf727d47238b03bcbf5d7d585df9669f260d1da7632b6f58de6e28967d
+    note: Checks v3.2.0 candidate surfaces and bounded guide acquisition.
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -504,9 +504,9 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 13
-    hash: sha256:e36241d074554908a2948a59b0f866a08d3cad58ebb634d5c2543dc078fa85ad
-    note: v3.1.0 Action starter with Node 22.12+ runtime requirement
+    version: 14
+    hash: sha256:bf936af74c6c133c110d3ae8971efa43d0328f6a4c2314a007b2d3c66b6f6309
+    note: Pins the prepared v3.2.0 Action release.
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -614,7 +614,7 @@ files:
     role: reference
     version: 36
     hash: null
-    note: Tracks candidate revision 47; published v3.1.0 remains immutable; self-hash omitted
+    note: Tracks candidate revision 48; published v3.1.0 remains immutable; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script
@@ -660,6 +660,6 @@ files:
 
   - path: references/authenticated-scans.md
     role: reference
-    version: 2
-    hash: sha256:b7b859f92d5e3363b5d56820f73082b2788065dde96cf6c35dd6488ce920c73c
-    note: Records local guide preparation and remaining publication boundaries.
+    version: 3
+    hash: sha256:fc61f38a324034af2a1fa2eed47c9e3041cb042c4da7f90340a97427099d37ad
+    note: Records the intended v3.2.0 release provenance.

@@ -19,6 +19,14 @@ description: >
 
 # Accessibility Audit
 
+## Authenticated targets
+
+For explicitly authorized authenticated scans, read `references/authenticated-scans.md`
+before execution. Require paired storage state and per-target URL/readiness
+assertions. Do not infer access approval from possession of a state file. Stop
+on authentication failure; do not treat a login page as a successful target.
+Discovery remains unauthenticated. Keep state out of version control and artifacts.
+
 ## Architecture
 
 This skill operates as a single layer. It reads the project environment,

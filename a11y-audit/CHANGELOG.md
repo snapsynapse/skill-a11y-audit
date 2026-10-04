@@ -1,14 +1,26 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 47
+version: 48
 version_date: 2026-10-03
-previous_version: 46
+previous_version: 47
 change_summary: >
-  Records approved local guide-anchor preparation.
+  Records v3.2.0 publication preparation and guide acquisition correction.
 ---
 
 # Changelog
+
+## v3.2.0 -- 2026-10-03
+
+- `SKILL.md`, `references/authenticated-scans.md` and `ROADMAP.md`: expose the authenticated input contract and record publication status without marking journeys complete.
+- `assets/ci/github-actions/accessibility-audit.yml`: prepare the v3.2.0 Action pin.
+- `evals/run-evals.js`: require v3.2.0 examples, guide 0.3.17 acquisition semantics, and the intended release URL.
+- `../assistant-guide.txt` and hosted copy: replace the unresolved third-party installer action with release-specific source acquisition; keep Skills CLI registration outside the guide and preserve public-only scan scope.
+- `../docs/.well-known/assistant-guide-manifest.txt`: bind the new guide hash and intended immutable v3.2.0 URL with publication metadata finalized for the approved release.
+- Root validation lockfile: patch fast-uri for GHSA-hrr3-gc8f-f4qj.
+- Root package and lock metadata, README, website and machine-readable overview: propagate v3.2.0, with local versus hosted acceptance distinguished.
+- `../.github/workflows/validate-skill.yml`: retain the original pinned verifier and add a pinned current-compatibility lane.
+- `CHANGELOG.md` and `MANIFEST.yaml`: advance bundle revision to 48 and refresh changed-file versions and hashes.
 
 ## Guide anchor preparation (unreleased) -- 2026-10-03
 

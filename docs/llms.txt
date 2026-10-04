@@ -4,10 +4,10 @@
 > Template-aware sampling, stable finding fingerprints, and accepted
 > baselines let CI block new barriers without requiring zero existing debt.
 
-Documentation version: 3.1.0. Updated: 2026-09-07.
+Documentation version: 3.2.0. Updated: 2026-10-03.
 Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.10.0
 and axe-core 4.12.1. The reusable Action defaults to Node 22.
-GitHub installs fetch main; pin the reusable Action to v3.1.0 for this release.
+GitHub installs fetch main; pin the reusable Action to v3.2.0 for this release.
 
 ## What this skill does
 
@@ -55,7 +55,7 @@ Argument names describe reviewed inputs, not literal placeholder values:
 
 ## Key files
 
-- [Assistant Guide](https://skilla11y.dev/.well-known/assistant-guide.txt): bounded assistant install, audit execution, and maintenance instructions
+- [Assistant Guide](https://skilla11y.dev/.well-known/assistant-guide.txt): release-source acquisition and bounded public audit instructions
 - [SKILL.md](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/SKILL.md): core skill instructions
 - [scripts](https://github.com/snapsynapse/skill-a11y-audit/tree/main/a11y-audit/scripts): check-runtime.js, run-audit.js, discover.js, select-changed-surfaces.js, scan.js, report.js, bootstrap-context.js, plan-issues.js
 - [Runtime compatibility](https://github.com/snapsynapse/skill-a11y-audit/blob/main/a11y-audit/references/runtime-compatibility.md): Node floor, managed dependencies, browser acquisition, and upgrade behavior
@@ -96,3 +96,6 @@ The agent selects final delivery using the workspace context.
 - Other agents can read the Markdown skill or invoke the JSON adapter.
 - Per-platform historical evidence lives in MANIFEST.yaml; this is not a claim
   that every agent or model has been tested with v3.
+
+Authenticated inputs: pair --storage-state with --auth-targets for exact URL and visible-selector assertions. Cookies and local storage only; discovery stays unauthenticated. See a11y-audit/references/authenticated-scans.md in the repository.
+Guide 0.3.17 passes local pinned/current verifier checks; verify the deployed hash and hosted result before use.

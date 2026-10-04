@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 10
+version: 11
 version_date: 2026-10-03
-previous_version: 9
+previous_version: 10
 change_summary: >
-  Records prepared guide anchors and remaining publication work.
+  Records local installer correction and pending hosted verification.
 ---
 
 # Accessibility Audit Roadmap
@@ -78,16 +78,15 @@ own evidence rather than inferred from A11y release acceptance.
 3. First-class Playwright execution. Add it only where it improves
    deterministic state coverage or reuses an existing project dependency.
 
-## Authenticated input slice (local, unreleased)
+## v3.2.0 authenticated input slice
 
 The scanner, process adapter, and Action accept storage state plus per-target
 URL/readiness assertions. See [authenticated scan inputs](references/authenticated-scans.md).
-This completes the initial input slice locally, subject to recorded validation;
+This completes the initial input slice with recorded validation;
 it does not complete authenticated deterministic journeys. Named journey
-checkpoints and state-aware baseline identity remain next. Guide 0.3.16 and its draft sidecar are prepared locally for the changed
-scanner, which verifies its local dependencies before loading them. Publication
-and immutable release anchoring remain pending, separate from the existing
-hosted verifier compatibility finding.
+checkpoints and state-aware baseline identity remain next. Guide 0.3.17 and its sidecar bind the changed scanner, which verifies its
+local dependencies before loading them. See `../ops/v3.2.0-release-state.json`
+for publication and hosted verification evidence.
 
 ## Open maintenance
 
@@ -106,9 +105,10 @@ GuideCheck 0.7.0 Level 3 result remains valid evidence for that evaluator
 only. Since 2026-09-23 the README and website state the hosted result and
 recommend the Skills CLI.
 
-Next step: reproduce the finding, inspect the installer action and the
-versioned opacity rules, then propose either a narrowly scoped guide
-correction or an explicit verifier-compatibility policy. Do not weaken
+Local v3.2.0 preparation replaces the guide installer with release-specific
+source acquisition and retains Skills CLI registration outside the guide.
+Pinned and current local verifier acceptance must be recorded against the
+final candidate hash. Deployment and hosted acceptance remain pending. Do not weaken
 GuideCheck, change frozen reports, rotate anchors, or adopt profile 2.0.0
 solely to hide the finding. Changed guide bytes need their own manifest and
 anchor plan, consumer validation, and independent review before publication.

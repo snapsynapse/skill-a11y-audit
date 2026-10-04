@@ -4,8 +4,8 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.16
-applies-to: skill-a11y-audit 3.1.x
+guide-version: 0.3.17
+applies-to: skill-a11y-audit 3.2.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
@@ -18,12 +18,12 @@ manifest-url: https://skilla11y.dev/.well-known/assistant-guide-manifest.txt
 [/assistant-guide-metadata]
 
 Task scope
-Requires Node.js 22.12.0 or later. Current release: v3.1.0.
-This guide covers installing skill-a11y-audit and running a bounded local
+Requires Node.js 22.12.0 or later. Current release: v3.2.0.
+This guide covers acquiring skill-a11y-audit and running a bounded local
 accessibility audit, including an optional reviewed baseline for new-finding
 CI gates. It does not authorize production deployment, access to private or
 authenticated pages, changes to application source, or legal-conformance
-claims. SKILL_DIR below means the skill directory selected during install.
+claims. SKILL_DIR means SKILL_REPO/a11y-audit from the acquisition action.
 
 Before acting
 1. Verify this guide with the recommended verifier or another conformant
@@ -63,15 +63,14 @@ approval. Each approval applies to one action id only.
 Actions
 
 [action]
-id: install-skill
-class: networked, persistence-changing, code-executing
+id: acquire-skill
+class: networked, persistence-changing
 approval: required
-command: npx skills add snapsynapse/skill-a11y-audit --skill a11y-audit
+command: git clone --branch v3.2.0 --depth 1 https://github.com/snapsynapse/skill-a11y-audit SKILL_REPO
 runner: argv
 cwd: TARGET_WORKSPACE
-egress: registry.npmjs.org, github.com
-exec-opaque: acknowledged
-notes: Runs the third-party skills installer and fetches this public repository.
+egress: github.com
+notes: Fetches release source into a new directory; does not register an agent-client skill.
 [/action]
 
 [action]
