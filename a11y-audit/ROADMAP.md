@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 8
-version_date: 2026-09-23
-previous_version: 7
+version: 10
+version_date: 2026-10-03
+previous_version: 9
 change_summary: >
-  Adds the open hosted GuideCheck guide finding as maintenance work.
+  Records prepared guide anchors and remaining publication work.
 ---
 
 # Accessibility Audit Roadmap
@@ -77,6 +77,17 @@ own evidence rather than inferred from A11y release acceptance.
    universal CI surface.
 3. First-class Playwright execution. Add it only where it improves
    deterministic state coverage or reuses an existing project dependency.
+
+## Authenticated input slice (local, unreleased)
+
+The scanner, process adapter, and Action accept storage state plus per-target
+URL/readiness assertions. See [authenticated scan inputs](references/authenticated-scans.md).
+This completes the initial input slice locally, subject to recorded validation;
+it does not complete authenticated deterministic journeys. Named journey
+checkpoints and state-aware baseline identity remain next. Guide 0.3.16 and its draft sidecar are prepared locally for the changed
+scanner, which verifies its local dependencies before loading them. Publication
+and immutable release anchoring remain pending, separate from the existing
+hosted verifier compatibility finding.
 
 ## Open maintenance
 

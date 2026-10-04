@@ -1,0 +1,36 @@
+{
+  "compact_report": "Verifier: guidecheck-reference-local 0.7.0\nGuide: assistant-guide.txt\nLevel: 3\nSHA-256: 87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8\nBlocking findings: 0\nWarnings: 0\nHash pinned: no\nProceed? yes",
+  "findings": [
+    {
+      "id": "metadata.last-reviewed.age",
+      "message": "last-reviewed is 1 days old",
+      "severity": "info"
+    }
+  ],
+  "guide": {
+    "achieved_level": 3,
+    "bytes": 8087,
+    "level5_ready": false,
+    "sha256": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8"
+  },
+  "input": {
+    "evaluation_mode": "local-file",
+    "path": "assistant-guide.txt"
+  },
+  "local_evaluation": {
+    "evaluated_at": "2026-10-04T02:55:56.144481Z"
+  },
+  "summary": {
+    "blocking_findings": 0,
+    "infos": 1,
+    "warnings": 0
+  },
+  "verifier": {
+    "guide_profile": "human-verifiable-assistant-guide",
+    "guide_profile_version": "0.7.0",
+    "name": "guidecheck-reference-local",
+    "verifier_profile": "human-verifiable-assistant-guide-verifier",
+    "verifier_profile_version": "0.7.0",
+    "version": "0.7.0"
+  }
+}

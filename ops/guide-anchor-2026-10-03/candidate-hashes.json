@@ -1,0 +1,14 @@
+{
+  "session_date": "2026-10-03",
+  "scope": "independently reviewed local guide-anchor preparation; unpublished",
+  "sha256": {
+    "assistant-guide.txt": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8",
+    "docs/.well-known/assistant-guide.txt": "87700567075d76c536916dc1cee82ba40bb101ef4ef829c81ac47a4452fdbbd8",
+    "docs/.well-known/assistant-guide-manifest.txt": "26141ed84706896c558de254cb94029994704010865684bb17a1bad6a236e83d",
+    "a11y-audit/scripts/scan.js": "db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a",
+    "a11y-audit/scripts/auth-state.js": "4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a",
+    "a11y-audit/scripts/check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d",
+    "a11y-audit/evals/run-evals.js": "00596cb927b313a0e076651ab3dff84e0c7c7797452cbe36174c20f45a239eb4",
+    "a11y-audit/MANIFEST.yaml": "4983afbb387bcbe5598948cf3db61221a447035b135bcb5dc8d8bdc90146d9ad"
+  }
+}

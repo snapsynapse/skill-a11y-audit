@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 3
-version_date: 2026-09-07
-previous_version: 2
+version: 4
+version_date: 2026-10-03
+previous_version: 3
 change_summary: >
-  Adds the opt-in experimental posix-json-v1 process contract while preserving
-  the legacy adapter path.
+  Carries paired authentication inputs and protects their artifact paths.
 */
 
 const fs = require('fs');
@@ -15,6 +14,8 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { isDeepStrictEqual } = require('util');
 const { buildAuditEvidence, evaluateMajorGate } = require('./scan.js');
+
+const { protectAuthFiles } = require('./auth-state.js');
 
 const SCHEMA_VERSION = 1;
 const SCRIPT_DIR = __dirname;
@@ -246,7 +247,7 @@ function buildRunPlan(configPath, cliArgs = {}) {
   }
 
   const scan = config.scan === undefined ? {} : assertObject(config.scan, 'scan');
-  assertKeys(scan, new Set(['root', 'baseline', 'fail_on', 'summary', 'axe_version']), 'scan');
+  assertKeys(scan, new Set(['root', 'baseline', 'fail_on', 'summary', 'axe_version', 'storage_state', 'auth_targets']), 'scan');
   const failOn = scan.fail_on || 'none';
   if (!['errors', 'major', 'new', 'none'].includes(failOn)) {
     throw new Error('scan.fail_on must be errors, major, new, or none');
@@ -266,6 +267,16 @@ function buildRunPlan(configPath, cliArgs = {}) {
     const baseline = resolveWithin(workspace, scan.baseline, 'scan.baseline');
     protectedPaths.add(baseline);
     addValue(scanArgs, '--baseline', baseline);
+  }
+  if (Boolean(scan.storage_state) !== Boolean(scan.auth_targets)) {
+    throw new Error('scan.storage_state and scan.auth_targets must be supplied together');
+  }
+  for (const key of ['storage_state', 'auth_targets']) {
+    if (scan[key] !== undefined) {
+      const input = resolveWithin(workspace, scan[key], `scan.${key}`);
+      protectedPaths.add(input);
+      addValue(scanArgs, `--${key.replace('_', '-')}`, input);
+    }
   }
   addValue(scanArgs, '--axe-version', scan.axe_version);
   if (scan.summary !== false) scanArgs.push('--summary');
@@ -324,6 +335,10 @@ function buildRunPlan(configPath, cliArgs = {}) {
       path.join(plan.artifacts.report_dir, `audit-${plan.contractReportDate}.json`),
     ],
   });
+  if (scan.storage_state) {
+    protectAuthFiles([resolveWithin(workspace, scan.storage_state, 'scan.storage_state'),
+      resolveWithin(workspace, scan.auth_targets, 'scan.auth_targets')], Object.values(artifacts));
+  }
   return plan;
 }
 

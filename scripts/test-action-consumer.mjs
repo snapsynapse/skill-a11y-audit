@@ -55,7 +55,7 @@ function substitute(text) {
 const conditions = new Map([
   [undefined, true], ["inputs.serve-path != ''", true], ["inputs.discover-url != ''", true],
   ["inputs.discover-url != '' && inputs.surface-map != '' && (inputs.changed-files != '' || inputs.changed-base != '')", true],
-  ["always() && inputs.serve-path != ''", true], ["always() && inputs.upload-artifact == 'true'", false],
+  ["always() && inputs.serve-path != ''", true], ["always() && steps.auth-paths.outcome == 'success' && inputs.upload-artifact == 'true'", false],
 ]);
 const env = { ...process.env, RUNNER_TEMP: runtime, GITHUB_WORKSPACE: workspace,
   PUPPETEER_CACHE_DIR: path.join(temp, 'browser-cache') };

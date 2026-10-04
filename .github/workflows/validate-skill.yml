@@ -99,6 +99,9 @@ jobs:
       - name: Run real browser and baseline eval
         run: npm run eval:browser
 
+      - name: Authenticated browser eval
+        run: npm run eval:auth
+
       - name: Verify CLI contract through an external consumer
         run: npm run eval:cli:consumer
 

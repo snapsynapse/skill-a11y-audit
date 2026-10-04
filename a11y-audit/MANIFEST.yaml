@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 45
-bundle_date: 2026-09-23
+bundle_version: 47
+bundle_date: 2026-10-03
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -204,15 +204,15 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 8
-    hash: sha256:7ee7ca3cc4c38ee7b28c40803f96bbb6c5b3b2808d5c127449ccc69c08272230
-    note: Adds the open hosted GuideCheck guide finding as maintenance work
+    version: 10
+    hash: sha256:f999de285a24a2dc3f1793218ac11f484f469e56b4e5c7afdeb055568417a027
+    note: Records prepared guide anchors and remaining publication work.
 
   - path: CHANGELOG.md
     role: reference
-    version: 45
-    hash: sha256:cdad983788f4fbb0f9e470158019422f3de996de96397f5f368aa24b4ebcf90c
-    note: Records handoff migration into roadmap and ops records; runtime and release unchanged
+    version: 47
+    hash: sha256:2e957c62a6aa9c17909ed6e937405d9cb0a4614793edd55a7fb348e5da7c526c
+    note: Records approved local guide-anchor preparation.
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,9 +222,9 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 26
-    hash: sha256:d9199801d665b03d0d1971bac3466dbc06e5cb835d1aea831827fa1e43127b51
-    note: Covers major-gate pass, fail, and inconclusive semantics
+    version: 28
+    hash: sha256:00596cb927b313a0e076651ab3dff84e0c7c7797452cbe36174c20f45a239eb4
+    note: Verifies guide candidate identity and dependency tamper rejection.
 
   - path: evals/run-browser-eval.js
     role: evals
@@ -396,9 +396,9 @@ files:
 
   - path: references/interoperability.md
     role: reference
-    version: 4
-    hash: sha256:943cb57e588ab181e9dafcf09a6290d244bcf0d2a1508c6057d8511ca7dd3096
-    note: Documents the additive major-findings acceptance mode
+    version: 5
+    hash: sha256:11177c7f2f5b074b75c6b16d2b41797469346eced3acf4bdc9afe2e2fd18846a
+    note: Documents paired authenticated inputs and discovery limits.
 
   - path: references/project-context-template.md
     role: reference
@@ -426,15 +426,15 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 12
-    hash: sha256:5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
-    note: Adds major-gate evidence and inconclusive handling
+    version: 14
+    hash: sha256:db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
+    note: Binds local executable dependencies before loading them.
 
   - path: scripts/run-audit.js
     role: script
-    version: 3
-    hash: sha256:ce7a6dd36fea7340fd6ccdcb54c35d6f2eebe91c492f3b986bf3478f77fe98da
-    note: Forwards the additive major-findings gate
+    version: 4
+    hash: sha256:a3685b5d4a7fc8dd2a3443a78f8c18f6c14f038724af0f7addb811b8dd37f051
+    note: Carries paired authentication inputs and protects their artifact paths.
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -614,7 +614,7 @@ files:
     role: reference
     version: 36
     hash: null
-    note: Tracks documentation revision 45; published v3.1.0 remains immutable; self-hash omitted
+    note: Tracks candidate revision 47; published v3.1.0 remains immutable; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script
@@ -645,3 +645,21 @@ files:
     version: 1
     hash: sha256:5d9e55b5f3eac8c574a80c0e122ded99d973151c43114b70c2bb2ef93a3ea922
     note: Deterministic CLI contract and legacy compatibility cases
+
+  - path: scripts/auth-state.js
+    role: script
+    version: 1
+    hash: sha256:4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a
+    note: Bounded authenticated scan inputs and acceptance coverage
+
+  - path: evals/test-auth-state.js
+    role: evals
+    version: 1
+    hash: sha256:6b25408520fb876d18637a934acc2f5c1714b343600ca4f2dfe8221881016027
+    note: Bounded authenticated scan inputs and acceptance coverage
+
+  - path: references/authenticated-scans.md
+    role: reference
+    version: 2
+    hash: sha256:b7b859f92d5e3363b5d56820f73082b2788065dde96cf6c35dd6488ce920c73c
+    note: Records local guide preparation and remaining publication boundaries.

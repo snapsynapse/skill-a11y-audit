@@ -4,12 +4,12 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.15
+guide-version: 0.3.16
 applies-to: skill-a11y-audit 3.1.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
-last-reviewed: 2026-09-05
+last-reviewed: 2026-10-03
 reviewed-by: Snap Synapse LLC
 status: active
 recommended-verifier: https://guidecheck.org/verify
@@ -105,7 +105,7 @@ command: node SKILL_DIR/scripts/scan.js --discover SCAN_PLAN_JSON --output SCAN_
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URLs in SCAN_PLAN_JSON, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
+exec-sha256: db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
 notes: May install missing packages, replace stale managed Puppeteer, and download Chrome.
 [/action]
 
@@ -117,7 +117,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --write-baseline BASELIN
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
+exec-sha256: db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
 notes: Replaces a baseline only after human review; acceptance is not conformance.
 [/action]
 
@@ -129,7 +129,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --baseline BASELINE_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 5d6fad11e116adad2c68b68dfa8db440651058de6d8c7a9cb8838cb1abfa647d
+exec-sha256: db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
 notes: Stops on axe-core drift and reports accepted, new, and resolved findings.
 [/action]
 
