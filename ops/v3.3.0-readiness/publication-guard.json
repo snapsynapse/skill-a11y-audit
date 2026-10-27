@@ -1,0 +1,35 @@
+{
+  "scope": "actual Pages shell step with deterministic local gh/sleep fixtures; no provider access",
+  "cases": [
+    {
+      "case": "valid",
+      "exit": 0,
+      "pass": true
+    },
+    {
+      "case": "later-docs",
+      "exit": 0,
+      "pass": true
+    },
+    {
+      "case": "old-tag",
+      "exit": 1,
+      "pass": true
+    },
+    {
+      "case": "diverged",
+      "exit": 1,
+      "pass": true
+    },
+    {
+      "case": "unpublished",
+      "exit": 1,
+      "pass": true
+    },
+    {
+      "case": "missing-asset",
+      "exit": 1,
+      "pass": true
+    }
+  ]
+}

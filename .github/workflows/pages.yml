@@ -38,6 +38,26 @@ jobs:
         run: npm run build:site
       - name: Verify offline search contract
         run: npm run check:search
+      - name: Wait for matching published release
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          tag="v$version"
+          expected="SHA256SUMS,skill-a11y-audit-$tag.tar.gz,skill-a11y-audit-$tag.zip"
+          for attempt in $(seq 1 40); do
+            relationship=$(gh api "repos/$GITHUB_REPOSITORY/compare/$tag...$GITHUB_SHA" --jq .status 2>/dev/null || true)
+            assets=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" \
+              --jq 'select(.draft == false and .prerelease == false) | [.assets[].name] | sort | join(",")' 2>/dev/null || true)
+            if { [ "$relationship" = identical ] || [ "$relationship" = ahead ]; } && [ "$assets" = "$expected" ]; then
+              exit 0
+            fi
+            echo "Waiting for matching $tag release and assets ($attempt/40)"
+            sleep 15
+          done
+          echo "Matching published $tag release and assets are not ready for $GITHUB_SHA" >&2
+          exit 1
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site

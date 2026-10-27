@@ -10,8 +10,10 @@ is hosted on a different origin than the runtime URL.
 - That sitemap is a sitemap index which points to `http://cdn.test/nested.xml`
 - The nested sitemap publishes final page URLs on `http://cdn.test`
 
-Discovery should preserve those published URLs exactly as published
-instead of rewriting them onto `http://base.test`.
+The fixture explicitly approves `http://cdn.test` with `allowedOrigins`.
+Discovery should preserve those approved published URLs instead of rewriting
+them onto `http://base.test`. Without that target approval, sitemap leaves
+on the other origin are excluded, even if cross-origin documents are enabled.
 
 ## Files
 
@@ -21,6 +23,7 @@ instead of rewriting them onto `http://base.test`.
 
 ## Run
 
+Literal
 ```bash
 node a11y-audit/evals/run-discover-fixture.js \
   --fixture a11y-audit/evals/fixtures/eval-9

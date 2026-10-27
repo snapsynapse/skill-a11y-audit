@@ -1,0 +1,23 @@
+
+> skill-a11y-audit@3.3.0 eval:cli
+> node a11y-audit/evals/test-cli-contract.js
+
+PASS strict parser rejects unsupported selectors, options, duplicate values, and boolean values
+PASS contract dry-run is one schema-valid terminal object and does not claim gate acceptance
+PASS legacy dry-run output remains exactly the legacy plan envelope
+PASS accepted major gate completes reporting and isolates child logs from terminal data
+PASS progress artifact is explicitly nonterminal while a child is running
+PASS confirmed rejection and inconclusive evidence retain 2 and 3 after reporting
+PASS report operational failure overrides a retained rejection
+PASS no-gate scan with findings completes without claiming accessibility acceptance
+PASS unverified child 2, missing, malformed, empty, and errored scan artifacts cannot become gates
+PASS major gate status must agree with independently derived raw evidence
+PASS child error and signal take precedence over a numeric child status
+PASS missing request, malformed JSON, and impossible output have stable sysexits
+PASS symlink escapes and hard-link input aliases are rejected before mutation
+PASS existing non-regular report destinations are rejected before any stage runs
+PASS disabled report outputs do not create false output collisions
+PASS report paths stay frozen when execution crosses a UTC date boundary
+PASS progress writes do not follow predictable preexisting temporary symlinks
+
+17 CLI contract checks passed

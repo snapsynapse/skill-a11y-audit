@@ -1,0 +1,40 @@
+
+> skill-a11y-audit@3.3.0 validate
+> node a11y-audit/evals/run-evals.js --validate
+
+PASS syntax checks cover bundled scripts and eval harnesses
+PASS JSON files parse and sample output matches audit shape
+PASS YAML and frontmatter files parse
+PASS manifest paths, hashes, and embedded versions cover the complete bundle
+PASS bootstrap-context smoke test creates workspace context
+PASS eval-9 preserves explicitly approved cross-origin sitemap URLs
+PASS eval-10 keeps discovery deterministic
+PASS security regressions fail closed and bound network work
+PASS eval-12 blocks cross-origin sitemaps unless explicitly allowed
+PASS eval-19 targets mapped changed surfaces and falls back conservatively
+PASS eval-20 groups flat routes and always includes directly changed pages
+PASS eval-21 composes portable audit stages and propagates CI base/head objects
+PASS eval-2 plans issues with labels and deduplication
+PASS eval-3 quick scan summarizes one plain HTML page
+PASS eval-4 reports skipped Lighthouse without inventing scores
+PASS eval-11 reports page-aware delta movement
+PASS eval-15 renders matrices from pluggable standards data
+PASS authentication inputs reject unsupported state and protect adapter inputs
+PASS scan.js rejects unsupported browser package names before install
+Dependency install attempt 1/3 timed out after 0ms (limit 54321ms; raise --install-timeout-ms or A11Y_AUDIT_INSTALL_TIMEOUT_MS); retrying in 1000ms...
+Dependency install attempt 2/3 exited with status 1 after 0ms; retrying in 2000ms...
+PASS scan.js retries atomic dependency installs with actionable timeout diagnostics
+PASS scan.js consumes validated, deduplicated discover plans
+PASS scan.js fingerprints and compares accepted accessibility baselines
+PASS scan.js enforces the total major-findings acceptance contract
+PASS report.js escapes target-derived markdown fields
+PASS plan-issues.js escapes target-derived markdown fields
+PASS scan.js dependency auto-install policy is documented
+PASS public install surfaces stay current and synchronized
+PASS reusable Action and workflow starter stay template-aware
+PASS workflow and Action supply-chain controls stay enforced
+PASS dependency graph excludes extract-zip and runtimes enforce Node 22.12+
+PASS assistant guide artifacts stay bounded, pinned, and synchronized
+PASS main ruleset requires the exact ten CI contexts and approved PR policy
+
+32/32 checks passed

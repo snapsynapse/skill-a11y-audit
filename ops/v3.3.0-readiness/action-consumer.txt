@@ -1,0 +1,27 @@
+
+> skill-a11y-audit@3.3.0 eval:consumer
+> node scripts/test-action-consumer.mjs
+
+LOCAL Set up Node.js: using Node 26.12.1; hosted setup-node is not emulated
+PASS Check supported Node runtime
+PASS Protect authentication artifacts
+PASS Prepare local http-server
+PASS Start local http-server
+PASS Discover representative templates
+PASS Select changed surfaces
+PASS Run a11y scan
+PASS temporary server is loopback-only with dotfiles and directory listings disabled
+PASS external consumer (skip-download=false) with isolated packages and browser cache
+PASS Stop local http-server
+LOCAL Set up Node.js: using Node 26.12.1; hosted setup-node is not emulated
+PASS Check supported Node runtime
+PASS Protect authentication artifacts
+PASS Prepare local http-server
+PASS Start local http-server
+PASS Discover representative templates
+PASS Select changed surfaces
+PASS Run a11y scan
+PASS temporary server is loopback-only with dotfiles and directory listings disabled
+PASS external consumer (skip-download=true) with isolated packages and browser cache
+PASS stale managed Puppeteer triggers a locked reinstall before scanning
+PASS Stop local http-server

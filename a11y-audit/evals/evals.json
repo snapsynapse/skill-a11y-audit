@@ -596,5 +596,33 @@
         "The local Puppeteer fixture validates a real finding, accepted-baseline rescan, and requested HTTP 404 as an inconclusive missing-route result."
       ]
     }
+  },
+  {
+    "id": "eval-24",
+    "prompt": "Verify the v3.3.0 security execution defaults using npm run eval:security and node a11y-audit/evals/test-security.js --browser. Run isolated consumers and both default and explicit sandbox configurations.",
+    "expectations": {
+      "structural": [
+        "New helpers are manifest-inventoried and bound by guide-pinned entrypoints",
+        "The Action defaults sandbox override to false and binds loopback with dotfiles/listings disabled",
+        "The main ruleset requires PRs and all ten existing Actions checks without mandatory approvals"
+      ],
+      "behavioral": [
+        "Unavailable or malformed npm reports fail while clean and moderate-threshold controls work",
+        "Deceptive and off-origin sitemap targets and navigation fail before unapproved requests",
+        "Reviewed multi-origin targets, compressed sitemaps and preview rewriting remain supported",
+        "Response byte, decompression, deadline, redirect, document, aggregate-byte and target-count budgets hold",
+        "Redirect and error response bodies close promptly",
+        "Default Chromium sandbox and explicit fixture override both have real-browser coverage"
+      ]
+    },
+    "results": {
+      "status": "pass",
+      "date": "2026-10-26",
+      "notes": [
+        "32 deterministic checks and 17 CLI contract checks pass; eight security regression groups exercise actual sandbox-enabled Chromium on Node 22.12.0 and Node 26.12.1.",
+        "The isolated Action consumer passes empty-browser-cache acquisition, locked skip-download reinstall and stale-version repair, plus loopback and hidden-path/listing refusal checks.",
+        "Independent adversarial review corrected three initial defects and verified 28 local-server path variants with zero failures. Full receipts and source identities are retained in ops/v3.3.0-readiness; publication and hosted checks remain pending."
+      ]
+    }
   }
 ]

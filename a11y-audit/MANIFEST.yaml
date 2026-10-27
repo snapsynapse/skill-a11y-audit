@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 50
+bundle_version: 51
 bundle_date: 2026-10-26
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -193,13 +193,13 @@ files:
   - path: SKILL.md
     role: skill
     version: 29
-    hash: sha256:783c51146290403658995850e95e3cfa2fb9817a85a33ddca5ce725ed88136ed
+    hash: sha256:55036d141490750dc7e1289bae990437ab60c8665a4b31881a391426ee65e001
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
     role: evals
     version: 24
-    hash: sha256:254be455b4ad87c5cf7742361b51b26c6628c4c664747f473c96c49d55177910
+    hash: sha256:36a31533c13c96b46b7685cb7ba1301ef311493f6bfcf54f64b963c0176b7b03
     note: 23 eval cases including the major-findings acceptance contract
 
   - path: ROADMAP.md
@@ -210,9 +210,9 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 50
-    hash: sha256:d4050893d4b79b64546ad832a18f26492e5569a17cfe2c7b272c8d78c0247050
-    note: Records dependency security maintenance after v3.2.0 publication
+    version: 51
+    hash: sha256:52048ae0ee218c37c6841066bf974e4269af38729862eb737bcfa8c95501448d
+    note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,15 +222,15 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 30
-    hash: sha256:d97aee8642332073a3aa20cf6878ec2e5d85c1cf0c14d07fa8615cf7ad9ac6af
-    note: Validates updated dependency pins and immutable guide release evidence.
+    version: 31
+    hash: sha256:c015bc83d0ae157982db2f95707b7c4221232e5e44ff93a6ed07703a036d9830
+    note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
     role: evals
-    version: 4
-    hash: sha256:f9ab17355f6decfb4184fba91797e3add6f4385927008161478965cff9074e4b
-    note: Covers missing required route handling in the major gate
+    version: 5
+    hash: sha256:4965912caf92e21a4e5e35d2f9eafa55f2182324a5f86353e2f3aea01add7854
+    note: Exercises explicit trusted-fixture sandbox overrides without changing product defaults.
 
   - path: evals/fixtures/eval-11/README.md
     role: evals
@@ -259,13 +259,13 @@ files:
   - path: evals/fixtures/eval-9/README.md
     role: evals
     version: 1
-    hash: sha256:c2878384b14f0e0ba693ebf3c1bf3cde44f672c21c01d358cb608d17354d70a3
+    hash: sha256:6f6aaead3ac73d8293fefebb7d7c61a5cef6fb431917251a3d3472fcc33cbedf
     note: Fixture documentation for cross-origin sitemap preservation
 
   - path: evals/fixtures/eval-9/config.json
     role: evals
     version: 1
-    hash: sha256:07a281b197d3871602b3de4870870c049b61f862fbde48b834c556371d3034f4
+    hash: sha256:1be0d811e304cd3fcade9fe641d758322e9c99ade5f32e22ca2cf7b6b6d34b6c
     note: Fixture config for eval-9 explicit cross-origin sitemap run
 
   - path: evals/fixtures/eval-9/responses.json
@@ -277,7 +277,7 @@ files:
   - path: evals/fixtures/eval-9/expected.json
     role: evals
     version: 1
-    hash: sha256:77874d398b69fd3c64a4631a953e9af2b9212cb00a11ca3cc15c09dbefd24696
+    hash: sha256:ba2e7820c8a3a0b47134469015aef989451cbc9dc59626ec2128cfe0872da59a
     note: Expected discovery output for eval-9 with origin disclosure
 
   - path: evals/fixtures/eval-10/README.md
@@ -396,9 +396,9 @@ files:
 
   - path: references/interoperability.md
     role: reference
-    version: 5
-    hash: sha256:11177c7f2f5b074b75c6b16d2b41797469346eced3acf4bdc9afe2e2fd18846a
-    note: Documents paired authenticated inputs and discovery limits.
+    version: 6
+    hash: sha256:6b20468a3a287ad35945f4847a72d476886528cfa75544adac08ce8a879c6d1b
+    note: Documents explicit origin approval and sandbox configuration in adapter requests.
 
   - path: references/project-context-template.md
     role: reference
@@ -426,15 +426,15 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 15
-    hash: sha256:b65e38fed7e7f69cbc00adfbb81bb7df71ef18c6677d18f93b4215921dfc8418
-    note: Synchronizes managed Puppeteer with the security-updated lockfile.
+    version: 16
+    hash: sha256:904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad
+    note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
     role: script
-    version: 4
-    hash: sha256:a3685b5d4a7fc8dd2a3443a78f8c18f6c14f038724af0f7addb811b8dd37f051
-    note: Carries paired authentication inputs and protects their artifact paths.
+    version: 5
+    hash: sha256:c0cee2ed8725e8573bfa0d5dc45aeb95280f5a4691f7ea6e2d033d96a8210b1f
+    note: Propagates explicit approved origins and sandbox configuration through the adapter.
 
   - path: scripts/bootstrap-context.js
     role: script
@@ -456,9 +456,9 @@ files:
 
   - path: scripts/discover.js
     role: script
-    version: 5
-    hash: sha256:c5e4182b42c0c48d80a84f66b0c578c3299ea0bb95eb728bd7b0ad38eb5ed763
-    note: Reviewed route grouping with exact-page conservative fallback
+    version: 6
+    hash: sha256:f26f27e8ebe93aa39bec20f8afad1bd3b70e4ebdd19fb86dcce0fe09b7be732c
+    note: Filters sitemap targets to approved origins and uses shared bounded HTTP reads.
 
   - path: scripts/select-changed-surfaces.js
     role: script
@@ -475,7 +475,7 @@ files:
   - path: deps/package.json
     role: config
     version: 5
-    hash: sha256:744db581a0b0bed91df26d0e675cea0677ae49238fdff517beb6210c6c1bf303
+    hash: sha256:51ca3edc1bb0172ed9b76ca356e638b586ac7d1330986102bdafb6730b114b77
     note: Exact validated axe-core, Puppeteer, and Action http-server dependencies
 
   - path: deps/package-lock.json
@@ -505,8 +505,8 @@ files:
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
     version: 14
-    hash: sha256:bf936af74c6c133c110d3ae8971efa43d0328f6a4c2314a007b2d3c66b6f6309
-    note: Pins the prepared v3.2.0 Action release.
+    hash: sha256:718559f4ae5934aaa7b68f21be04bc6d563d689bade9dc6873fcf2128b156c17
+    note: Pins the prepared v3.3.0 Action candidate.
 
   - path: assets/ci/github-actions/surface-map.example.json
     role: asset
@@ -612,9 +612,9 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 37
+    version: 38
     hash: null
-    note: Tracks bundle revision 50; published v3.2.0 remains immutable; self-hash omitted
+    note: Tracks bundle revision 51; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script
@@ -624,9 +624,9 @@ files:
 
   - path: references/runtime-compatibility.md
     role: reference
-    version: 2
-    hash: sha256:93be1793ee2625decdced8e9a1fe6629cde0d2b14cba3987c7887eb425e4a26b
-    note: v3 runtime, managed browser installation, and validation contract
+    version: 3
+    hash: sha256:59d110e6e7872ff1cffafcabad2624bbeaf6ab104ef1567f10acd88f7992567e
+    note: Documents the v3.3.0 candidate browser graph and sandbox policy.
 
   - path: references/cli-contract.md
     role: reference
@@ -654,12 +654,42 @@ files:
 
   - path: evals/test-auth-state.js
     role: evals
-    version: 1
-    hash: sha256:6b25408520fb876d18637a934acc2f5c1714b343600ca4f2dfe8221881016027
-    note: Bounded authenticated scan inputs and acceptance coverage
+    version: 2
+    hash: sha256:76fa0583a3ed462d457f3118552d42a7793ee40a26b3b8ff8f0b092fa93c1661
+    note: Retains authenticated isolation while exposing a trusted-fixture sandbox override.
 
   - path: references/authenticated-scans.md
     role: reference
-    version: 3
-    hash: sha256:fc61f38a324034af2a1fa2eed47c9e3041cb042c4da7f90340a97427099d37ad
-    note: Records the intended v3.2.0 release provenance.
+    version: 4
+    hash: sha256:da638b74396ef631089d2d4105e5bb509c259c7783e148675505b877e4a7bc75
+    note: Distinguishes candidate network defaults from authenticated input guarantees.
+
+  - path: evals/fixtures/eval-24/network-cases.json
+    role: evals
+    version: 1
+    hash: sha256:d2d8c0bd512a53a9ea3287c17b8c4744efe79d09dd38ff4bda48e24854624355
+    note: Security hardening regression or policy reference
+
+  - path: evals/test-security.js
+    role: evals
+    version: 1
+    hash: sha256:ddb105d32b4d66bdb15daacf58d58cf04136227445e5a25178ef470d5077289b
+    note: Security hardening regression or policy reference
+
+  - path: references/network-policy.md
+    role: reference
+    version: 1
+    hash: sha256:a5f407cc239f2adc1ec42092ae36a0ddcb58a21616811639310e06f1ff81d3de
+    note: Security hardening regression or policy reference
+
+  - path: scripts/network-policy.js
+    role: script
+    version: 1
+    hash: sha256:7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc
+    note: Security hardening regression or policy reference
+
+  - path: scripts/serve-local.js
+    role: script
+    version: 1
+    hash: sha256:229e6bfe61cb858829cdcc53b8ef1e0a8499dedff25fdc743f91ff2ce854889d
+    note: Security hardening regression or policy reference

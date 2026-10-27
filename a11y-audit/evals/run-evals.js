@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 30
+version: 31
 version_date: 2026-10-26
-previous_version: 29
+previous_version: 30
 change_summary: >
-  Checks updated dependency pins while verifying the guide against its published release evidence.
+  Validates security behavior, helper integrity and versioned guide synchronization.
 */
 
 const assert = require('assert');
@@ -1176,7 +1176,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.2\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.3\.0/);
   assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
   assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
   assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
@@ -1209,7 +1209,7 @@ function reusableActionRegression() {
     assert.match(action, new RegExp(`^  ${input}:`, 'm'), `action missing ${input} input`);
   }
   assert.match(action, /cd "\$SERVER_ROOT"[\s\S]*npm ci --no-audit --no-fund/);
-  assert.match(action, /"\$SERVER_ROOT\/node_modules\/\.bin\/http-server"/);
+  assert.match(action, /scripts\/serve-local\.js/);
   assert.doesNotMatch(action, /npx --yes http-server/);
   assert.doesNotMatch(action, /npm install/);
   assert.match(action, /--install-timeout-ms "\$INSTALL_TIMEOUT_MS"/);
@@ -1220,7 +1220,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.2\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.3\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
@@ -1293,6 +1293,7 @@ function workflowSecurityRegression() {
   }
   assert.match(dependabot, /directory: \/a11y-audit\/deps[\s\S]*open-pull-requests-limit: 0/);
   const deps = readJson(repoPath('a11y-audit/deps/package.json'));
+  assert.deepStrictEqual(deps.allowScripts, { 'puppeteer@25.16.0': true });
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
     'http-server': '14.1.1',
@@ -1390,7 +1391,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.17$/m);
+  assert.match(text, /^guide-version: 0\.3\.18$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   assert.match(text, /Do not scan\nprivate or authenticated pages\./);
@@ -1399,13 +1400,13 @@ function assistantGuideArtifactRegression() {
   assert.deepStrictEqual(scannerActions.map(block => block.match(/^id: (.+)$/m)[1]),
     ['scan-pages', 'write-reviewed-baseline', 'scan-new-findings']);
   const scanner = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
-  for (const name of ['auth-state.js', 'check-runtime.js']) {
+  for (const name of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
     const helper = fs.readFileSync(repoPath('a11y-audit/scripts', name));
     assert.ok(scanner.includes(JSON.stringify(name) + ': ' + JSON.stringify(crypto.createHash('sha256').update(helper).digest('hex'))));
     const isolated = path.join(tmpRoot, 'tampered-' + name);
     fs.mkdirSync(isolated, { recursive: true });
     fs.writeFileSync(path.join(isolated, 'scan.js'), scanner);
-    for (const dependency of ['auth-state.js', 'check-runtime.js']) {
+    for (const dependency of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
       fs.copyFileSync(repoPath('a11y-audit/scripts', dependency), path.join(isolated, dependency));
     }
     fs.writeFileSync(path.join(isolated, name), 'throw new Error("UNVERIFIED_CODE_EXECUTED");');
@@ -1421,15 +1422,9 @@ function assistantGuideArtifactRegression() {
     ['a11y-audit/scripts/scan.js', null],
     ['a11y-audit/scripts/report.js', null],
   ]);
-  // The acquisition action selects immutable v3.2.0, so its executable
-  // hashes must match retained release evidence rather than evolving main.
-  const publishedHashes = readJson(repoPath('ops/v3.2.0-readiness/candidate-hashes.json')).sha256;
-  const receipt = readJson(repoPath('ops/v3.2.0-publication-receipt.json'));
-  assert.strictEqual(receipt.tag, 'v3.2.0');
-  assert.strictEqual(crypto.createHash('sha256').update(rootGuide).digest('hex'), receipt.hosted_guide.sha256);
+  // The release guide and executable bytes must be synchronized.
   for (const script of scriptHashes.keys()) {
-    assert.match(publishedHashes[script], /^[0-9a-f]{64}$/);
-    scriptHashes.set(script, publishedHashes[script]);
+    scriptHashes.set(script, crypto.createHash('sha256').update(fs.readFileSync(repoPath(script))).digest('hex'));
   }
   for (const block of text.matchAll(/\[action\]\n([\s\S]*?)\n\[\/action\]/g)) {
     const command = block[1].match(/^command: (.+)$/m)?.[1] || '';
@@ -1445,19 +1440,43 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.17$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.18$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
   assert.match(manifest, /^release-status: published$/m);
   assert.doesNotMatch(manifest, /^released-at:/m);
-  assert.match(manifest, /^immutable-release-url: https:\/\/github\.com\/snapsynapse\/skill-a11y-audit\/releases\/tag\/v3\.2\.0$/m);
+  assert.match(manifest, /^immutable-release-url: https:\/\/github\.com\/snapsynapse\/skill-a11y-audit\/releases\/tag\/v3\.3\.0$/m);
   const installer = text.match(/\[action\]\nid: acquire-skill\n([\s\S]*?)\[\/action\]/)[1];
   assert.doesNotMatch(installer, /exec-opaque:/);
   assert.match(installer, /approval: required/);
-  assert.match(installer, /git clone --branch v3\.2\.0 --depth 1/);
+  assert.match(installer, /git clone --branch v3\.3\.0 --depth 1/);
   assert.match(installer, /does not register an agent-client skill/);
   assert.doesNotMatch(installer, /npx|exec-opaque/);
+}
+
+function requiredChecksRegression() {
+  const contract = readJson(repoPath('.github/repository-settings.json'));
+  assert.strictEqual(contract.repository, 'snapsynapse/skill-a11y-audit');
+  const ruleset = contract.rulesets.find(rule => rule.id === 20615522);
+  assert.strictEqual(ruleset.enforcement, 'active');
+  assert.deepStrictEqual(ruleset.conditions.ref_name.include, ['refs/heads/main']);
+  assert.deepStrictEqual(ruleset.bypass_actors, []);
+  const rules = new Map(ruleset.rules.map(rule => [rule.type, rule.parameters]));
+  assert.ok(rules.has('deletion') && rules.has('non_fast_forward'));
+  assert.strictEqual(rules.get('pull_request').required_approving_review_count, 0);
+  assert.strictEqual(rules.get('pull_request').require_extra_approval_for_unattributed_changes, false);
+  assert.strictEqual(rules.get('pull_request').required_review_thread_resolution, true);
+  const workflow = JSON.parse(runCommand('ruby', ['-rjson', '-ryaml', '-e',
+    'puts JSON.generate(YAML.safe_load(File.read(ARGV[0])))', '.github/workflows/validate-skill.yml']).stdout);
+  const contexts = Object.values(workflow.jobs).flatMap(job => job.strategy?.matrix?.node
+    ? job.strategy.matrix.node.map(node => job.name.replace('${{ matrix.node }}', node)) : [job.name]);
+  const checks = rules.get('required_status_checks');
+  assert.strictEqual(checks.strict_required_status_checks_policy, true);
+  assert.strictEqual(checks.do_not_enforce_on_create, false);
+  assert.strictEqual(contexts.length, 10);
+  assert.deepStrictEqual(checks.required_status_checks.map(check => check.context).sort(), contexts.sort());
+  assert.ok(checks.required_status_checks.every(check => check.integration_id === 15368));
 }
 
 resetDir(tmpRoot);
@@ -1470,8 +1489,9 @@ if (validateMode) {
   test('bootstrap-context smoke test creates workspace context', validateBootstrapSmoke);
 }
 
-test('eval-9 preserves cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
+test('eval-9 preserves explicitly approved cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
+test('security regressions fail closed and bound network work', () => runNode(['a11y-audit/evals/test-security.js']));
 test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
 test('eval-19 targets mapped changed surfaces and falls back conservatively', eval19ChangedSurfaceSelection);
 test('eval-20 groups flat routes and always includes directly changed pages', eval20FlatRouteGroupingAndDirectPages);
@@ -1498,6 +1518,7 @@ test('reusable Action and workflow starter stay template-aware', reusableActionR
 test('workflow and Action supply-chain controls stay enforced', workflowSecurityRegression);
 test('dependency graph excludes extract-zip and runtimes enforce Node 22.12+', dependencyRuntimePolicy);
 test('assistant guide artifacts stay bounded, pinned, and synchronized', assistantGuideArtifactRegression);
+test('main ruleset requires the exact ten CI contexts and approved PR policy', requiredChecksRegression);
 
 const failed = results.filter((result) => !result.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);

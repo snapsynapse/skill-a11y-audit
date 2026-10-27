@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 3
 version_date: 2026-10-26
-previous_version: 1
+previous_version: 2
 change_summary: >
-  Records the security-updated browser graph on main and its release boundary.
+  Documents the v3.3.0 browser graph and sandbox policy.
 ---
 
 # Runtime compatibility
@@ -24,8 +24,9 @@ no `extract-zip`. This removes the managed dependency path affected by
 which concerns symlink traversal during ZIP extraction. It does not claim
 that every browser installation mechanism or user-supplied package is safe.
 
-These versions describe current main. The immutable v3.2.0 release keeps
-its original graph until a new release is published.
+These versions belong to v3.3.0. The immutable v3.2.0 release
+keeps its original graph until a new release is published. Read
+`network-policy.md` for sandbox defaults, explicit overrides and fetch limits.
 
 axe-core stays pinned to 4.12.1. Existing accepted baselines retain their
 rule-engine version; review actual finding changes before updating a baseline.
@@ -48,7 +49,11 @@ Literal
 a11y-audit/deps/node_modules/.bin/puppeteer browsers install chrome
 ```
 Use the same `PUPPETEER_CACHE_DIR` for installation and scanning. Review
-installer settings if npm disables lifecycle scripts. The Action honors
+installer settings if npm disables lifecycle scripts. The committed scanner
+manifest permits only `puppeteer@25.16.0` lifecycle scripts for npm versions
+that require an explicit script policy; other dependency scripts remain
+unapproved. This does not alter global npm settings or override an operator
+using `--ignore-scripts`. The Action honors
 Puppeteer download settings and does not silently override a skipped download.
 
 An installed skill uses the same `deps/` layout under its selected skill

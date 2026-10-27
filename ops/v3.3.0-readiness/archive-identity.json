@@ -1,0 +1,15 @@
+{
+  "source_fingerprint_sha256": "cc62ea31e1ded019f83371dc528014e3e6dd6c98601a8fab54596308fa57db3c",
+  "files": 180,
+  "both_archive_contents_match_source": true,
+  "sha256": {
+    "skill-a11y-audit-v3.3.0-review.tar.gz": "91a0915632e590bca521cdcf4d94c1151bbb34c9931405740dcda802ba5a011f",
+    "skill-a11y-audit-v3.3.0-review.zip": "3f3d9f9703e083b5b42321a58c7ec10064ce11d264f563ee5249fc080b519345"
+  },
+  "published": false,
+  "executed_suite_source_fingerprint_sha256": "2554953652127692fc28e3e5f082eb428dbae51e7e91253aebe6b3ece52a2597",
+  "post_suite_changed_files": [
+    "ops/v3.3.0-release-state.json"
+  ],
+  "post_suite_verification": "Only the release-state progress receipt changed after the full suite. Its JSON schema passed, and every final extracted file matches the final source inventory; all executable, dependency, guide, fixture and documentation bytes are identical to the executed archive."
+}

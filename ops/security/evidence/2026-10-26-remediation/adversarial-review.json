@@ -1,0 +1,271 @@
+{
+  "review": "Independent adversarial code review; local mocks and loopback fixtures only",
+  "date": "2026-10-26",
+  "base": "2c21b9a2c5b91d57593b89c51e42a4981f1ea29c",
+  "initial_findings": [
+    {
+      "id": "ADV-001",
+      "title": "Redirect and non-200 bodies outlive fetch budgets",
+      "reproduced": "302 streaming body stayed open after result, 2700 bytes after161ms despite30ms deadline/maxBytes10",
+      "correction_verified": "Redirect stream closed, zero stream bytes after162ms; discarded-response regression passes",
+      "status": "resolved"
+    },
+    {
+      "id": "ADV-002",
+      "title": "Valid moderate report fails under npm audit-level=high",
+      "reproduced": "Complete moderate audit JSON with npm exit0 caused audit gate exit1",
+      "correction_verified": "Identical mock returns gate0; high reports still block and provider errors fail",
+      "status": "resolved"
+    },
+    {
+      "id": "ADV-003",
+      "title": "Compressed sitemap compatibility lost",
+      "reproduced": "Old loader returned one target for gzip Content-Encoding; new loader returned []",
+      "correction_verified": "Old and corrected loaders return the identical target; gzip/malformed/gzip-bomb tests pass",
+      "status": "resolved"
+    }
+  ],
+  "remaining_material_findings": [],
+  "verified_controls": [
+    "HTTP(S) origin structural comparisons reject userinfo, lookalike hosts, altered scheme/port and forged discovery metadata",
+    "Explicit approved origins and preview rewriting preserve legitimate multi-origin input",
+    "Default Chromium launch omits --no-sandbox; override must be explicit",
+    "HTTP redirects and script navigation are blocked by real scanner fixtures when unapproved",
+    "HTTP wire and decompressed bytes, absolute streaming deadlines, redirect/document/URL/total budgets are covered",
+    "Action server argv binds127.0.0.1, disables directory listings/dotfiles; full consumer harness owned by parent",
+    "Effective GitHub rules require PR+ten strict GitHub Actions checks; no bypass actors or mandatory reviewer, matching user choice"
+  ],
+  "scope_limits": [
+    "Network policy intentionally covers target selection and main-frame navigation, not arbitrary subresources, workers, popups or DNS rebinding",
+    "No live hostile target, browser exploit, credentials, external settings mutation or repo edit performed by reviewer",
+    "Metadata/hash synchronization and final release evidence remain parent-owned"
+  ],
+  "npm_audit_reference": "https://docs.npmjs.com/cli/v11/commands/npm-audit/",
+  "source_sha256": {
+    "scripts/audit-deps.mjs": "7a902082d5fe00d999d0029b1775c738db9d62ec3b6bfb6a40153f54ce040ff9",
+    "a11y-audit/scripts/network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc",
+    "a11y-audit/scripts/discover.js": "f26f27e8ebe93aa39bec20f8afad1bd3b70e4ebdd19fb86dcce0fe09b7be732c",
+    "a11y-audit/scripts/scan.js": "904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad",
+    "a11y-audit/scripts/run-audit.js": "c0cee2ed8725e8573bfa0d5dc45aeb95280f5a4691f7ea6e2d033d96a8210b1f",
+    ".github/actions/scan/action.yml": "07a8dc03a6072776f91ed68eb2fe3f80f236f8fab32c1dfec1cc52ebf70b5782",
+    ".github/workflows/validate-skill.yml": "cf744a70fda92e63be38f791e74884fd4b15a09b428e9ff269a8612ef1132c62",
+    ".github/repository-settings.json": "27c379b5091e4ec53f539e853f0bc1856e1a4782fbf25dd21df433135eac634b",
+    "ops/security/evidence/2026-10-26-remediation/main-effective-rules.json": "240b05bba7f9e99528996b63c251ba9d5bfc8f1d309e6d85246ca05c8c977a0e"
+  },
+  "supplementary_reviews": [
+    {
+      "id": "server-wrapper-followup",
+      "date": "2026-10-26",
+      "scope": "Read-only source review and raw loopback HTTP probes against bundled serve-local.js; no source modifications",
+      "reason": "Parent full consumer proved that http-server --no-dotfiles hides listings but still serves direct hidden paths; the new wrapper adds pre-handler denial",
+      "supersedes": "Earlier verified_controls statement about dotfile denial through http-server argv alone. The argv flag was insufficient; wrapper verification below is the current evidence.",
+      "prior_finding": {
+        "id": "ADV-004",
+        "title": "Direct hidden paths remain readable with http-server listing-only dotfile flag",
+        "discovered_by": "Parent full consumer execution",
+        "status": "resolved",
+        "fix": "Bundled loopback wrapper checks percent-decoded path segments before http-server static routing."
+      },
+      "test_results": {
+        "bind": {
+          "port": 63585,
+          "host": "127.0.0.1"
+        },
+        "bind_is_loopback": true,
+        "cases": [
+          {
+            "route": "/.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2esecret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2Esecret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "//.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/.hidden/",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2ehidden/index.html",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2Ehidden%2findex.html",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2ehidden%2Findex.html",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%2f.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/%5c.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/public%5c..%5c.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/public/../.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/public/%2e%2e/.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/public%2f..%2f.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "http://ignored.test/.secret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          },
+          {
+            "route": "/",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/index.html",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/visible.txt",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/public/",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/hello%20world.txt",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/caf%C3%A9.txt",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/%252esecret",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/%252ehidden/",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/index.html?.secret",
+            "status": 200,
+            "expected": "public-readable",
+            "passed": true
+          },
+          {
+            "route": "/bad%zz",
+            "status": 400,
+            "expected": "malformed-refused",
+            "passed": true
+          },
+          {
+            "route": "/%C0%AEsecret",
+            "status": 400,
+            "expected": "malformed-refused",
+            "passed": true
+          },
+          {
+            "route": "/listing/",
+            "status": 403,
+            "expected": "listing-refused",
+            "passed": true
+          },
+          {
+            "route": "HEAD /%2esecret",
+            "status": 404,
+            "expected": "hidden-refused",
+            "passed": true
+          }
+        ],
+        "failures": [],
+        "log": "Serving http://127.0.0.1:63585"
+      },
+      "summary": {
+        "cases": 28,
+        "passed": 28,
+        "failed": 0,
+        "public_positive_cases": 9,
+        "hidden_refusal_cases": 16,
+        "malformed_refusal_cases": 2,
+        "listing_refusal_status": 403
+      },
+      "source_sha256": {
+        "a11y-audit/scripts/serve-local.js": "229e6bfe61cb858829cdcc53b8ef1e0a8499dedff25fdc743f91ff2ce854889d",
+        ".github/actions/scan/action.yml": "4f29224007d478ce21d7c14996f523b7c1bb83fe73f6ab3e88c0912274107adf",
+        "scripts/test-action-consumer.mjs": "4e5b6316575bcb01a23bb066d35c5af4e9128a41344a56f3b914ba7101fc3df6",
+        "a11y-audit/scripts/network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc",
+        "scripts/audit-deps.mjs": "7a902082d5fe00d999d0029b1775c738db9d62ec3b6bfb6a40153f54ce040ff9"
+      },
+      "remaining_material_findings": [],
+      "limitations": [
+        "Loopback binding and URL-path hidden-segment denial are verified. This is not a filesystem symlink isolation boundary; the operator must select a public build directory.",
+        "Full clean consumer, packaging, final manifest and release evidence remain parent-owned."
+      ]
+    }
+  ]
+}

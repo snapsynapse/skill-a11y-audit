@@ -1,11 +1,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-10-03
-previous_version: null
+version: 2
+version_date: 2026-10-26
+previous_version: 1
 change_summary: >
-  Exercises authenticated browser isolation, failure handling, and input rejection.
+  Retains authenticated isolation while exposing a trusted-fixture sandbox override.
 */
 const assert = require('assert');
 const fs = require('fs');
@@ -18,6 +18,7 @@ const { buildRunPlan } = require('../scripts/run-audit.js');
 const unit = process.argv.includes('--unit');
 const root = path.resolve(__dirname, '../..');
 function run(args, options = {}) {
+  if (process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true' && args[0]?.endsWith('scan.js')) args = [...args, '--no-sandbox'];
   return new Promise((resolve, reject) => {
     const child = spawn(options.command || process.execPath, args, { cwd: root, env: options.env || process.env });
     let stdout = '', stderr = '';
@@ -75,7 +76,7 @@ async function main() {
     assert.throws(() => loadAuth(statePath, targetsPath, [url], [statePath]));
     fs.linkSync(statePath, path.join(dir, 'alias')); assert.throws(() => loadAuth(statePath, targetsPath, [url], [path.join(dir, 'alias')]));
     assert.throws(() => protectAuthFiles([statePath, targetsPath], [dir]));
-    const request = { schema_version: 1, workspace: '.', artifacts_dir: 'artifacts', discovery: {url: origin}, scan: {storage_state: 'state.json', auth_targets: 'targets.json', fail_on: 'none'}, report: {enabled: false} };
+    const request = { schema_version: 1, workspace: '.', artifacts_dir: 'artifacts', discovery: {url: origin}, scan: {no_sandbox: process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true', storage_state: 'state.json', auth_targets: 'targets.json', fail_on: 'none'}, report: {enabled: false} };
     const requestPath = path.join(dir, 'request.json'); save(requestPath, request);
     const plan = buildRunPlan(requestPath, {});
     const args = plan.stages[1].args;
@@ -88,7 +89,7 @@ async function main() {
     assert.strictEqual(yaml.status, 0, yaml.stderr);
     const action = JSON.parse(yaml.stdout);
     const inputs = Object.fromEntries(Object.entries(action.inputs).map(([key, value]) => [key, value.default || '']));
-    Object.assign(inputs, {urls: url, 'storage-state': statePath, 'auth-targets': targetsPath, output, 'fail-on': 'none'});
+    Object.assign(inputs, {urls: url, 'no-sandbox': process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true' ? 'true' : 'false', 'storage-state': statePath, 'auth-targets': targetsPath, output, 'fail-on': 'none'});
     async function actionStep(name) {
       const step = action.runs.steps.find(s => s.name === name);
       const env = Object.fromEntries(Object.entries(step.env).map(([key, value]) => [key, value.replace(/\$\{\{ inputs\.([^ ]+) \}\}/g, (_, input) => inputs[input])]));

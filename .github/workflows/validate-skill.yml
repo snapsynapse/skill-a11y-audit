@@ -78,6 +78,9 @@ jobs:
         run: python3 .guidecheck-current/scripts/guidecheck_verify.py assistant-guide.txt --level 3 --pretty
 
   browser-eval:
+    # Only these self-contained loopback fixtures use the explicit compatibility override.
+    env:
+      A11Y_AUDIT_TEST_NO_SANDBOX: 'true'
     name: Real browser eval (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
@@ -107,6 +110,9 @@ jobs:
       - name: Audit scanner dependencies against the reviewed allowlist
         run: npm run audit:scanner
 
+      - name: Verify network boundaries and browser configuration
+        run: node a11y-audit/evals/test-security.js --browser
+
       - name: Run real browser and baseline eval
         run: npm run eval:browser
 
@@ -129,6 +135,7 @@ jobs:
       - name: Run the local Action as a consumer
         uses: ./.github/actions/scan
         with:
+          no-sandbox: true
           serve-path: a11y-audit/evals/fixtures/eval-3
           port: '8088'
           discover-url: http://127.0.0.1:8088/
@@ -155,6 +162,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: ./.github/actions/scan
         with:
+          no-sandbox: true
           serve-path: a11y-audit/evals/fixtures/eval-3
           port: '8089'
           discover-url: http://127.0.0.1:8089/

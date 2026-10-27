@@ -1,0 +1,10 @@
+
+> skill-a11y-audit@3.3.0 build:site
+> node scripts/build-site.mjs
+
+build-site: staged _site with 3 reviewed hidden files
+
+> skill-a11y-audit@3.3.0 check:search
+> node scripts/check-search.mjs
+
+check-search: 1 sitemap pages, 0 defects, 0 infrastructure failures

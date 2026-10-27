@@ -27,14 +27,36 @@ function runAudit() {
     const result = spawnSync('npm', args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
     if (result.error) throw new Error(`npm audit failed to run: ${result.error.message}`);
     if (!result.stdout.trim()) throw new Error(`npm audit produced no output: ${result.stderr.trim()}`);
-    return JSON.parse(result.stdout);
+    const report = JSON.parse(result.stdout);
+    const object = value => value && typeof value === 'object' && !Array.isArray(value);
+    const totals = report?.metadata?.vulnerabilities;
+    if (result.signal || ![0, 1].includes(result.status) || report?.error
+        || report?.auditReportVersion !== 2 || !object(report.vulnerabilities)
+        || !object(totals)
+        || !['info', 'low', 'moderate', 'high', 'critical', 'total'].every(
+          key => Number.isSafeInteger(totals[key]) && totals[key] >= 0)
+        || Object.keys(report.vulnerabilities).length !== totals.total
+        || ['info', 'low', 'moderate', 'high', 'critical'].reduce((sum, key) => sum + totals[key], 0) !== totals.total
+        || (result.status === 1 && totals.total === 0)) {
+      throw new Error('npm audit did not return a complete, consistent vulnerability report; coverage is unavailable.');
+    }
+    for (const vulnerability of Object.values(report.vulnerabilities)) {
+      if (!object(vulnerability) || !['info', 'low', 'moderate', 'high', 'critical'].includes(vulnerability.severity)
+          || !Array.isArray(vulnerability.via) || vulnerability.via.length === 0
+          || !vulnerability.via.every(via => typeof via === 'string' || (object(via)
+            && typeof via.name === 'string' && typeof via.url === 'string'
+            && ['info', 'low', 'moderate', 'high', 'critical'].includes(via.severity)))) {
+        throw new Error('npm audit returned malformed advisory data; coverage is unavailable.');
+      }
+    }
+    return report;
 }
 
 // npm nests advisory objects inside each vulnerability's `via` chain; string
 // entries are indirection through another vulnerable package, not advisories.
 function collectAdvisories(report) {
     const found = new Map();
-    for (const vulnerability of Object.values(report.vulnerabilities ?? {})) {
+    for (const vulnerability of Object.values(report.vulnerabilities)) {
         for (const via of vulnerability.via ?? []) {
             if (typeof via !== 'object' || !BLOCKING.has(via.severity)) continue;
             const id = String(via.url ?? '').split('/').pop() || `npm-${via.source}`;

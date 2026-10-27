@@ -4,10 +4,11 @@
 > Template-aware sampling, stable finding fingerprints, and accepted
 > baselines let CI block new barriers without requiring zero existing debt.
 
-Documentation version: 3.2.0. Updated: 2026-10-03.
-Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.10.0
+Documentation version: 3.3.0. Updated: 2026-10-26.
+Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.16.0
 and axe-core 4.12.1. The reusable Action defaults to Node 22.
-GitHub installs fetch main; pin the reusable Action to v3.2.0 for this release.
+v3.3.0 enables sandboxing and explicit target-origin controls.
+Release-specific source and Action examples pin v3.3.0.
 
 ## What this skill does
 
@@ -98,4 +99,6 @@ The agent selects final delivery using the workspace context.
   that every agent or model has been tested with v3.
 
 Authenticated inputs: pair --storage-state with --auth-targets for exact URL and visible-selector assertions. Cookies and local storage only; discovery stays unauthenticated. See a11y-audit/references/authenticated-scans.md in the repository.
-Guide 0.3.17 passes local pinned/current verifier checks; verify the deployed hash and hosted result before use.
+Guide 0.3.18 acquires v3.3.0; local checks do not establish hosted acceptance.
+Security defaults: approved sitemap/navigation origins, bounded fetches, sandboxed Chrome and loopback-only Action serving.
+Read a11y-audit/references/network-policy.md before configuring additional origins or a sandbox override.

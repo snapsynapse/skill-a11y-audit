@@ -1,0 +1,5 @@
+
+> skill-a11y-audit@3.3.0 eval:auth
+> node a11y-audit/evals/test-auth-state.js
+
+Authenticated browser and adapter checks passed

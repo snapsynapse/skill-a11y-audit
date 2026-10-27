@@ -1,0 +1,4 @@
+PASS external CLI consumer: accepted (exit 0)
+PASS external CLI consumer: rejected (exit 2)
+PASS external CLI consumer: report-only (exit 0)
+PASS external CLI consumer: missing (exit 1)

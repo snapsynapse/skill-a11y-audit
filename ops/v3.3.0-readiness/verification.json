@@ -1,0 +1,194 @@
+{
+  "candidate_version": "3.3.0",
+  "bundle_revision": 51,
+  "guide_version": "0.3.18",
+  "checked_at": "2026-10-27T03:56:39.059972+00:00",
+  "status": "ready_for_local_review",
+  "authority": "R1_preparation_plus_explicit_ruleset_change",
+  "base_head": "2c21b9a2c5b91d57593b89c51e42a4981f1ea29c",
+  "candidate_head": null,
+  "branch": "codex/security-hardening-3.3.0",
+  "source_fingerprint_sha256": "cc62ea31e1ded019f83371dc528014e3e6dd6c98601a8fab54596308fa57db3c",
+  "source_files": 180,
+  "checks": [
+    {
+      "name": "source_validation",
+      "status": "pass",
+      "result": "32/32 on Node26.12.1 and Node22.12.0",
+      "evidence": [
+        "validate.txt",
+        "node22-final-validate.txt"
+      ]
+    },
+    {
+      "name": "cli_contract",
+      "status": "pass",
+      "result": "17/17",
+      "evidence": [
+        "node22-cli.txt",
+        "archive-cli.txt"
+      ]
+    },
+    {
+      "name": "security_regressions",
+      "status": "pass",
+      "result": "8/8 groups with actual sandbox-enabled Chromium; separate explicit trusted-fixture override passes",
+      "evidence": [
+        "node22-security.txt",
+        "archive-security.txt",
+        "explicit-override-security.txt"
+      ]
+    },
+    {
+      "name": "browser_baseline_and_missing_route",
+      "status": "pass",
+      "evidence": [
+        "node22-browser.txt",
+        "archive-browser.txt"
+      ]
+    },
+    {
+      "name": "authenticated_browser_and_adapter",
+      "status": "pass",
+      "evidence": [
+        "node22-auth.txt",
+        "archive-auth.txt"
+      ]
+    },
+    {
+      "name": "external_cli_consumer",
+      "status": "pass",
+      "result": "accepted0, rejected2, report-only0, missing1",
+      "evidence": [
+        "node22-cli-consumer.txt",
+        "archive-cli-consumer.txt"
+      ]
+    },
+    {
+      "name": "external_action_consumer",
+      "status": "pass",
+      "result": "Empty browser cache acquisition; skip-download clean reinstall; stale install repair; loopback bind, hidden-path404 and listings403",
+      "evidence": [
+        "action-consumer.txt"
+      ],
+      "limits": "Hosted setup-node and artifact-upload actions are not emulated. npm package acquisition used its local cache; pinned Chrome acquisition used the empty isolated browser cache."
+    },
+    {
+      "name": "managed_dependencies",
+      "status": "pass",
+      "result": "zero known vulnerabilities in both complete npm audit reports; repaired gate passes",
+      "evidence": [
+        "root-audit.json",
+        "scanner-audit.json",
+        "audit-gates.txt"
+      ]
+    },
+    {
+      "name": "workflow_analysis",
+      "status": "pass",
+      "result": "actionlint1.7.12; zizmor1.28.0 default persona, min severity low",
+      "evidence": [
+        "actionlint.txt",
+        "zizmor.json"
+      ]
+    },
+    {
+      "name": "guide_verification",
+      "status": "pass",
+      "result": "Local Level3, zero blockers and warnings, pinned0.7.0 and compatibility0.7.1 verifiers",
+      "evidence": [
+        "guide-pinned.json",
+        "guide-current.json"
+      ],
+      "limits": "Informational human-date age and un-fetched executable-anchor findings remain. Manifest and tamper tests verify local hashes; no hosted acceptance asserted."
+    },
+    {
+      "name": "secret_scan",
+      "status": "pass_with_triage",
+      "result": "6 integrity-hash false positives; 0 confirmed credentials; no suppression added",
+      "evidence": [
+        "secret-scan-triage.json",
+        "gitleaks.txt"
+      ]
+    },
+    {
+      "name": "independent_adversarial_review",
+      "status": "pass",
+      "result": "All four initial implementation defects resolved; supplementary server corpus28/28, nine public positive controls; no remaining material findings",
+      "evidence": [
+        "review-identity.json",
+        "../security/evidence/2026-10-26-remediation/adversarial-review.json"
+      ]
+    },
+    {
+      "name": "clean_archive_consumer",
+      "status": "pass",
+      "result": "Node22.12.0 validation32/32, CLI17/17, security8/8, browser/auth, external CLI and site gates pass",
+      "evidence": [
+        "archive-runtime.txt",
+        "archive-validate.txt",
+        "archive-cli.txt",
+        "archive-security.txt",
+        "archive-browser.txt",
+        "archive-auth.txt",
+        "archive-cli-consumer.txt",
+        "archive-site.txt",
+        "archive-identity.json"
+      ],
+      "limits": "Locked offline installs used --ignore-scripts and the previously acquired pinned Chrome. Fresh default browser acquisition is tested separately by the Action consumer. Only the validated release-state progress JSON changed after the full archive suite; all other final packaged bytes match the tested inventory."
+    },
+    {
+      "name": "clean_site_build_and_search",
+      "status": "pass",
+      "result": "1 sitemap page;0 defects;0 infrastructure failures",
+      "evidence": [
+        "archive-site.txt"
+      ]
+    },
+    {
+      "name": "release_and_ruleset_json_schemas",
+      "status": "pass",
+      "result": "Both records validate against their governing skill schemas"
+    },
+    {
+      "name": "diff_whitespace",
+      "status": "pass",
+      "result": "git diff --check"
+    }
+  ],
+  "finding_disposition": {
+    "SEC-001": "fixed_in_local_unpublished_candidate",
+    "SEC-002": "fixed_in_local_unpublished_candidate",
+    "SEC-003": "fixed_in_local_unpublished_candidate",
+    "SEC-004": "fixed_in_local_unpublished_candidate",
+    "SEC-005": "fixed_in_local_unpublished_candidate",
+    "SEC-006": "fixed_active_GitHub_ruleset20615522_PR_plus_ten_strict_checks_zero_approvals_no_bypass"
+  },
+  "remote_reconciliation": {
+    "main": "2c21b9a2c5b91d57593b89c51e42a4981f1ea29c",
+    "open_prs": 0,
+    "candidate_tag_present": false,
+    "latest_published_release": "v3.2.0"
+  },
+  "publication": {
+    "staged_files": 0,
+    "new_source_commits": 0,
+    "pushed": false,
+    "pull_request_created": false,
+    "tag_created": false,
+    "release_created": false,
+    "assets_uploaded": false,
+    "site_deployed": false,
+    "exact_candidate_head_ci": "not_started"
+  },
+  "review_archives": {
+    "skill-a11y-audit-v3.3.0-review.tar.gz": "91a0915632e590bca521cdcf4d94c1151bbb34c9931405740dcda802ba5a011f",
+    "skill-a11y-audit-v3.3.0-review.zip": "3f3d9f9703e083b5b42321a58c7ec10064ce11d264f563ee5249fc080b519345"
+  },
+  "residual_limits": [
+    "Origin checks constrain automatic targets and main-frame navigation, not arbitrary subresources/workers/popups/DNS rebinding or browser compromise.",
+    "Temporary server is loopback-only, not filesystem symlink isolation; select a public build directory.",
+    "Authenticated page outputs and external package fallback graphs retain their documented sensitivity/review limits.",
+    "Local fixes and review packages do not establish delivery to release-pinned consumers or live site bytes."
+  ]
+}
