@@ -300,5 +300,6 @@
     "merged_into": "6d153f9865f230594b76ac2440dccb4a0eebf8bb"
   },
   "evidence_directory": "ops/v3.3.0-publication/",
-  "checked_at": "2026-10-27T04:27:16.416022+00:00"
+  "checked_at": "2026-10-27T04:27:16.416022+00:00",
+  "anonymous_public_asset_downloads_verified": true
 }
