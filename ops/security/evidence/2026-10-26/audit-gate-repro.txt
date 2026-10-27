@@ -1,0 +1,3 @@
+{"scenario":"unsupported-audit-endpoint","exit_code":0,"stdout":"AUDIT  no unreviewed high or critical advisories","stderr":""}
+{"scenario":"provider-failure","exit_code":0,"stdout":"AUDIT  no unreviewed high or critical advisories","stderr":""}
+{"scenario":"valid-clean-control","exit_code":0,"stdout":"AUDIT  no unreviewed high or critical advisories","stderr":""}
