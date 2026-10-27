@@ -31,3 +31,7 @@ The dependency resolutions are delivered in v3.3.0. The immutable v3.2.0 release
 ## Latest remediation
 
 See `remediation-2026-10-26.md` and `../v3.3.0-release-preparation.md`. All six findings are remediated: source fixes are delivered in v3.3.0 and the selected GitHub ruleset is active. Provider, asset and live evidence is retained in `../v3.3.0-publication-receipt.json`; the original full audit remains historical evidence.
+
+## Accepted hosting limitation
+
+Sam explicitly accepted the missing `X-Content-Type-Options: nosniff` response header on 2026-10-26 and chose to retain GitHub Pages and the current DNS without migration. The warning remains visible in verification results. The decision, rationale, scope and review triggers are recorded in [the remediation record](remediation-2026-10-26.md#accepted-hosting-limitation-missing-nosniff-header); no migration or header-remediation task is open.
