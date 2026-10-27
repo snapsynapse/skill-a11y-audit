@@ -1,14 +1,28 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 50
+version: 51
 version_date: 2026-10-26
-previous_version: 49
+previous_version: 50
 change_summary: >
-  Records combined dependency security updates and synchronized runtime validation.
+  Records the six security remediations and v3.3.0 review preparation.
 ---
 
 # Changelog
+
+## v3.3.0 -- 2026-10-26
+
+- `scripts/network-policy.js`, `scripts/discover.js` and `scripts/scan.js`: enforce reviewed origins for automatic targets and top-level navigation; share bounded HTTP reads, including compressed responses; enable Chromium sandboxing by default.
+- `scripts/scan.js`: bound sitemap responses, aggregate bytes, documents, target count and total deadline; retain explicit preview-host rewriting and add `--allow-origin` / `--no-sandbox` controls.
+- `scripts/run-audit.js`, `scripts/serve-local.js`, `../.github/actions/scan/action.yml` and `references/interoperability.md`: carry reviewed origins and explicit sandbox configuration. The Action binds its temporary server to loopback, denies literal/encoded hidden paths and disables directory listings.
+- `../.github/workflows/pages.yml`: wait for the matching published release tag and three named assets before deploying its guide. The release tag must identify the deployment commit or an ancestor.
+- `deps/package.json`: permit only the pinned Puppeteer 25.16.0 lifecycle script under npm install-script policy, preserving managed browser acquisition without a global configuration change.
+- `../scripts/audit-deps.mjs`: reject unavailable and malformed npm audit reports while preserving valid provider severity-threshold behavior.
+- `../.github/repository-settings.json` and `../ops/security/evidence/2026-10-26-remediation/`: retain the selected main policy and verified GitHub rules: PR required, ten strict Actions checks, zero required approvals, no bypass actors, and existing history protections.
+- `evals/test-security.js`, `evals/fixtures/eval-24/`, `evals/evals.json`, `evals/run-evals.js`, `evals/run-browser-eval.js`, `evals/test-auth-state.js`, `evals/fixtures/eval-9/`, `../scripts/test-action-consumer.mjs`, `../scripts/test-cli-contract-consumer.mjs` and `../.github/workflows/validate-skill.yml`: add security reproductions, legitimate-input controls, real-browser navigation checks, server behavior checks and explicit trusted-fixture sandbox overrides.
+- `references/network-policy.md`, `references/runtime-compatibility.md`, `references/authenticated-scans.md` and `SKILL.md`: document tighter defaults, fixed budgets, operator approvals and residual network-isolation boundaries.
+- `../package.json`, `../package-lock.json`, `../README.md`, `../llms.txt`, `../docs/` and `assets/ci/github-actions/accessibility-audit.yml`: prepare v3.3.0 runtime, documentation and Action references. Guide 0.3.18 and its sidecar are synchronized release surfaces; no new human verification date is asserted.
+- `MANIFEST.yaml`, `CHANGELOG.md`, `../RELEASE_NOTES-3.3.0.md`, `../ops/v3.3.0-release-preparation.md`, `../ops/v3.3.0-release-state.json` and `../ops/security/`: retain verification evidence and bundle revision 51. The release-state record distinguishes completed preparation from provider-confirmed publication.
 
 ## Dependency security maintenance -- 2026-10-26
 

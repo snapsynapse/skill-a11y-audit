@@ -1,0 +1,9 @@
+PASS SEC-001 audit errors and malformed reports cannot become clean coverage
+PASS SEC-002 origin matching uses parsed HTTP(S) origins and rejects deceptive URLs
+PASS SEC-003 sandbox stays enabled unless the operator explicitly disables it
+PASS SEC-002 discovery filters cross-origin leaves without fetching them; explicit allowlist works
+PASS SEC-002 direct sitemap leaves, children and redirects cannot fetch another origin
+PASS SEC-005 bytes, streaming deadlines, redirect loops and total sitemap budgets are bounded
+PASS SEC-002 page navigation guard blocks redirects while preserving ordinary external assets
+PASS SEC-002/003 real scanner keeps sandbox default and blocks HTTP and script redirects
+8 security regression groups passed

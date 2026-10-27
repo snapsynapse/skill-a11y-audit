@@ -72,6 +72,14 @@ inputs:
     description: '`true` to allow discover.js to follow sitemap documents on other origins.'
     required: false
     default: 'false'
+  allow-origin:
+    description: Comma-separated reviewed additional HTTP(S) origins for sitemap targets and navigation.
+    required: false
+    default: ''
+  no-sandbox:
+    description: Explicitly disable Chromium sandboxing only on a separately isolated trusted runner.
+    required: false
+    default: 'false'
   surface-map:
     description: Repository-relative path to the source-prefix ownership map.
     required: false
@@ -174,7 +182,7 @@ runs:
         PORT: ${{ inputs.port }}
         SERVER_ROOT: ${{ github.action_path }}/../../../a11y-audit/deps
       run: |
-        "$SERVER_ROOT/node_modules/.bin/http-server" "$SERVE_PATH" -p "$PORT" -c-1 > "$RUNNER_TEMP/a11y-http.log" 2>&1 &
+        node "${{ github.action_path }}/../../../a11y-audit/scripts/serve-local.js" "$SERVE_PATH" "$PORT" > "$RUNNER_TEMP/a11y-http.log" 2>&1 &
         echo $! > "$RUNNER_TEMP/a11y-http.pid"
         for i in $(seq 1 30); do
           curl -fs "http://localhost:$PORT/" > /dev/null && break || sleep 0.5
@@ -190,6 +198,7 @@ runs:
         DISCOVER_MAX_PER_GROUP: ${{ inputs.discover-max-per-group }}
         DISCOVER_GROUP_MAP: ${{ inputs.discover-group-map }}
         DISCOVER_NO_SITEMAP: ${{ inputs.discover-no-sitemap }}
+        ALLOW_ORIGIN: ${{ inputs.allow-origin }}
         ALLOW_CROSS_ORIGIN_SITEMAPS: ${{ inputs.allow-cross-origin-sitemaps }}
       run: |
         ARGS=(--url "$DISCOVER_URL" --output "$DISCOVER_OUTPUT")
@@ -197,6 +206,7 @@ runs:
         [ -n "$DISCOVER_GROUP_MAP" ] && ARGS+=(--group-map "$DISCOVER_GROUP_MAP")
         [ "$DISCOVER_NO_SITEMAP" = "true" ] && ARGS+=(--no-sitemap)
         [ "$ALLOW_CROSS_ORIGIN_SITEMAPS" = "true" ] && ARGS+=(--allow-cross-origin-sitemaps)
+        [ -n "$ALLOW_ORIGIN" ] && ARGS+=(--allow-origin "$ALLOW_ORIGIN")
         node "${{ github.action_path }}/../../../a11y-audit/scripts/discover.js" "${ARGS[@]}"
 
     - name: Select changed surfaces
@@ -240,6 +250,8 @@ runs:
         BASELINE: ${{ inputs.baseline }}
         OUTPUT: ${{ inputs.output }}
         SUMMARY: ${{ inputs.summary }}
+        ALLOW_ORIGIN: ${{ inputs.allow-origin }}
+        NO_SANDBOX: ${{ inputs.no-sandbox }}
         INSTALL_TIMEOUT_MS: ${{ inputs.install-timeout-ms }}
       run: |
         ARGS=()
@@ -256,6 +268,12 @@ runs:
         [ -n "$FAIL_ON" ]         && ARGS+=(--fail-on "$FAIL_ON")
         [ -n "$BASELINE" ]        && ARGS+=(--baseline "$BASELINE")
         [ "$SUMMARY" = "true" ]   && ARGS+=(--summary)
+        [ -n "$ALLOW_ORIGIN" ] && ARGS+=(--allow-origin "$ALLOW_ORIGIN")
+        case "$NO_SANDBOX" in
+          true) ARGS+=(--no-sandbox) ;;
+          false) ;;
+          *) echo 'no-sandbox must be true or false' >&2; exit 1 ;;
+        esac
         [ -n "$INSTALL_TIMEOUT_MS" ] && ARGS+=(--install-timeout-ms "$INSTALL_TIMEOUT_MS")
         [ -n "$STORAGE_STATE" ] && ARGS+=(--storage-state "$STORAGE_STATE")
         [ -n "$AUTH_TARGETS" ] && ARGS+=(--auth-targets "$AUTH_TARGETS")

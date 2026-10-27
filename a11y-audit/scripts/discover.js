@@ -2,18 +2,21 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 5
-version_date: 2026-08-09
-previous_version: 4
+version: 6
+version_date: 2026-10-26
+previous_version: 5
 change_summary: >
-  Adds reviewed route-group maps with exact-over-wildcard precedence and
-  exact-page fallback when the map is invalid, ambiguous, or incomplete.
+  Filters sitemap targets to approved origins and uses shared bounded HTTP reads.
 */
 
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
-const https = require('https');
+const crypto = require('crypto');
+const NETWORK_POLICY_SHA256 = '7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc';
+if (crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, 'network-policy.js'))).digest('hex') !== NETWORK_POLICY_SHA256) {
+  throw new Error('Discovery dependency integrity mismatch: network-policy.js');
+}
+const { approvedOrigins, webUrl, fetchResource } = require('./network-policy.js');
 
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
 const DEFAULT_MAX_REDIRECTS = 5;
@@ -40,71 +43,6 @@ function parseArgs(argv) {
 // ---------------------------------------------------------------------------
 // HTTP helpers
 // ---------------------------------------------------------------------------
-
-function fetchResource(url, opts = {}, state = {}) {
-  return new Promise((resolve) => {
-    const requestUrl = new URL(url);
-    const redirects = state.redirects || 0;
-    const maxRedirects = Number.isFinite(opts.maxRedirects) ? opts.maxRedirects : DEFAULT_MAX_REDIRECTS;
-    const maxBytes = Number.isFinite(opts.maxBytes) ? opts.maxBytes : DEFAULT_MAX_BYTES;
-    const allowedOrigins = opts.allowedOrigins || null;
-
-    if (allowedOrigins && !allowedOrigins.has(requestUrl.origin)) {
-      return resolve({
-        blocked: true,
-        reason: 'cross-origin',
-        url: requestUrl.href,
-        origin: requestUrl.origin,
-      });
-    }
-
-    const mod = requestUrl.protocol === 'https:' ? https : http;
-    const req = mod.get(requestUrl, { timeout: 10000 }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        const redirectUrl = new URL(res.headers.location, requestUrl).href;
-        res.resume();
-        if (redirects >= maxRedirects) {
-          return resolve({
-            blocked: true,
-            reason: 'redirect-limit',
-            url: redirectUrl,
-            origin: new URL(redirectUrl).origin,
-          });
-        }
-        return resolve(fetchResource(redirectUrl, opts, { redirects: redirects + 1 }));
-      }
-      if (res.statusCode !== 200) {
-        res.resume();
-        return resolve(null);
-      }
-      const chunks = [];
-      let totalBytes = 0;
-      let tooLarge = false;
-      res.on('data', (c) => {
-        totalBytes += c.length;
-        if (totalBytes > maxBytes) {
-          tooLarge = true;
-          res.resume();
-          req.destroy();
-          return;
-        }
-        chunks.push(c);
-      });
-      res.on('end', () => resolve({
-        body: tooLarge ? null : Buffer.concat(chunks).toString('utf8'),
-        url: requestUrl.href,
-        blocked: tooLarge,
-        reason: tooLarge ? 'max-bytes' : null,
-        origin: requestUrl.origin,
-      }));
-    });
-    req.on('timeout', () => {
-      req.destroy();
-      resolve(null);
-    });
-    req.on('error', () => resolve(null));
-  });
-}
 
 async function httpFetch(url, opts = {}) {
   const resource = await fetchResource(url, opts);
@@ -499,14 +437,16 @@ function enrichGroupLabel(pattern, apiManifest) {
 async function discover(runtimeUrl, opts = {}) {
   const maxPerGroup = parseInt(opts.maxPerGroup, 10) || 2;
   const useFingerprint = opts.fingerprint !== false;
-  const baseOrigin = new URL(runtimeUrl).origin;
+  const baseOrigin = webUrl(runtimeUrl).origin;
+  const origins = approvedOrigins(runtimeUrl, opts.allowedOrigins || []);
   const allowCrossOriginSitemaps = opts.allowCrossOriginSitemaps === true;
   const fetchOpts = {
-    allowedOrigins: allowCrossOriginSitemaps ? null : new Set([baseOrigin]),
+    allowedOrigins: origins,
     maxBytes: Number.isFinite(opts.maxBytes) ? opts.maxBytes : DEFAULT_MAX_BYTES,
     maxRedirects: Number.isFinite(opts.maxRedirects) ? opts.maxRedirects : DEFAULT_MAX_REDIRECTS,
   };
 
+  const sitemapFetchOpts = { ...fetchOpts, allowedOrigins: allowCrossOriginSitemaps ? null : origins };
   let allUrls = [];
   let source = 'unknown';
   const blockedFetches = [];
@@ -530,7 +470,7 @@ async function discover(runtimeUrl, opts = {}) {
       `${baseOrigin}/sitemap_index.xml`,
     ];
 
-    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`, fetchOpts);
+    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`, sitemapFetchOpts);
     if (recordBlocked(robotsResource)) {
       // Continue with default same-origin sitemap paths.
     } else if (robotsResource) {
@@ -543,7 +483,7 @@ async function discover(runtimeUrl, opts = {}) {
     }
 
     for (const sitemapUrl of [...new Set(sitemapUrls)]) {
-      const xmlResource = await fetchResource(sitemapUrl, fetchOpts);
+      const xmlResource = await fetchResource(sitemapUrl, sitemapFetchOpts);
       if (recordBlocked(xmlResource)) continue;
       const xml = xmlResource && xmlResource.body;
       if (xml && (xml.includes('<urlset') || xml.includes('<sitemapindex'))) {
@@ -559,7 +499,7 @@ async function discover(runtimeUrl, opts = {}) {
           const subSitemaps = discoveredUrls;
           discoveredUrls = [];
           for (const sub of subSitemaps) {
-            const subXmlResource = await fetchResource(sub, fetchOpts);
+            const subXmlResource = await fetchResource(sub, sitemapFetchOpts);
             if (recordBlocked(subXmlResource)) continue;
             if (!subXmlResource) continue;
             discoveredUrls.push(...parseSitemap(subXmlResource.body).map((entry) => {
@@ -572,7 +512,16 @@ async function discover(runtimeUrl, opts = {}) {
           }
         }
 
-        allUrls = [...new Set(discoveredUrls)];
+        allUrls = [...new Set(discoveredUrls)].filter(value => {
+          let target;
+          try { target = webUrl(value); } catch {
+            recordBlocked({ blocked: true, reason: 'invalid-target', url: value, origin: null });
+            return false;
+          }
+          if (origins.has(target.origin)) return true;
+          recordBlocked({ blocked: true, reason: 'cross-origin-target', url: target.href, origin: target.origin });
+          return false;
+        });
         source = `sitemap (${sitemapUrl})`;
         break;
       }
@@ -676,7 +625,9 @@ async function discover(runtimeUrl, opts = {}) {
     discoverySchemaVersion: 2,
     source,
     runtimeUrl,
-    originPolicy: allowCrossOriginSitemaps ? 'cross-origin-sitemaps-allowed' : 'same-origin',
+    originPolicy: origins.size > 1 ? 'approved-origins' : 'same-origin',
+    allowedOrigins: [...origins].sort(),
+    sitemapPolicy: allowCrossOriginSitemaps ? 'cross-origin-documents-allowed' : 'approved-origins',
     discoveredOrigins,
     blockedFetches,
     totalPages: allUrls.length,
@@ -702,7 +653,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const url = args.url;
   if (!url) {
-    console.error('Usage: discover.js --url <base-url> [--group-map <route-group-map.json>] [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint] [--allow-cross-origin-sitemaps]');
+    console.error('Usage: discover.js --url <base-url> [--group-map <route-group-map.json>] [--output <path>] [--max-per-group N] [--no-sitemap] [--no-fingerprint] [--allow-cross-origin-sitemaps] [--allow-origin origin1,origin2]');
     process.exit(1);
   }
 
@@ -720,6 +671,7 @@ async function main() {
     noSitemap: args['no-sitemap'] === true || args['no-sitemap'] === 'true',
     fingerprint: !(args['no-fingerprint'] === true || args['no-fingerprint'] === 'true'),
     allowCrossOriginSitemaps: args['allow-cross-origin-sitemaps'] === true || args['allow-cross-origin-sitemaps'] === 'true',
+    allowedOrigins: typeof args['allow-origin'] === 'string' ? args['allow-origin'].split(',') : [],
     routeGroupMap,
   });
 

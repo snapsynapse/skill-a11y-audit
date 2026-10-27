@@ -1,0 +1,17 @@
+{
+  "latest_reviewed_sources_match": true,
+  "files": {
+    "scripts/audit-deps.mjs": "7a902082d5fe00d999d0029b1775c738db9d62ec3b6bfb6a40153f54ce040ff9",
+    "a11y-audit/scripts/network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc",
+    "a11y-audit/scripts/discover.js": "f26f27e8ebe93aa39bec20f8afad1bd3b70e4ebdd19fb86dcce0fe09b7be732c",
+    "a11y-audit/scripts/scan.js": "904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad",
+    "a11y-audit/scripts/run-audit.js": "c0cee2ed8725e8573bfa0d5dc45aeb95280f5a4691f7ea6e2d033d96a8210b1f",
+    ".github/actions/scan/action.yml": "4f29224007d478ce21d7c14996f523b7c1bb83fe73f6ab3e88c0912274107adf",
+    ".github/workflows/validate-skill.yml": "cf744a70fda92e63be38f791e74884fd4b15a09b428e9ff269a8612ef1132c62",
+    ".github/repository-settings.json": "27c379b5091e4ec53f539e853f0bc1856e1a4782fbf25dd21df433135eac634b",
+    "ops/security/evidence/2026-10-26-remediation/main-effective-rules.json": "240b05bba7f9e99528996b63c251ba9d5bfc8f1d309e6d85246ca05c8c977a0e",
+    "a11y-audit/scripts/serve-local.js": "229e6bfe61cb858829cdcc53b8ef1e0a8499dedff25fdc743f91ff2ce854889d",
+    "scripts/test-action-consumer.mjs": "4e5b6316575bcb01a23bb066d35c5af4e9128a41344a56f3b914ba7101fc3df6"
+  },
+  "note": "Supplementary review supersedes initial Action hash; initial review remains historical evidence."
+}

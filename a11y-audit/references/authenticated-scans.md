@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
-version_date: 2026-10-03
-previous_version: null
+version: 4
+version_date: 2026-10-26
+previous_version: 3
 change_summary: >
-  Records the intended v3.2.0 release provenance.
+  Distinguishes candidate network defaults from authenticated input guarantees.
 ---
 
 # Authenticated scan inputs
@@ -58,8 +58,9 @@ is rendered. Data and blob resources remain available.
 
 Authentication failures are operational failures even with `--fail-on none`.
 They produce no successful result for that target and never write an accepted
-baseline. Existing unauthenticated defaults and finding fingerprints remain
-unchanged. The process adapter retains its gate/operational distinction.
+baseline. Authentication assertions and finding fingerprints remain unchanged.
+v3.3.0 tightens unauthenticated network policy and sandbox defaults; see
+`network-policy.md`. The process adapter retains its gate/operational distinction.
 
 Cookie and local-storage values are redacted from page-derived axe evidence, including HTML
 snippets, before findings and reports are derived. Per-target failures use a
@@ -82,7 +83,8 @@ blocked cross-origin requests, and terminal adapter success/failure.
 `npm run validate` includes input-validation and artifact-alias regressions.
 
 Bounded journeys, state-specific baseline identity, and native Playwright
-execution remain separate roadmap work. Guide 0.3.17 carries refreshed scanner pins and a matching sidecar. The scanner verifies both local executable dependencies before loading
-them. Guide actions remain public-only; authenticated scans need separate user
-authorization. The manifest names the v3.2.0 release URL. See the release receipt for
-publication and external anchor verification evidence.
+execution remain separate roadmap work. Draft guide 0.3.18 carries candidate scanner pins and a matching sidecar.
+The scanner verifies its local executable dependencies before loading them.
+Guide actions remain public-only; authenticated scans need separate user
+authorization. The draft manifest names the intended v3.3.0 release URL.
+Publication and hosted acceptance remain later release gates.

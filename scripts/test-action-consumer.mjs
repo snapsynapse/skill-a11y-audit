@@ -31,6 +31,11 @@ fs.cpSync(path.join(root, 'a11y-audit/evals/fixtures/eval-3'), path.join(workspa
 for (const name of ['route-group-map.json', 'surface-map.json', 'changed-files.json']) {
   fs.copyFileSync(path.join(root, 'a11y-audit/evals/fixtures/eval-19', name), path.join(workspace, name));
 }
+fs.writeFileSync(path.join(workspace, 'site/.private-fixture'), 'must not be served');
+fs.mkdirSync(path.join(workspace, 'site/.private-directory'));
+fs.writeFileSync(path.join(workspace, 'site/.private-directory/index.html'), 'must not be served');
+fs.mkdirSync(path.join(workspace, 'site/listing-fixture'));
+fs.writeFileSync(path.join(workspace, 'site/listing-fixture/file.txt'), 'must not be listed');
 const socket = net.createServer();
 await new Promise((resolve, reject) => {
   socket.on('error', reject);
@@ -44,6 +49,7 @@ Object.assign(inputs, {
   'discover-no-sitemap': 'true', 'discover-group-map': 'route-group-map.json',
   'surface-map': 'surface-map.json', 'changed-files': 'changed-files.json',
   'fail-on': 'none', 'upload-artifact': 'false',
+  'no-sandbox': process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true' ? 'true' : 'false',
 });
 function substitute(text) {
   return text.replace(/\$\{\{\s*(.*?)\s*\}\}/g, (_, key) => {
@@ -93,6 +99,21 @@ try {
     try {
       for (const step of action.runs.steps.filter(step => !step.if?.startsWith('always()'))) runStep(step);
       const read = input => JSON.parse(fs.readFileSync(path.join(workspace, inputs[input]), 'utf8'));
+      const serverLog = fs.readFileSync(path.join(runtime, 'a11y-http.log'), 'utf8').replace(/\x1b\[[0-9;]*m/g, '');
+      const advertised = [...serverLog.matchAll(/http:\/\/([^\s]+)/g)].map(match => match[1]);
+      assert.deepEqual(advertised, [`127.0.0.1:${port}`], 'Action server must advertise only its loopback bind');
+      // Each pass restarts the server on the same port. Do not reuse a pooled
+      // socket from the previous server instance across that boundary.
+      for (const [route, expectedStatus] of [
+        ['/.private-fixture', 404], ['/%2eprivate-fixture', 404],
+        ['/.private-directory/', 404], ['/%2eprivate-directory%2findex.html', 404],
+        ['/listing-fixture/', 403],
+      ]) {
+        const response = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Connection: 'close' } });
+        await response.arrayBuffer();
+        assert.equal(response.status, expectedStatus, route);
+      }
+      console.log('PASS temporary server is loopback-only with dotfiles and directory listings disabled');
       const scan = read('output');
       assert.deepEqual(scan.errors, []);
       assert.equal(scan.results.length, 1);
@@ -115,6 +136,7 @@ try {
         fs.writeFileSync(browserMetadata, JSON.stringify(stale));
         const repairedOutput = path.join(workspace, 'repaired-scan.json');
         const repair = spawnSync(process.execPath, [path.join(bundle, 'a11y-audit/scripts/scan.js'),
+          ...(inputs['no-sandbox'] === 'true' ? ['--no-sandbox'] : []),
           '--urls', inputs['discover-url'], '--output', repairedOutput, '--summary', '--fail-on', 'none'],
         { cwd: workspace, env, encoding: 'utf8', timeout: 300000 });
         assert.equal(repair.status, 0, repair.stderr);

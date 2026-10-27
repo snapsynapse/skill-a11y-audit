@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 4
-version_date: 2026-10-03
-previous_version: 3
+version: 5
+version_date: 2026-10-26
+previous_version: 4
 change_summary: >
-  Carries paired authentication inputs and protects their artifact paths.
+  Propagates explicit approved origins and sandbox configuration through the adapter.
 */
 
 const fs = require('fs');
@@ -148,9 +148,12 @@ function buildRunPlan(configPath, cliArgs = {}) {
   const discovery = assertObject(config.discovery, 'discovery');
   assertKeys(discovery, new Set([
     'url', 'group_map', 'max_per_group', 'no_sitemap', 'no_fingerprint',
-    'allow_cross_origin_sitemaps',
+    'allow_cross_origin_sitemaps', 'allowed_origins',
   ]), 'discovery');
   const discoveryUrl = validateHttpUrl(discovery.url, 'discovery.url');
+  const { approvedOrigins } = require('./network-policy.js');
+  const origins = approvedOrigins(discoveryUrl, discovery.allowed_origins || []);
+  const extraOrigins = [...origins].filter(origin => origin !== new URL(discoveryUrl).origin).join(',');
   if (discovery.max_per_group !== undefined
     && (!Number.isInteger(discovery.max_per_group) || discovery.max_per_group < 1)) {
     throw new Error('discovery.max_per_group must be a positive integer');
@@ -168,6 +171,7 @@ function buildRunPlan(configPath, cliArgs = {}) {
   };
   const stages = [];
   const discoverArgs = ['--url', discoveryUrl, '--output', artifacts.discovery];
+  addValue(discoverArgs, '--allow-origin', extraOrigins);
   if (discovery.group_map) {
     const groupMap = resolveWithin(workspace, discovery.group_map, 'discovery.group_map');
     protectedPaths.add(groupMap);
@@ -247,12 +251,13 @@ function buildRunPlan(configPath, cliArgs = {}) {
   }
 
   const scan = config.scan === undefined ? {} : assertObject(config.scan, 'scan');
-  assertKeys(scan, new Set(['root', 'baseline', 'fail_on', 'summary', 'axe_version', 'storage_state', 'auth_targets']), 'scan');
+  assertKeys(scan, new Set(['root', 'baseline', 'fail_on', 'summary', 'axe_version', 'storage_state', 'auth_targets', 'no_sandbox']), 'scan');
   const failOn = scan.fail_on || 'none';
   if (!['errors', 'major', 'new', 'none'].includes(failOn)) {
     throw new Error('scan.fail_on must be errors, major, new, or none');
   }
   if (scan.summary !== undefined) assertBoolean(scan.summary, 'scan.summary');
+  if (scan.no_sandbox !== undefined) assertBoolean(scan.no_sandbox, 'scan.no_sandbox');
   if (failOn === 'new' && !scan.baseline) {
     throw new Error('scan.baseline is required when scan.fail_on is new');
   }
@@ -278,6 +283,8 @@ function buildRunPlan(configPath, cliArgs = {}) {
       addValue(scanArgs, `--${key.replace('_', '-')}`, input);
     }
   }
+  addValue(scanArgs, '--allow-origin', extraOrigins);
+  addBoolean(scanArgs, '--no-sandbox', scan.no_sandbox);
   addValue(scanArgs, '--axe-version', scan.axe_version);
   if (scan.summary !== false) scanArgs.push('--summary');
   stages.push(stage('scan', 'scan.js', scanArgs));

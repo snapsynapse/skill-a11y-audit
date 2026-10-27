@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 4
+version: 5
 version_date: 2026-10-26
-previous_version: 3
+previous_version: 4
 change_summary: >
-  Verifies the committed browser version after dependency maintenance.
+  Exercises explicit trusted-fixture sandbox overrides without changing product defaults.
 */
 
 const assert = require('assert');
@@ -20,6 +20,7 @@ const fixture = path.join(__dirname, 'fixtures', 'eval-3', 'index.html');
 const tmpDir = '/tmp/a11y-audit-browser-eval';
 
 function runNode(args) {
+  if (process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true' && args[0]?.endsWith('scan.js')) args = [...args, '--no-sandbox'];
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, args, { cwd: repoRoot, encoding: 'utf8' });
     let stdout = '';

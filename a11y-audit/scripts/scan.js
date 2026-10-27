@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 15
+version: 16
 version_date: 2026-10-26
-previous_version: 14
+previous_version: 15
 change_summary: >
-  Synchronizes the managed Puppeteer pin with the security-updated lockfile.
+  Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 */
 
 const fs = require('fs');
@@ -15,13 +15,14 @@ const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { execSync, spawnSync } = require('child_process');
 // The guide pins this entry point; bind its local executable dependencies too.
-const LOCAL_SCRIPT_HASHES = {"auth-state.js": "4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d"};
+const LOCAL_SCRIPT_HASHES = {"network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc", "auth-state.js": "4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d"};
 for (const [name, expected] of Object.entries(LOCAL_SCRIPT_HASHES)) {
   const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, name))).digest('hex');
   if (actual !== expected) throw new Error(`Scanner dependency integrity mismatch: ${name}`);
 }
 const { loadAuth, prepareAuth, assertAuth } = require('./auth-state.js');
 const { assertSupportedNode } = require('./check-runtime.js');
+const { webUrl, approvedOrigins, requireApprovedUrl, fetchResource, guardNavigation } = require('./network-policy.js');
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -59,6 +60,7 @@ function validateScanUrl(value) {
   if (!['http:', 'https:'].includes(parsed.protocol)) {
     throw new Error(`Unsupported scan URL protocol: ${parsed.protocol} (${value})`);
   }
+  if (parsed.username || parsed.password) throw new Error('Scan URLs must not contain embedded credentials.');
   return parsed.href;
 }
 
@@ -66,7 +68,7 @@ function normalizeScanUrls(values) {
   return [...new Set((values || []).map(validateScanUrl))];
 }
 
-function loadUrlsFromDiscoverPlan(discoverPath) {
+function loadUrlsFromDiscoverPlan(discoverPath, allowedOrigins = []) {
   let plan;
   try {
     plan = JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8'));
@@ -79,7 +81,9 @@ function loadUrlsFromDiscoverPlan(discoverPath) {
   if (!plan.scanList.every((value) => typeof value === 'string')) {
     throw new Error(`Discover plan ${discoverPath} scanList must contain only URL strings.`);
   }
-  return normalizeScanUrls(plan.scanList);
+  // Plan metadata records policy but cannot grant cross-origin permission.
+  const origins = approvedOrigins(plan.runtimeUrl || plan.scanList[0], allowedOrigins);
+  return normalizeScanUrls(plan.scanList).map(url => requireApprovedUrl(url, origins));
 }
 
 function validateBrowserLib(browserLib) {
@@ -127,38 +131,61 @@ function parsePositiveInteger(value, label) {
 // fetch so the rewritten host is used for child sitemaps too. The exclude
 // regex applies only to leaf URLs, never to child-sitemap fetches.
 // Uses global fetch on the supported Node runtime; guards against cycles.
-async function loadUrlsFromSitemap(sitemapUrl, { find, replace, exclude } = {}, _seen = new Set()) {
-  if (typeof fetch !== 'function') {
-    throw new Error('Sitemap loading requires global fetch on Node.js >=22.12.0.');
-  }
-  if (_seen.has(sitemapUrl)) return [];
-  _seen.add(sitemapUrl);
-  if (_seen.size > 50) {
-    throw new Error(`Sitemap recursion exceeded 50 documents (cycle?). Last: ${sitemapUrl}`);
-  }
-  const response = await fetch(sitemapUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch sitemap ${sitemapUrl}: HTTP ${response.status}`);
-  }
-  const xml = await response.text();
-  const isIndex = /<sitemapindex\b/i.test(xml);
-  const locMatches = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
+async function loadUrlsFromSitemap(sitemapUrl, options = {}) {
+  const { find, replace, exclude } = options;
+  const rewrite = value => find ? value.split(find).join(replace || '') : value;
+  const root = webUrl(rewrite(sitemapUrl));
+  const origins = approvedOrigins(root.href, options.allowedOrigins || []);
+  const maxBytes = parsePositiveInteger(options.maxBytes ?? 2 * 1024 * 1024, 'sitemap maxBytes');
+  const totalBytes = parsePositiveInteger(options.totalBytes ?? 10 * 1024 * 1024, 'sitemap totalBytes');
+  const maxDocuments = parsePositiveInteger(options.maxDocuments ?? 50, 'sitemap maxDocuments');
+  const maxUrls = parsePositiveInteger(options.maxUrls ?? 10000, 'sitemap maxUrls');
+  const deadline = Date.now() + parsePositiveInteger(options.timeoutMs ?? 30000, 'sitemap timeoutMs');
+  const seen = new Set();
+  const urls = new Set();
   const excludeRegex = exclude ? new RegExp(exclude) : null;
-  const urls = [];
-  for (const tag of locMatches) {
-    let url = tag.replace(/^<loc>/, '').replace(/<\/loc>$/, '').trim();
-    if (find && url.includes(find)) {
-      url = url.split(find).join(replace || '');
+  let bytes = 0;
+  async function visit(value, base) {
+    const target = requireApprovedUrl(rewrite(value), origins, base);
+    if (seen.has(target)) return;
+    if (seen.size >= maxDocuments) throw new Error('Sitemap document budget exceeded.');
+    seen.add(target);
+    if (Date.now() >= deadline) throw new Error('Sitemap total deadline exceeded.');
+    if (bytes >= totalBytes) throw new Error('Sitemap total byte budget exceeded.');
+    const resource = await fetchResource(target, {
+      allowedOrigins: origins, maxBytes: Math.min(maxBytes, totalBytes - bytes),
+      timeoutMs: Math.max(1, deadline - Date.now()), maxRedirects: 5,
+    });
+    if (!resource || resource.blocked) {
+      throw new Error(`Sitemap fetch failed (${resource?.reason || 'HTTP or network error'}).`);
     }
-    if (isIndex) {
-      const childUrls = await loadUrlsFromSitemap(url, { find, replace, exclude }, _seen);
-      for (const c of childUrls) urls.push(c);
-      continue;
+    bytes += resource.bytes;
+    const xml = resource.body;
+    const isIndex = /<sitemapindex\b/i.test(xml);
+    for (const match of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+      const entry = match[1].trim().replace(/&amp;/g, '&');
+      if (isIndex) await visit(entry, resource.url);
+      else {
+        const url = requireApprovedUrl(rewrite(entry), origins, resource.url);
+        if (excludeRegex && excludeRegex.test(url)) continue;
+        urls.add(url);
+        if (urls.size > maxUrls) throw new Error('Sitemap target URL budget exceeded.');
+      }
     }
-    if (excludeRegex && excludeRegex.test(url)) continue;
-    urls.push(url);
   }
-  return urls;
+  await visit(sitemapUrl);
+  return [...urls];
+}
+
+function browserLaunchOptions(noSandbox = false) {
+  if (typeof noSandbox !== 'boolean') throw new Error('no-sandbox must be a boolean.');
+  return { headless: true, args: noSandbox ? ['--no-sandbox'] : [] };
+}
+
+function booleanOption(value, name) {
+  if (value === undefined || value === false || value === 'false') return false;
+  if (value === true || value === 'true') return true;
+  throw new Error(`${name} must be true or false.`);
 }
 
 // Count axe violation instances across every scanned URL. Used by --fail-on
@@ -546,6 +573,10 @@ function summarizeAxe(axe) {
 async function run() {
   assertSupportedNode();
   const args = parseArgs(process.argv.slice(2));
+  const noSandbox = booleanOption(args['no-sandbox'], '--no-sandbox');
+  const allowedOrigins = args['allow-origin'] === undefined ? [] : splitCsv(args['allow-origin']);
+  if (args['allow-origin'] === true) throw new Error('--allow-origin requires an origin list.');
+  if (noSandbox) console.error('WARNING: Chromium sandbox disabled by explicit operator override; use an isolated runner.');
   const rootDir = path.resolve(args.root || process.cwd());
   let urls = splitCsv(args.urls);
   const outputPath = path.resolve(args.output || path.join(process.cwd(), 'a11y-scan-results.json'));
@@ -565,7 +596,7 @@ async function run() {
 
   if (typeof args.discover === 'string') {
     try {
-      urls.push(...loadUrlsFromDiscoverPlan(args.discover));
+      urls.push(...loadUrlsFromDiscoverPlan(args.discover, allowedOrigins));
     } catch (err) {
       console.error(err.message);
       process.exit(1);
@@ -598,6 +629,7 @@ async function run() {
   if (args.sitemap && typeof args.sitemap === 'string') {
     try {
       const sitemapUrls = await loadUrlsFromSitemap(args.sitemap, {
+        allowedOrigins,
         find: typeof args['sitemap-find'] === 'string' ? args['sitemap-find'] : null,
         replace: typeof args['sitemap-replace'] === 'string' ? args['sitemap-replace'] : null,
         exclude: typeof args['sitemap-exclude'] === 'string' ? args['sitemap-exclude'] : null,
@@ -617,10 +649,11 @@ async function run() {
   }
 
   if (urls.length === 0) {
-    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--storage-state <path> --auth-targets <path>] [--output <path>] [--summary] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|major|new|none]');
+    console.error('Usage: scan.js (--urls url1,url2 | --sitemap <url> | --discover <plan.json>) [--root <project-dir>] [--storage-state <path> --auth-targets <path>] [--output <path>] [--summary] [--allow-origin origin1,origin2] [--no-sandbox] [--axe-version <x.y.z|latest>] [--install-timeout-ms <milliseconds>] [--sitemap-find <s> --sitemap-replace <s>] [--sitemap-exclude <regex>] [--baseline <path> --fail-on new] [--write-baseline <path>] [--fail-on errors|major|new|none]');
     process.exit(1);
   }
 
+  const navigationOrigins = approvedOrigins(urls[0], [...urls.map(url => webUrl(url).origin), ...allowedOrigins]);
   const auth = loadAuth(args['storage-state'], args['auth-targets'], urls,
     [outputPath, args['write-baseline']]);
 
@@ -650,18 +683,17 @@ async function run() {
   const errors = [];
   let browser;
   try {
-    browser = await browserModule.default.launch({
-      headless: true,
-      args: ['--no-sandbox'],
-    });
+    browser = await browserModule.default.launch(browserLaunchOptions(noSandbox));
     for (const url of urls) {
       let page;
       let context;
       try {
         if (auth) ({ page, context } = await prepareAuth(browser, auth, url));
         else page = await browser.newPage();
+        const checkNavigation = auth ? () => {} : await guardNavigation(page, navigationOrigins);
         await page.setViewport({ width: 1280, height: 800 });
         const response = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+        checkNavigation();
         if (auth) await assertAuth(page, response, auth.byUrl.get(url));
         if (failOn === 'major') {
           if (!response) throw new Error('Required scan target returned no HTTP response.');
@@ -680,6 +712,7 @@ async function run() {
             resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
           });
         });
+        checkNavigation();
         if (auth) {
           if (page.url() !== auth.byUrl.get(url).expected) throw new Error("Authentication target changed during scan.");
           axe = auth.redact(axe);
@@ -821,6 +854,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  browserLaunchOptions,
+  booleanOption,
   splitCsv,
   validateScanUrl,
   normalizeScanUrls,

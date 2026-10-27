@@ -1,0 +1,179 @@
+{
+  "bind": {
+    "port": 63585,
+    "host": "127.0.0.1"
+  },
+  "bind_is_loopback": true,
+  "cases": [
+    {
+      "route": "/.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2esecret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2Esecret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "//.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/.hidden/",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2ehidden/index.html",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2Ehidden%2findex.html",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2ehidden%2Findex.html",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%2f.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/%5c.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/public%5c..%5c.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/public/../.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/public/%2e%2e/.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/public%2f..%2f.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "http://ignored.test/.secret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    },
+    {
+      "route": "/",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/index.html",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/visible.txt",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/public/",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/hello%20world.txt",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/caf%C3%A9.txt",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/%252esecret",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/%252ehidden/",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/index.html?.secret",
+      "status": 200,
+      "expected": "public-readable",
+      "passed": true
+    },
+    {
+      "route": "/bad%zz",
+      "status": 400,
+      "expected": "malformed-refused",
+      "passed": true
+    },
+    {
+      "route": "/%C0%AEsecret",
+      "status": 400,
+      "expected": "malformed-refused",
+      "passed": true
+    },
+    {
+      "route": "/listing/",
+      "status": 403,
+      "expected": "listing-refused",
+      "passed": true
+    },
+    {
+      "route": "HEAD /%2esecret",
+      "status": 404,
+      "expected": "hidden-refused",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "log": "Serving http://127.0.0.1:63585"
+}

@@ -79,6 +79,12 @@ Prefer bundled helpers over ad hoc generation when they fit:
   opt-in terminal JSON and exit-status pilot, read `references/cli-contract.md`
   before selecting `--contract posix-json-v1`.
 
+### Network and browser policy
+
+Read `references/network-policy.md` before scanning remote targets, using
+cross-origin sitemap content, or configuring a sandbox override. Keep default
+Chromium sandboxing enabled; explicitly approve any additional target origins.
+
 ### Dependencies
 
 Requires Node.js 22.12.0 or later. Run `node --version` before scanning;

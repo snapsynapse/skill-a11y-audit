@@ -1,7 +1,7 @@
 {
   "source": "sitemap (http://cdn.test/sitemap.xml)",
   "runtimeUrl": "http://base.test",
-  "originPolicy": "cross-origin-sitemaps-allowed",
+  "originPolicy": "approved-origins",
   "discoveredOrigins": [
     "http://cdn.test"
   ],
@@ -19,7 +19,7 @@
         "http://cdn.test/docs/a",
         "http://cdn.test/docs/b"
       ],
-      "reason": "all 2 — small group"
+      "reason": "all 2 \u2014 small group"
     }
   ],
   "scanList": [

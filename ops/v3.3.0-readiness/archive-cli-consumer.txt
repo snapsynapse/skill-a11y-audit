@@ -1,0 +1,8 @@
+
+> skill-a11y-audit@3.3.0 eval:cli:consumer
+> node scripts/test-cli-contract-consumer.mjs
+
+PASS external CLI consumer: accepted (exit 0)
+PASS external CLI consumer: rejected (exit 2)
+PASS external CLI consumer: report-only (exit 0)
+PASS external CLI consumer: missing (exit 1)

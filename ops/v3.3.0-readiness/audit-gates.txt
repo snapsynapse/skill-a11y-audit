@@ -1,0 +1,10 @@
+
+> skill-a11y-audit@3.3.0 audit:deps
+> node scripts/audit-deps.mjs
+
+AUDIT  no unreviewed high or critical advisories
+
+> skill-a11y-audit@3.3.0 audit:scanner
+> node scripts/audit-deps.mjs --prefix=a11y-audit/deps --allowlist=ops/audit-allowlist.json
+
+AUDIT  no unreviewed high or critical advisories in a11y-audit/deps

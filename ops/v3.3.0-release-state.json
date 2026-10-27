@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "repository": "https://github.com/snapsynapse/skill-a11y-audit",
+  "profile": "versioned-skill",
+  "authority": "R2",
+  "start_head": "2c21b9a2c5b91d57593b89c51e42a4981f1ea29c",
+  "candidate_head": null,
+  "candidate_version": "3.3.0",
+  "updated_at": "2026-10-27T04:03:04.383634+00:00",
+  "steps": [
+    {
+      "id": "local_preparation",
+      "status": "ready",
+      "evidence": "Uncommitted v3.3.0 source, bundle51, guide0.3.18 and draft sidecar. Exact working-tree fingerprint: ops/v3.3.0-readiness/candidate-files.json."
+    },
+    {
+      "id": "repository_security_rules",
+      "status": "completed",
+      "evidence": "SEC-006 applied/read back on GitHub: mandatory PR, ten strict Actions contexts, zero approvals and no bypass actors. See ops/security/evidence/2026-10-26-remediation/."
+    },
+    {
+      "id": "local_validation",
+      "status": "completed",
+      "evidence": "Source and extracted-archive gates passed, including exact Node22.12.0, real sandbox-enabled browser/auth/CLI consumers, clean Action/browser acquisition, zero-advisory audits, workflow checks and clean site build/search checks. See ops/v3.3.0-readiness/verification.json."
+    },
+    {
+      "id": "independent_review",
+      "status": "completed",
+      "evidence": "Four initial implementation defects corrected and retested. Final source identities match the initial plus supplementary adversarial review; 28 server-path cases pass with zero remaining material findings."
+    },
+    {
+      "id": "review_packages",
+      "status": "completed",
+      "evidence": "Local review tar.gz and zip contain identical clean candidate source; SHA256SUMS in dist/v3.3.0-review. Per-file identity and extracted-payload verification retained in ops/v3.3.0-readiness/. Not release assets or uploaded bytes."
+    },
+    {
+      "id": "commit_and_push",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "pull_request_and_exact_head_ci",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "merge",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "tag_and_release",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "asset_upload",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "pages_deployment",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "live_and_hosted_guide_verification",
+      "status": "not_started",
+      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+    },
+    {
+      "id": "npm_publication",
+      "status": "not_applicable",
+      "evidence": "Private metadata; distribution remains source archives."
+    },
+    {
+      "id": "branch_cleanup",
+      "status": "not_started",
+      "evidence": "Authorized after release assets and live site verification; preserve refs until delivery is confirmed."
+    }
+  ]
+}

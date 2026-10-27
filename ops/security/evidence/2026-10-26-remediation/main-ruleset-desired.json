@@ -1,0 +1,82 @@
+{
+  "name": "Protect main history",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "refs/heads/main"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
+        "required_review_thread_resolution": true,
+        "require_extra_approval_for_unattributed_changes": false
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "required_status_checks": [
+          {
+            "context": "Validate (Node 22.12.0)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Validate (Node 22)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Validate (Node 24)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Validate (Node 26)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Verify assistant guide",
+            "integration_id": 15368
+          },
+          {
+            "context": "Real browser eval (Node 22.12.0)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Real browser eval (Node 24)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Real browser eval (Node 26)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Consumer Action smoke test",
+            "integration_id": 15368
+          },
+          {
+            "context": "Workflow semantics and security",
+            "integration_id": 15368
+          }
+        ],
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false
+      }
+    }
+  ],
+  "bypass_actors": []
+}

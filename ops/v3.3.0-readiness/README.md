@@ -1,0 +1,15 @@
+# v3.3.0 review verification
+
+This receipt describes an uncommitted local candidate on `codex/security-hardening-3.3.0`, based on `2c21b9a2c5b91d57593b89c51e42a4981f1ea29c`. It is not a publication receipt. The owning [release preparation record](../v3.3.0-release-preparation.md) and [release state](../v3.3.0-release-state.json) distinguish source preparation, the applied GitHub ruleset and pending publication.
+
+[verification.json](verification.json) records the completed checks, runtime versions and limits. [candidate-files.json](candidate-files.json) records each clean source file and an aggregate fingerprint; [archive-identity.json](archive-identity.json) binds both local review archives to that inventory. The readiness directory is intentionally outside the archives so their digests do not refer to themselves. Installed dependencies, Git metadata and ignored files are excluded.
+
+The extracted archive is verified on exact Node 22.12.0 with locked packages installed from the local npm cache and lifecycle scripts disabled. Its browser tests use the previously acquired pinned Chrome binary with sandboxing enabled. Separately, [action-consumer.txt](action-consumer.txt) verifies actual Action shell steps from a fresh external workspace and an empty browser cache, including browser acquisition, a skip-download clean reinstall and stale-version repair. Hosted setup-node and artifact upload are not emulated.
+
+The [independent adversarial review](../security/evidence/2026-10-26-remediation/adversarial-review.json) retains four initial implementation defects and their corrections, including the final hidden-path wrapper. [review-identity.json](review-identity.json) verifies the latest reviewed source hashes; the supplementary review supersedes the earlier Action hash. The local server's 28 raw-request cases include nine legitimate public-path controls and zero failures. This is an independent agent review, not a human attestation or a cross-vendor simplicity gate for a future PR.
+
+GuideCheck reports local Level 3, zero blockers and zero warnings using both pinned verifier versions. Its informational findings retain the older human review date and distinguish declared executable hashes from independently fetched bytes. Bundle hash and tamper regressions verify local executable/helper identities. There is no new hosted guide acceptance or independent release anchor.
+
+Both managed dependency graphs report zero known vulnerabilities. The [secret-scan triage](secret-scan-triage.json) records six generic-key matches, all existing SHA-256 integrity digests, with no credentials confirmed and no suppression added. History scanning belongs to the retained original full audit. Workflow actionlint and default-persona zizmor checks pass; the original audit retains its broader assessment.
+
+Review assets are in `dist/v3.3.0-review/`, with a checksum file beside them. Those names and hashes apply to review packages only. Final release assets must be rebuilt from an approved commit after all ten exact-head CI checks. No source files are staged or committed, and no candidate branch, tag, release, upload or deployment is published.

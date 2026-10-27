@@ -1,0 +1,21 @@
+{
+  "base": "https://example.test",
+  "allowed_origins": [
+    "HTTPS://EXAMPLE.TEST:443/",
+    "https://bücher.test"
+  ],
+  "valid": [
+    "https://example.test/a?x=1",
+    "https://EXAMPLE.TEST:443/",
+    "https://xn--bcher-kva.test/"
+  ],
+  "blocked": [
+    "https://example.test.evil.test/",
+    "https://evil.test/",
+    "http://example.test/",
+    "https://example.test:444/",
+    "https://example.test@evil.test/",
+    "file:///etc/passwd",
+    "https://example.test%2fevil.test/"
+  ]
+}

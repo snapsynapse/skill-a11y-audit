@@ -67,7 +67,7 @@ try {
       workspace: '.',
       artifacts_dir: `.a11y-audit/${scenario.name}`,
       discovery: { url: `${base}${scenario.route}`, no_sitemap: true, no_fingerprint: true },
-      scan: { fail_on: scenario.mode, summary: true },
+      scan: { fail_on: scenario.mode, summary: true, no_sandbox: process.env.A11Y_AUDIT_TEST_NO_SANDBOX === 'true' },
       report: { enabled: true, project_name: 'CLI contract consumer' },
     }));
     const result = await run(['--config', config, '--contract', 'posix-json-v1']);

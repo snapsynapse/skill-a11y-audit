@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 5
-version_date: 2026-10-03
-previous_version: 4
+version: 6
+version_date: 2026-10-26
+previous_version: 5
 change_summary: >
-  Documents paired authenticated inputs and discovery limits.
+  Documents explicit origin approval and sandbox configuration in adapter requests.
 ---
 
 # Interoperability Adapter
@@ -78,6 +78,14 @@ violation impact or critical, serious, or unknown-impact axe `incomplete`
 candidates produce an inconclusive nonzero result. Moderate and minor
 `incomplete` candidates remain advisory. The adapter defaults to `none` so
 report generation can complete even when findings exist.
+
+## Network configuration
+
+`discovery.allowed_origins` is an optional array of reviewed HTTP(S) origins.
+The adapter forwards it to discovery and scanning; plan metadata cannot add
+permission. `scan.no_sandbox` is an optional boolean, default false, for an
+explicitly isolated runner that cannot support Chromium sandboxing. See
+`network-policy.md` for target policy, fixed fetch budgets and limits.
 
 ## Invocation
 
