@@ -13,6 +13,8 @@ without requiring a legacy site to reach zero violations first.
 Version 3.2.0 requires Node.js 22.12.0 or later and uses Puppeteer 25.10.0.
 GitHub installs fetch main; pin the reusable Action to `v3.2.0` for this release.
 See the [release validation record](ops/v3.2.0-release-preparation.md).
+Current main uses Puppeteer 25.16.0 with dependency security updates;
+release-pinned installs retain the v3.2.0 graph until a new release is published.
 
 ## Authenticated scan inputs
 
@@ -92,7 +94,7 @@ Output modes:
 ## Install
 
 Requires Node.js 22.12.0 or later. v3 drops Node 18 and 20 support and pins
-Puppeteer 25.10.0 to remove `extract-zip` from the managed dependency graph.
+Puppeteer 25 to remove `extract-zip` from the managed dependency graph.
 The reusable Action defaults to Node 22 and rejects older runtimes before install.
 For browser installation and migration details, see
 [Runtime compatibility](a11y-audit/references/runtime-compatibility.md).
@@ -392,7 +394,7 @@ are absent:
 4. **Install the complete set** into skill-local `deps/` if either package is missing
 
 A stale skill-local Puppeteer also triggers replacement with the committed
-locked graph. That graph pins axe-core 4.12.1 and Puppeteer 25.10.0 and excludes
+locked graph. That graph on main pins axe-core 4.12.1 and Puppeteer 25.16.0 and excludes
 `extract-zip`; externally managed project/global graphs need their own audit.
 For skip-download behavior and cache configuration, read
 [Runtime compatibility](a11y-audit/references/runtime-compatibility.md).

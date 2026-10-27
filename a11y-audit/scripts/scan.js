@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 14
-version_date: 2026-10-03
-previous_version: 13
+version: 15
+version_date: 2026-10-26
+previous_version: 14
 change_summary: >
-  Binds local executable dependencies before loading them.
+  Synchronizes the managed Puppeteer pin with the security-updated lockfile.
 */
 
 const fs = require('fs');
@@ -96,7 +96,7 @@ function validateBrowserLib(browserLib) {
 // the output JSON either way so report.js can flag cross-version deltas.
 const PINNED_VERSIONS = {
   'axe-core': '4.12.1',
-  puppeteer: '25.10.0',
+  puppeteer: '25.16.0',
 };
 
 const DEFAULT_INSTALL_TIMEOUT_MS = 120000;

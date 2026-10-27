@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const pinnedBrowser = JSON.parse(fs.readFileSync(path.join(root, 'a11y-audit/deps/package.json'), 'utf8')).dependencies.puppeteer;
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'a11y-consumer-'));
 const bundle = path.join(temp, 'installed-skill');
 const workspace = path.join(temp, 'consumer');
@@ -95,7 +96,7 @@ try {
       const scan = read('output');
       assert.deepEqual(scan.errors, []);
       assert.equal(scan.results.length, 1);
-      assert.equal(scan.browser_version, '25.10.0');
+      assert.equal(scan.browser_version, pinnedBrowser);
       assert.ok(scan.results[0].axe.violations.some(item => item.id === 'button-name'));
       assert.equal(read('discover-output').routeGrouping.mode, 'mapped');
       assert.equal(read('selection-output').changedSurface.mode, 'targeted');
@@ -118,8 +119,8 @@ try {
         { cwd: workspace, env, encoding: 'utf8', timeout: 300000 });
         assert.equal(repair.status, 0, repair.stderr);
         assert.match(repair.stderr, /Managed puppeteer does not match/);
-        assert.equal(JSON.parse(fs.readFileSync(repairedOutput, 'utf8')).browser_version, '25.10.0');
-        assert.equal(JSON.parse(fs.readFileSync(browserMetadata, 'utf8')).version, '25.10.0');
+        assert.equal(JSON.parse(fs.readFileSync(repairedOutput, 'utf8')).browser_version, pinnedBrowser);
+        assert.equal(JSON.parse(fs.readFileSync(browserMetadata, 'utf8')).version, pinnedBrowser);
         console.log('PASS stale managed Puppeteer triggers a locked reinstall before scanning');
       }
     } finally {

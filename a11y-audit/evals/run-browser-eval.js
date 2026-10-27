@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 3
-version_date: 2026-09-07
-previous_version: 2
+version: 4
+version_date: 2026-10-26
+previous_version: 3
 change_summary: >
-  Covers missing required route handling in the major gate.
+  Verifies the committed browser version after dependency maintenance.
 */
 
 const assert = require('assert');
@@ -68,7 +68,9 @@ async function main() {
       'real axe scan must detect the fixture button-name violation'
     );
     assert.ok(scan.axe_version, 'scan must record the resolved axe-core version');
-    assert.strictEqual(scan.browser_version, '25.10.0', 'browser eval must exercise the migrated Puppeteer');
+    assert.strictEqual(scan.browser_version,
+      JSON.parse(fs.readFileSync(path.join(repoRoot, 'a11y-audit/deps/package.json'), 'utf8')).dependencies.puppeteer,
+      'browser eval must exercise the committed Puppeteer');
 
     const second = await runNode([
       'a11y-audit/scripts/scan.js',

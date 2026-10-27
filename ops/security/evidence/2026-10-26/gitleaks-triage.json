@@ -1,0 +1,56 @@
+{
+  "version": "8.30.1",
+  "history_commits": 86,
+  "history_raw_matches": 6,
+  "confirmed_credentials": 0,
+  "matches": [
+    {
+      "RuleID": "generic-api-key",
+      "File": "a11y-audit/scripts/scan.js",
+      "StartLine": 18,
+      "Commit": "07f1d751a42d26371a7ab485750cf19566e5ae77",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    },
+    {
+      "RuleID": "generic-api-key",
+      "File": "ops/guide-anchor-2026-10-03/candidate-hashes.json",
+      "StartLine": 9,
+      "Commit": "07f1d751a42d26371a7ab485750cf19566e5ae77",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    },
+    {
+      "RuleID": "generic-api-key",
+      "File": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "StartLine": 54,
+      "Commit": "736766daa2f985780b12d09ce797783db313847e",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    },
+    {
+      "RuleID": "generic-api-key",
+      "File": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "StartLine": 71,
+      "Commit": "736766daa2f985780b12d09ce797783db313847e",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    },
+    {
+      "RuleID": "generic-api-key",
+      "File": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "StartLine": 73,
+      "Commit": "736766daa2f985780b12d09ce797783db313847e",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    },
+    {
+      "RuleID": "generic-api-key",
+      "File": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "StartLine": 89,
+      "Commit": "736766daa2f985780b12d09ce797783db313847e",
+      "classification": "false-positive",
+      "reason": "SHA-256 file integrity digest, independently checked at referenced commit"
+    }
+  ]
+}

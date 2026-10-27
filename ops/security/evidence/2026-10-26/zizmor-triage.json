@@ -1,0 +1,65 @@
+[
+  {
+    "ident": "template-injection",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "github.action_path is runner/workflow-selected Action location, not scanned page or pull-request body data. No attacker-controlled interpolation path demonstrated. Moving it to env is defense in depth."
+  },
+  {
+    "ident": "template-injection",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "github.action_path is runner/workflow-selected Action location, not scanned page or pull-request body data. No attacker-controlled interpolation path demonstrated. Moving it to env is defense in depth."
+  },
+  {
+    "ident": "template-injection",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "github.action_path is runner/workflow-selected Action location, not scanned page or pull-request body data. No attacker-controlled interpolation path demonstrated. Moving it to env is defense in depth."
+  },
+  {
+    "ident": "template-injection",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "github.action_path is runner/workflow-selected Action location, not scanned page or pull-request body data. No attacker-controlled interpolation path demonstrated. Moving it to env is defense in depth."
+  },
+  {
+    "ident": "template-injection",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "github.action_path is runner/workflow-selected Action location, not scanned page or pull-request body data. No attacker-controlled interpolation path demonstrated. Moving it to env is defense in depth."
+  },
+  {
+    "ident": "excessive-permissions",
+    "scanner_severity": "High",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "Pages is a single-job deployment workflow on main push or manual dispatch, not pull_request; pages:write and id-token:write are required by that deployment job. Job scoping reduces future expansion risk but does not remove a current untrusted-job privilege boundary."
+  },
+  {
+    "ident": "excessive-permissions",
+    "scanner_severity": "High",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "Pages is a single-job deployment workflow on main push or manual dispatch, not pull_request; pages:write and id-token:write are required by that deployment job. Job scoping reduces future expansion risk but does not remove a current untrusted-job privilege boundary."
+  },
+  {
+    "ident": "undocumented-permissions",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "The two deployment permissions have no inline explanatory comment. Documentation improvement, not independent exploit."
+  },
+  {
+    "ident": "concurrency-limits",
+    "scanner_severity": "Low",
+    "persona": "Pedantic",
+    "disposition": "contextual hardening observation; not counted as a confirmed vulnerability",
+    "reason": "Validation has no cancel-in-progress concurrency policy. Resource efficiency hardening, not a demonstrated confidentiality or integrity defect."
+  }
+]

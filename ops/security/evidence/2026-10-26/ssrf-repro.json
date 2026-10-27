@@ -1,0 +1,35 @@
+{
+  "reproduction": "SEC-200 mock-only; no live requests",
+  "discovery": {
+    "originPolicy": "same-origin",
+    "discoveredOrigins": [
+      "http://127.0.0.1:8000"
+    ],
+    "blockedFetches": [],
+    "scanList": [
+      "http://127.0.0.1:8000/admin"
+    ],
+    "mockedRequests": [
+      "https://public.test/robots.txt",
+      "https://public.test/sitemap.xml",
+      "https://public.test/api/v1/index.json",
+      "https://public.test/api/index.json"
+    ]
+  },
+  "directSitemap": {
+    "mockedFetches": [
+      {
+        "url": "https://public.test/sitemap.xml",
+        "options": null
+      },
+      {
+        "url": "http://127.0.0.1:8000/internal.xml",
+        "options": null
+      }
+    ],
+    "urls": [
+      "http://127.0.0.1:8000/admin"
+    ]
+  },
+  "assertions": "passed"
+}
