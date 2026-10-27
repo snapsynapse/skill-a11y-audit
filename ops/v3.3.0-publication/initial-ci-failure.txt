@@ -1,0 +1,24 @@
+Workflow semantics and security	Run actionlint 1.7.12	﻿2026-10-27T04:14:47.9613157Z ##[group]Run go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:47.9615001Z ^[[36;1mgo run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12^[[0m
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:47.9806400Z shell: /usr/bin/bash -e {0}
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:47.9807276Z ##[endgroup]
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:49.0176663Z go: downloading github.com/rhysd/actionlint v1.7.12
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:49.1955285Z go: github.com/rhysd/actionlint@v1.7.12 requires go >= 1.25.0; switching to go1.26.10
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:49.1956142Z go: downloading go1.26.10 (linux/amd64)
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3386714Z go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3392733Z go: downloading github.com/fatih/color v1.19.0
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3393621Z go: downloading github.com/mattn/go-colorable v0.1.14
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3411669Z go: downloading github.com/mattn/go-runewidth v0.0.21
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3877166Z go: downloading github.com/mattn/go-shellwords v1.0.12
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3900474Z go: downloading github.com/robfig/cron/v3 v3.0.1
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3935872Z go: downloading go.yaml.in/yaml/v4 v4.0.0-rc.3
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.3955526Z go: downloading golang.org/x/sync v0.20.0
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.4148350Z go: downloading golang.org/x/sys v0.42.0
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.4352297Z go: downloading github.com/clipperhouse/uax29/v2 v2.7.0
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:52.4367702Z go: downloading github.com/mattn/go-isatty v0.0.20
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3476092Z .github/workflows/pages.yml:45:9: shellcheck reported issue in this script: SC2034:warning:4:1: attempt appears unused. Verify use (or export if used externally) [shellcheck]
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3477074Z    |
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3477277Z 45 |         run: |
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3477533Z    |         ^~~~
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3477915Z exit status 1
+Workflow semantics and security	Run actionlint 1.7.12	2026-10-27T04:14:59.3754223Z ##[error]Process completed with exit code 1.

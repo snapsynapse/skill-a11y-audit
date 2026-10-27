@@ -1,0 +1,305 @@
+{
+  "release_head": "6d153f9865f230594b76ac2440dccb4a0eebf8bb",
+  "tag": "v3.3.0",
+  "tag_object": "04ff6ee46a3dfb4a5eb14767931976bc0d430025",
+  "signature_verified": true,
+  "release_id": 425032027,
+  "url": "https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.3.0",
+  "published_at": "2026-10-27T04:23:43Z",
+  "user_date": "2026-10-26",
+  "source_pr": 31,
+  "source_commits": [
+    "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+    "c269c4b36f81461133cd01c6264f858125b8e0b9"
+  ],
+  "pr_ci": {
+    "run_id": 40448916972,
+    "head": "c269c4b36f81461133cd01c6264f858125b8e0b9",
+    "url": "https://github.com/snapsynapse/skill-a11y-audit/actions/runs/40448916972",
+    "conclusion": "success",
+    "checks": [
+      {
+        "name": "Workflow semantics and security",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:54Z"
+      },
+      {
+        "name": "Real browser eval (Node 22.12.0)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:18:55Z"
+      },
+      {
+        "name": "Consumer Action smoke test",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:52Z"
+      },
+      {
+        "name": "Verify assistant guide",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:40Z"
+      },
+      {
+        "name": "Validate (Node 22)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:40Z"
+      },
+      {
+        "name": "Validate (Node 22.12.0)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:48Z"
+      },
+      {
+        "name": "Validate (Node 26)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:45Z"
+      },
+      {
+        "name": "Real browser eval (Node 24)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:18:46Z"
+      },
+      {
+        "name": "Validate (Node 24)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:17:44Z"
+      },
+      {
+        "name": "Real browser eval (Node 26)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:18:50Z"
+      }
+    ]
+  },
+  "main_ci": {
+    "run_id": 40449112546,
+    "head": "6d153f9865f230594b76ac2440dccb4a0eebf8bb",
+    "url": "https://github.com/snapsynapse/skill-a11y-audit/actions/runs/40449112546",
+    "conclusion": "success",
+    "checks": [
+      {
+        "name": "Real browser eval (Node 24)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:21:04Z"
+      },
+      {
+        "name": "Workflow semantics and security",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:20:00Z"
+      },
+      {
+        "name": "Validate (Node 22.12.0)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:55Z"
+      },
+      {
+        "name": "Verify assistant guide",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:48Z"
+      },
+      {
+        "name": "Validate (Node 22)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:53Z"
+      },
+      {
+        "name": "Validate (Node 26)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:59Z"
+      },
+      {
+        "name": "Real browser eval (Node 22.12.0)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:21:04Z"
+      },
+      {
+        "name": "Consumer Action smoke test",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:57Z"
+      },
+      {
+        "name": "Validate (Node 24)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:19:55Z"
+      },
+      {
+        "name": "Real browser eval (Node 26)",
+        "conclusion": "success",
+        "completed_at": "2026-10-27T04:21:01Z"
+      }
+    ]
+  },
+  "initial_ci_failure": {
+    "run_id": 40448660073,
+    "head": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+    "reason": "ShellCheck SC2034: unused Pages retry counter",
+    "correction": "c269c4b uses the counter in retry progress output; final PR and merge runs pass all ten checks"
+  },
+  "archive_files_each": 221,
+  "assets_sha256": {
+    "skill-a11y-audit-v3.3.0.tar.gz": "aea736b4ca6b03b8217f23218266aa55681eebfd8777e2cc0b65628cda3e8878",
+    "skill-a11y-audit-v3.3.0.zip": "85c06a24fd791a838eee3e336f10ac6bdc679c1b3fcfe038efed474bb8a7165f",
+    "SHA256SUMS": "aeb4a75e7596ec8425b3ca6944dc825afd1a6b9e36eccf28edec392e715cfe02"
+  },
+  "downloaded_assets_verified": true,
+  "provider_asset_digests_match_downloads": true,
+  "archives_match_every_release_git_blob": true,
+  "extracted_smoke": {
+    "node": "22.12.0",
+    "bundle_checks": 32,
+    "cli_contract_checks": 17,
+    "security_groups": 8,
+    "sandbox_enabled": true,
+    "browser_baseline_missing_route": "pass",
+    "authenticated_browser_adapter": "pass",
+    "external_cli_consumers": "all four pass",
+    "site_build_search": "pass",
+    "install": "locked offline packages with lifecycle scripts disabled; previously acquired matching Chrome; fresh browser acquisition covered separately by exact-head CI consumer tests"
+  },
+  "pages": {
+    "run_id": 40449112645,
+    "head": "6d153f9865f230594b76ac2440dccb4a0eebf8bb",
+    "deployment_id": 7350235991,
+    "status": "success",
+    "environment_url": "https://skilla11y.dev/"
+  },
+  "live_files": [
+    {
+      "path": ".well-known/assistant-guide-manifest.txt",
+      "url": "https://skilla11y.dev/.well-known/assistant-guide-manifest.txt",
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "expected_sha256": "466087885d779c0ac376e0e89bc8e068515715e95f0bddf83af1f3cdb45e1ed6",
+      "sha256": "466087885d779c0ac376e0e89bc8e068515715e95f0bddf83af1f3cdb45e1ed6",
+      "match": true
+    },
+    {
+      "path": ".well-known/assistant-guide.txt",
+      "url": "https://skilla11y.dev/.well-known/assistant-guide.txt",
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "expected_sha256": "8a8db727de9d89cb3734d6e21a9c7deab74eb5aa812a10fd05bd5e6462408512",
+      "sha256": "8a8db727de9d89cb3734d6e21a9c7deab74eb5aa812a10fd05bd5e6462408512",
+      "match": true
+    },
+    {
+      "path": "CNAME",
+      "url": "https://skilla11y.dev/CNAME",
+      "status": 200,
+      "content_type": "application/octet-stream",
+      "expected_sha256": "ad9c63dea73df2255785c979dfc3470510d32e77c97f8a0b2c92106aa79f1649",
+      "sha256": "ad9c63dea73df2255785c979dfc3470510d32e77c97f8a0b2c92106aa79f1649",
+      "match": true
+    },
+    {
+      "path": "favicon.svg",
+      "url": "https://skilla11y.dev/favicon.svg",
+      "status": 200,
+      "content_type": "image/svg+xml",
+      "expected_sha256": "df24ee0f62282967ab9d1e02d339d4189717a44db9af52d1c1366cc96fcef3c8",
+      "sha256": "df24ee0f62282967ab9d1e02d339d4189717a44db9af52d1c1366cc96fcef3c8",
+      "match": true
+    },
+    {
+      "path": "imgs/og.png",
+      "url": "https://skilla11y.dev/imgs/og.png",
+      "status": 200,
+      "content_type": "image/png",
+      "expected_sha256": "c468c7e05b29a0e5f367a9e49729d3ebea45ce459225634025e300b916e8a79b",
+      "sha256": "c468c7e05b29a0e5f367a9e49729d3ebea45ce459225634025e300b916e8a79b",
+      "match": true
+    },
+    {
+      "path": "index.html",
+      "url": "https://skilla11y.dev/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "expected_sha256": "623f07a4b973eae37c52ac5caf4767507d5dd449d0439dcb0513da7a39271d55",
+      "sha256": "623f07a4b973eae37c52ac5caf4767507d5dd449d0439dcb0513da7a39271d55",
+      "match": true
+    },
+    {
+      "path": "llms.txt",
+      "url": "https://skilla11y.dev/llms.txt",
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "expected_sha256": "20d55eaa7d9065d4d69caf70687faf18dd76b9f8c1a681d00cb6dfd9120d5a09",
+      "sha256": "20d55eaa7d9065d4d69caf70687faf18dd76b9f8c1a681d00cb6dfd9120d5a09",
+      "match": true
+    },
+    {
+      "path": "robots.txt",
+      "url": "https://skilla11y.dev/robots.txt",
+      "status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "expected_sha256": "db0b78e374d83738839d6b55ab6abda1234ab7db3a3f23459c35d74ec48b6f08",
+      "sha256": "db0b78e374d83738839d6b55ab6abda1234ab7db3a3f23459c35d74ec48b6f08",
+      "match": true
+    },
+    {
+      "path": "schema/audit-v1.json",
+      "url": "https://skilla11y.dev/schema/audit-v1.json",
+      "status": 200,
+      "content_type": "application/json; charset=utf-8",
+      "expected_sha256": "4d4c1067844dbb9aeb81092a24afacdca90462b3662887be58fce1e270f66218",
+      "sha256": "4d4c1067844dbb9aeb81092a24afacdca90462b3662887be58fce1e270f66218",
+      "match": true
+    },
+    {
+      "path": "schema/cli-result-posix-json-v1.json",
+      "url": "https://skilla11y.dev/schema/cli-result-posix-json-v1.json",
+      "status": 200,
+      "content_type": "application/json; charset=utf-8",
+      "expected_sha256": "3a27a38c5a0d77958615c54f032db986ba1b914602ebd3bbfd8be65c87bc1486",
+      "sha256": "3a27a38c5a0d77958615c54f032db986ba1b914602ebd3bbfd8be65c87bc1486",
+      "match": true
+    },
+    {
+      "path": "sitemap.xml",
+      "url": "https://skilla11y.dev/sitemap.xml",
+      "status": 200,
+      "content_type": "application/xml",
+      "expected_sha256": "7540ee7f287f5f44d0abd9dfec4eda8ab017452be42d78501368ea3993e028f7",
+      "sha256": "7540ee7f287f5f44d0abd9dfec4eda8ab017452be42d78501368ea3993e028f7",
+      "match": true
+    }
+  ],
+  "missing_route": {
+    "status": 404,
+    "pass": true
+  },
+  "production_search": {
+    "contractVersion": 4,
+    "base": "https://skilla11y.dev/",
+    "pages": 1,
+    "defects": 0,
+    "infrastructure": 0
+  },
+  "hosted_guidecheck": {
+    "verifier": {
+      "name": "guidecheck-hosted",
+      "version": "0.7.1",
+      "verifier_profile": "human-verifiable-assistant-guide-verifier",
+      "verifier_profile_version": "0.7.1",
+      "guide_profile": "human-verifiable-assistant-guide",
+      "guide_profile_version": "0.7.1"
+    },
+    "sha256": "8a8db727de9d89cb3734d6e21a9c7deab74eb5aa812a10fd05bd5e6462408512",
+    "bytes": 8068,
+    "achieved_level": 4,
+    "blocking_findings": 0,
+    "warnings": 1,
+    "warning_ids": [
+      "header.x-content-type-options.missing"
+    ],
+    "scope": "Fetched guide and release anchors verified; no Level 5 runtime execution or human re-attestation claimed"
+  },
+  "source_branch_cleanup": {
+    "branch": "codex/security-hardening-3.3.0",
+    "local_deleted": true,
+    "remote_deleted_or_already_absent": true,
+    "merged_into": "6d153f9865f230594b76ac2440dccb4a0eebf8bb"
+  },
+  "evidence_directory": "ops/v3.3.0-publication/",
+  "checked_at": "2026-10-27T04:27:16.416022+00:00",
+  "anonymous_public_asset_downloads_verified": true
+}

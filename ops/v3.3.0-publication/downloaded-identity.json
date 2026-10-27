@@ -1,0 +1,11 @@
+{
+  "release_head": "6d153f9865f230594b76ac2440dccb4a0eebf8bb",
+  "downloaded_assets_sha256": {
+    "skill-a11y-audit-v3.3.0.tar.gz": "aea736b4ca6b03b8217f23218266aa55681eebfd8777e2cc0b65628cda3e8878",
+    "skill-a11y-audit-v3.3.0.zip": "85c06a24fd791a838eee3e336f10ac6bdc679c1b3fcfe038efed474bb8a7165f",
+    "SHA256SUMS": "aeb4a75e7596ec8425b3ca6944dc825afd1a6b9e36eccf28edec392e715cfe02"
+  },
+  "checksums_match": true,
+  "files_per_archive": 221,
+  "both_archives_match_every_release_git_blob": true
+}

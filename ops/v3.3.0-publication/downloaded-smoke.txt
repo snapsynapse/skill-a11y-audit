@@ -1,0 +1,106 @@
+v22.12.0
+
+added 6 packages in 348ms
+npm warn deprecated whatwg-encoding@2.0.0: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+
+added 76 packages in 650ms
+
+> skill-a11y-audit@3.3.0 validate
+> node a11y-audit/evals/run-evals.js --validate
+
+PASS syntax checks cover bundled scripts and eval harnesses
+PASS JSON files parse and sample output matches audit shape
+PASS YAML and frontmatter files parse
+PASS manifest paths, hashes, and embedded versions cover the complete bundle
+PASS bootstrap-context smoke test creates workspace context
+PASS eval-9 preserves explicitly approved cross-origin sitemap URLs
+PASS eval-10 keeps discovery deterministic
+PASS security regressions fail closed and bound network work
+PASS eval-12 blocks cross-origin sitemaps unless explicitly allowed
+PASS eval-19 targets mapped changed surfaces and falls back conservatively
+PASS eval-20 groups flat routes and always includes directly changed pages
+PASS eval-21 composes portable audit stages and propagates CI base/head objects
+PASS eval-2 plans issues with labels and deduplication
+PASS eval-3 quick scan summarizes one plain HTML page
+PASS eval-4 reports skipped Lighthouse without inventing scores
+PASS eval-11 reports page-aware delta movement
+PASS eval-15 renders matrices from pluggable standards data
+PASS authentication inputs reject unsupported state and protect adapter inputs
+PASS scan.js rejects unsupported browser package names before install
+Dependency install attempt 1/3 timed out after 0ms (limit 54321ms; raise --install-timeout-ms or A11Y_AUDIT_INSTALL_TIMEOUT_MS); retrying in 1000ms...
+Dependency install attempt 2/3 exited with status 1 after 0ms; retrying in 2000ms...
+PASS scan.js retries atomic dependency installs with actionable timeout diagnostics
+PASS scan.js consumes validated, deduplicated discover plans
+PASS scan.js fingerprints and compares accepted accessibility baselines
+PASS scan.js enforces the total major-findings acceptance contract
+PASS report.js escapes target-derived markdown fields
+PASS plan-issues.js escapes target-derived markdown fields
+PASS scan.js dependency auto-install policy is documented
+PASS public install surfaces stay current and synchronized
+PASS reusable Action and workflow starter stay template-aware
+PASS workflow and Action supply-chain controls stay enforced
+PASS dependency graph excludes extract-zip and runtimes enforce Node 22.12+
+PASS assistant guide artifacts stay bounded, pinned, and synchronized
+PASS main ruleset requires the exact ten CI contexts and approved PR policy
+
+32/32 checks passed
+
+> skill-a11y-audit@3.3.0 eval:cli
+> node a11y-audit/evals/test-cli-contract.js
+
+PASS strict parser rejects unsupported selectors, options, duplicate values, and boolean values
+PASS contract dry-run is one schema-valid terminal object and does not claim gate acceptance
+PASS legacy dry-run output remains exactly the legacy plan envelope
+PASS accepted major gate completes reporting and isolates child logs from terminal data
+PASS progress artifact is explicitly nonterminal while a child is running
+PASS confirmed rejection and inconclusive evidence retain 2 and 3 after reporting
+PASS report operational failure overrides a retained rejection
+PASS no-gate scan with findings completes without claiming accessibility acceptance
+PASS unverified child 2, missing, malformed, empty, and errored scan artifacts cannot become gates
+PASS major gate status must agree with independently derived raw evidence
+PASS child error and signal take precedence over a numeric child status
+PASS missing request, malformed JSON, and impossible output have stable sysexits
+PASS symlink escapes and hard-link input aliases are rejected before mutation
+PASS existing non-regular report destinations are rejected before any stage runs
+PASS disabled report outputs do not create false output collisions
+PASS report paths stay frozen when execution crosses a UTC date boundary
+PASS progress writes do not follow predictable preexisting temporary symlinks
+
+17 CLI contract checks passed
+PASS SEC-001 audit errors and malformed reports cannot become clean coverage
+PASS SEC-002 origin matching uses parsed HTTP(S) origins and rejects deceptive URLs
+PASS SEC-003 sandbox stays enabled unless the operator explicitly disables it
+PASS SEC-002 discovery filters cross-origin leaves without fetching them; explicit allowlist works
+PASS SEC-002 direct sitemap leaves, children and redirects cannot fetch another origin
+PASS SEC-005 bytes, streaming deadlines, redirect loops and total sitemap budgets are bounded
+PASS SEC-002 page navigation guard blocks redirects while preserving ordinary external assets
+PASS SEC-002/003 real scanner keeps sandbox default and blocks HTTP and script redirects
+8 security regression groups passed
+
+> skill-a11y-audit@3.3.0 eval:browser
+> node a11y-audit/evals/run-browser-eval.js
+
+PASS real browser scan, accepted-baseline rescan, and missing-route major gate
+
+> skill-a11y-audit@3.3.0 eval:auth
+> node a11y-audit/evals/test-auth-state.js
+
+Authenticated browser and adapter checks passed
+
+> skill-a11y-audit@3.3.0 eval:cli:consumer
+> node scripts/test-cli-contract-consumer.mjs
+
+PASS external CLI consumer: accepted (exit 0)
+PASS external CLI consumer: rejected (exit 2)
+PASS external CLI consumer: report-only (exit 0)
+PASS external CLI consumer: missing (exit 1)
+
+> skill-a11y-audit@3.3.0 build:site
+> node scripts/build-site.mjs
+
+build-site: staged _site with 3 reviewed hidden files
+
+> skill-a11y-audit@3.3.0 check:search
+> node scripts/check-search.mjs
+
+check-search: 1 sitemap pages, 0 defects, 0 infrastructure failures
