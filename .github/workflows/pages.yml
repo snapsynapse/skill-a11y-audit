@@ -53,6 +53,7 @@ jobs:
             if { [ "$relationship" = identical ] || [ "$relationship" = ahead ]; } && [ "$assets" = "$expected" ]; then
               exit 0
             fi
+            echo "Waiting for matching $tag release and assets ($attempt/40)"
             sleep 15
           done
           echo "Matching published $tag release and assets are not ready for $GITHUB_SHA" >&2
