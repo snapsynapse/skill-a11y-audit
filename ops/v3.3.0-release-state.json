@@ -4,14 +4,14 @@
   "profile": "versioned-skill",
   "authority": "R2",
   "start_head": "2c21b9a2c5b91d57593b89c51e42a4981f1ea29c",
-  "candidate_head": null,
+  "candidate_head": "6d153f9865f230594b76ac2440dccb4a0eebf8bb",
   "candidate_version": "3.3.0",
-  "updated_at": "2026-10-27T04:03:04.383634+00:00",
+  "updated_at": "2026-10-27T04:27:16.416022+00:00",
   "steps": [
     {
       "id": "local_preparation",
-      "status": "ready",
-      "evidence": "Uncommitted v3.3.0 source, bundle51, guide0.3.18 and draft sidecar. Exact working-tree fingerprint: ops/v3.3.0-readiness/candidate-files.json."
+      "status": "completed",
+      "evidence": "Published source/package3.3.0, bundle 51 and guide 0.3.18 at signed tag v3.3.0; original R1 checkpoint remains historical in ops/v3.3.0-readiness/."
     },
     {
       "id": "repository_security_rules",
@@ -21,7 +21,7 @@
     {
       "id": "local_validation",
       "status": "completed",
-      "evidence": "Source and extracted-archive gates passed, including exact Node22.12.0, real sandbox-enabled browser/auth/CLI consumers, clean Action/browser acquisition, zero-advisory audits, workflow checks and clean site build/search checks. See ops/v3.3.0-readiness/verification.json."
+      "evidence": "Preparation and downloaded-release smoke passed on exact Node 22.12.0: validation32/32, CLI17/17, security8/8 with sandboxed Chromium, browser/auth/CLI consumers and site checks. Source PR and merge CI each passed all ten contexts. See ops/v3.3.0-publication-receipt.json."
     },
     {
       "id": "independent_review",
@@ -35,38 +35,38 @@
     },
     {
       "id": "commit_and_push",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "Signed source commits3e3dbe9 and c269c4b pushed; normal PR 31 merged at 6d153f9. No direct-main bypass."
     },
     {
       "id": "pull_request_and_exact_head_ci",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "PR 31 final head c269c4b passed all ten checks in run 40448916972; exact merge 6d153f9 passed all ten again in run 40449112546."
     },
     {
       "id": "merge",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "PR 31 merged normally at 6d153f9865f230594b76ac2440dccb4a0eebf8bb,2026-10-27T04:19:35Z."
     },
     {
       "id": "tag_and_release",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "Signed v3.3.0 tag 04ff6ee46a3dfb4a5eb14767931976bc0d430025 resolves to6d153f9; GitHub signature verified. Release425032027 published2026-10-27T04:23:43Z."
     },
     {
       "id": "asset_upload",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "All three downloaded assets match SHA256SUMS and GitHub asset digests; both 221-file archives match every release Git blob. See ops/v3.3.0-publication/downloaded-identity.json."
     },
     {
       "id": "pages_deployment",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "Pages run 40449112645 and deployment 7350235991 succeeded for release 6d153f9 after release/tag/assets gate passed."
     },
     {
       "id": "live_and_hosted_guide_verification",
-      "status": "not_started",
-      "evidence": "Authorized by Sam on 2026-10-26; awaits exact-head provider-confirmed publication evidence."
+      "status": "completed",
+      "evidence": "All11 public files match release build; missing route404; production search0 defects/0 infrastructure. Hosted guide 0.3.18 Level 4,0 blockers,1 existing nosniff warning. See ops/v3.3.0-publication-receipt.json."
     },
     {
       "id": "npm_publication",
@@ -75,8 +75,8 @@
     },
     {
       "id": "branch_cleanup",
-      "status": "not_started",
-      "evidence": "Authorized after release assets and live site verification; preserve refs until delivery is confirmed."
+      "status": "completed",
+      "evidence": "Original codex/security-hardening-3.3.0 removed locally after delivery; GitHub had already removed its remote head on merge. Receipt branch is removed after this evidence merges."
     }
   ]
 }
