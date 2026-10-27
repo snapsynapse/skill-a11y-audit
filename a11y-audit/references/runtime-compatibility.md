@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-09-05
-previous_version: null
+version: 2
+version_date: 2026-10-26
+previous_version: 1
 change_summary: >
-  Defines the v3 runtime floor, browser acquisition, and security migration.
+  Records the security-updated browser graph on main and its release boundary.
 ---
 
 # Runtime compatibility
@@ -16,13 +16,16 @@ The reusable GitHub Action defaults to Node 22 and checks
 the actual runtime before installing dependencies. Its `node-version` input
 can select another supported version, including `22.12.0` for floor testing.
 
-The managed lockfile pins Puppeteer 25.10.0, puppeteer-core 25.10.0, and
-`@puppeteer/browsers` 3.2.2. All three require Node >=22.12.0. The browser
+The managed lockfile pins Puppeteer 25.16.0, puppeteer-core 25.16.0, and
+`@puppeteer/browsers` 3.2.6. All three require Node >=22.12.0. The browser
 installer uses `modern-tar`; the complete root and scanner lockfiles contain
 no `extract-zip`. This removes the managed dependency path affected by
 [GHSA-jmr9-qjv8-65gv](https://github.com/advisories/GHSA-jmr9-qjv8-65gv),
 which concerns symlink traversal during ZIP extraction. It does not claim
 that every browser installation mechanism or user-supplied package is safe.
+
+These versions describe current main. The immutable v3.2.0 release keeps
+its original graph until a new release is published.
 
 axe-core stays pinned to 4.12.1. Existing accepted baselines retain their
 rule-engine version; review actual finding changes before updating a baseline.

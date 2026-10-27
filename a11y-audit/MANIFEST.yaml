@@ -1,6 +1,6 @@
 bundle: a11y-audit
-bundle_version: 49
-bundle_date: 2026-10-03
+bundle_version: 50
+bundle_date: 2026-10-26
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -192,8 +192,8 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 28
-    hash: sha256:52143bbb432a0f390569385e6f1760925cc2afa9008688adaa874b03ef87a2d5
+    version: 29
+    hash: sha256:783c51146290403658995850e95e3cfa2fb9817a85a33ddca5ce725ed88136ed
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
@@ -206,13 +206,13 @@ files:
     role: reference
     version: 12
     hash: sha256:044c2b4535fcfa2603358704fe9b4a0b8a7b422971029111ced9dab05abe56a2
-    note: Records verified v3.2.0 publication and hosted acceptance
+    note: Records dependency security maintenance after v3.2.0 publication
 
   - path: CHANGELOG.md
     role: reference
-    version: 49
-    hash: sha256:2d48149ed91bf2665b2450a0333e7697f1a76878e08afc62f2c346ee4ab319c5
-    note: Records verified v3.2.0 publication and hosted acceptance
+    version: 50
+    hash: sha256:d4050893d4b79b64546ad832a18f26492e5569a17cfe2c7b272c8d78c0247050
+    note: Records dependency security maintenance after v3.2.0 publication
 
   - path: evals/run-discover-fixture.js
     role: evals
@@ -222,14 +222,14 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 29
-    hash: sha256:e29d30bf727d47238b03bcbf5d7d585df9669f260d1da7632b6f58de6e28967d
-    note: Checks v3.2.0 candidate surfaces and bounded guide acquisition.
+    version: 30
+    hash: sha256:d97aee8642332073a3aa20cf6878ec2e5d85c1cf0c14d07fa8615cf7ad9ac6af
+    note: Validates updated dependency pins and immutable guide release evidence.
 
   - path: evals/run-browser-eval.js
     role: evals
-    version: 3
-    hash: sha256:6f2e3ffc9fc618b0699181cdb660bd031d0dceffd5f9eb70ece92ef9d90e3e4f
+    version: 4
+    hash: sha256:f9ab17355f6decfb4184fba91797e3add6f4385927008161478965cff9074e4b
     note: Covers missing required route handling in the major gate
 
   - path: evals/fixtures/eval-11/README.md
@@ -426,9 +426,9 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 14
-    hash: sha256:db62ae74880d569664df153f34efa177f68bf92680b874ce7aed69f5f91d5e7a
-    note: Binds local executable dependencies before loading them.
+    version: 15
+    hash: sha256:b65e38fed7e7f69cbc00adfbb81bb7df71ef18c6677d18f93b4215921dfc8418
+    note: Synchronizes managed Puppeteer with the security-updated lockfile.
 
   - path: scripts/run-audit.js
     role: script
@@ -474,14 +474,14 @@ files:
 
   - path: deps/package.json
     role: config
-    version: 4
-    hash: sha256:c3a03959c7273e5ed0d69518559083e5d0c985ebfb2753c3d59e13303358ed5f
+    version: 5
+    hash: sha256:744db581a0b0bed91df26d0e675cea0677ae49238fdff517beb6210c6c1bf303
     note: Exact validated axe-core, Puppeteer, and Action http-server dependencies
 
   - path: deps/package-lock.json
     role: config
-    version: 6
-    hash: sha256:c2705d6ac3482da2828960ff7cea96ae4df6ce62386b18618b54b306d915705d
+    version: 7
+    hash: sha256:eb4eed1460c1bf35f8457265c68e514ceddab917df3b81380da022c499884126
     note: Reproducible scanner and Action server dependency graph
 
   - path: assets/sample-output/audit-sample.md
@@ -612,9 +612,9 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 36
+    version: 37
     hash: null
-    note: Tracks documentation revision 49; published v3.1.0 remains immutable; self-hash omitted
+    note: Tracks bundle revision 50; published v3.2.0 remains immutable; self-hash omitted
 
   - path: scripts/check-runtime.js
     role: script
@@ -624,8 +624,8 @@ files:
 
   - path: references/runtime-compatibility.md
     role: reference
-    version: 1
-    hash: sha256:5f5c88717af508c77b925e8c4478f3fda0016e1829300ad4f9663110e1fae4fc
+    version: 2
+    hash: sha256:93be1793ee2625decdced8e9a1fe6629cde0d2b14cba3987c7887eb425e4a26b
     note: v3 runtime, managed browser installation, and validation contract
 
   - path: references/cli-contract.md

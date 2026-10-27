@@ -83,7 +83,7 @@ Prefer bundled helpers over ad hoc generation when they fit:
 
 Requires Node.js 22.12.0 or later. Run `node --version` before scanning;
 upgrade unsupported runtimes before dependency installation. The managed
-bundle pins Puppeteer 25.10.0. For browser cache, skip-download, and v3
+bundle pins Puppeteer 25.16.0. For browser cache, skip-download, and v3
 migration instructions, read `references/runtime-compatibility.md`.
 
 scan.js requires `axe-core` and `puppeteer`. It resolves these in order:

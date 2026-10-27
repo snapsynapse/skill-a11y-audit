@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 29
-version_date: 2026-10-03
-previous_version: 28
+version: 30
+version_date: 2026-10-26
+previous_version: 29
 change_summary: >
-  Checks v3.2.0 candidate surfaces and bounded guide acquisition.
+  Checks updated dependency pins while verifying the guide against its published release evidence.
 */
 
 const assert = require('assert');
@@ -1296,7 +1296,7 @@ function workflowSecurityRegression() {
   assert.deepStrictEqual(deps.dependencies, {
     'axe-core': '4.12.1',
     'http-server': '14.1.1',
-    puppeteer: '25.10.0',
+    puppeteer: '25.16.0',
   });
 }
 
@@ -1421,9 +1421,15 @@ function assistantGuideArtifactRegression() {
     ['a11y-audit/scripts/scan.js', null],
     ['a11y-audit/scripts/report.js', null],
   ]);
+  // The acquisition action selects immutable v3.2.0, so its executable
+  // hashes must match retained release evidence rather than evolving main.
+  const publishedHashes = readJson(repoPath('ops/v3.2.0-readiness/candidate-hashes.json')).sha256;
+  const receipt = readJson(repoPath('ops/v3.2.0-publication-receipt.json'));
+  assert.strictEqual(receipt.tag, 'v3.2.0');
+  assert.strictEqual(crypto.createHash('sha256').update(rootGuide).digest('hex'), receipt.hosted_guide.sha256);
   for (const script of scriptHashes.keys()) {
-    const digest = crypto.createHash('sha256').update(fs.readFileSync(repoPath(script))).digest('hex');
-    scriptHashes.set(script, digest);
+    assert.match(publishedHashes[script], /^[0-9a-f]{64}$/);
+    scriptHashes.set(script, publishedHashes[script]);
   }
   for (const block of text.matchAll(/\[action\]\n([\s\S]*?)\n\[\/action\]/g)) {
     const command = block[1].match(/^command: (.+)$/m)?.[1] || '';

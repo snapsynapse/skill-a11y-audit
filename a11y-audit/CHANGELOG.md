@@ -1,14 +1,25 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 49
-version_date: 2026-10-03
-previous_version: 48
+version: 50
+version_date: 2026-10-26
+previous_version: 49
 change_summary: >
-  Records verified v3.2.0 publication and hosted guide acceptance.
+  Records combined dependency security updates and synchronized runtime validation.
 ---
 
 # Changelog
+
+## Dependency security maintenance -- 2026-10-26
+
+- `deps/package.json` and `deps/package-lock.json`: upgrade Puppeteer to 25.16.0, Zod to 4.6.7 and follow-redirects to 1.16.1 by combining Dependabot PRs 28 and 30.
+- `scripts/scan.js`: synchronize the managed browser pin to prevent repeated reinstalls and version drift.
+- `evals/run-evals.js`: require the updated browser pin and verify the unchanged v3.2.0 guide against retained publication hashes. Those four script hashes were checked against the local v3.2.0 tag before this change.
+- `evals/run-browser-eval.js` and `../scripts/test-action-consumer.mjs`: derive the expected browser version from the committed dependency manifest while retaining clean-install and stale-install repair assertions.
+- `../package-lock.json`: integrate Dependabot PR 29, updating fast-uri to 3.1.9.
+- `../.github/workflows/validate-skill.yml`: integrate Dependabot PR 27, retaining the SHA pin for setup-uv 10.3.0.
+- `SKILL.md`, `references/runtime-compatibility.md` and `../README.md`: distinguish the updated main dependency graph from the immutable v3.2.0 release.
+- `CHANGELOG.md` and `MANIFEST.yaml`: advance bundle revision to 50 and refresh changed file versions and hashes. Published v3.2.0 guide, tag and release assets remain historical release evidence; these dependency updates require a future release for release-pinned consumers.
 
 ## v3.2.0 publication receipt -- 2026-10-03
 
@@ -27,6 +38,7 @@ change_summary: >
 - Root validation lockfile: patch fast-uri for GHSA-hrr3-gc8f-f4qj.
 - Root package and lock metadata, README, website and machine-readable overview: propagate v3.2.0, with local versus hosted acceptance distinguished.
 - `../.github/workflows/validate-skill.yml`: retain the original pinned verifier and add a pinned current-compatibility lane.
+- `SKILL.md`, `references/runtime-compatibility.md` and `../README.md`: distinguish the updated main dependency graph from the immutable v3.2.0 release.
 - `CHANGELOG.md` and `MANIFEST.yaml`: advance bundle revision to 48 and refresh changed-file versions and hashes.
 
 ## Guide anchor preparation (unreleased) -- 2026-10-03
