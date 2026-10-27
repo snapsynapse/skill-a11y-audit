@@ -28,3 +28,15 @@ The complete local and archive verification result is maintained in `../v3.3.0-r
 The origin control covers automatic targets and main-frame navigation. Ordinary unauthenticated subresources remain renderable. Workers, popups, DNS rebinding and browser compromise require external network/runner isolation. Authenticated state still needs explicitly authorized synthetic accounts and sensitive-artifact handling. Project/global package fallback graphs remain external to the managed lockfile guarantee.
 
 Static-host response-header observations and the original accessibility roadmap remain outside these six findings. No unrelated public site or infrastructure setting was changed. Release and hosted verification completed under Sam's subsequent publication authorization; the existing nosniff hosting warning remains recorded.
+
+## Accepted hosting limitation: missing nosniff header
+
+Decision owner: Sam. Accepted on 2026-10-26 in chat `01a17b40-1434-7700-93b2-87c15fd7155f`: "Keep the current hosting and document the nosniff warning as an accepted limitation. No migration needed."
+
+The site will retain its direct GitHub Pages hosting and Namecheap DNS. GitHub Pages does not expose a custom response-header setting, so the served guide continues to omit `X-Content-Type-Options: nosniff`. This is an accepted hosting limitation, not a fixed header or a suppressed verifier finding.
+
+The header provides additional protection against browsers interpreting content as a different MIME type. The current site serves reviewed static files, has no public upload feature, and serves the guide as `text/plain; charset=utf-8`. Sam accepted the remaining exposure rather than adding a host or proxy solely for this header. This decision applies only to the nosniff warning.
+
+The [published hosted verification](../v3.3.0-publication/hosted-guidecheck.json) retains finding `header.x-content-type-options.missing`: Level 4, zero blocking findings and one warning. That evidence and the immutable v3.3.0 release remain unchanged. No new human security attestation is inferred from acceptance.
+
+No hosting migration, DNS change or header-remediation task is pending. Reconsider this decision if the site begins serving user uploads or other untrusted content, MIME handling changes, or hosting changes for an independent reason. These are review triggers, not scheduled work or new implementation authority.
