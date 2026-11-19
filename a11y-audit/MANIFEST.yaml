@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 52
+bundle_version: 53
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 52
-    hash: sha256:4ad695ff38d973e1f9472849e1817485d78777f30c613ffe325b532af0e3347b
+    version: 53
+    hash: sha256:c201c4f9b0a3ebd52b795b83a551355de21b79a1239e95e6d967cf404fe36cc0
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 32
-    hash: sha256:0164bf86bf1646bb015c94f599fee5c7185740f241dc6c569912ce4cf46eaef8
+    version: 33
+    hash: sha256:cae7b7fc6af86bf4bf1844b51d7a536d8596561468a1daeb98014083357bcf4a
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -426,8 +426,8 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 16
-    hash: sha256:904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad
+    version: 17
+    hash: sha256:4b6ed55ea08dc1f1e81a07629d3c8000b13fb14481a5cb8c5d6ecbbb3d4659ef
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 40
+    version: 43
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -630,8 +630,8 @@ files:
 
   - path: references/cli-contract.md
     role: reference
-    version: 1
-    hash: sha256:8d44bc460bfe8fbce9e099b6919ca085e5fbf89b1cfb2415035fd8f3948b5c11
+    version: 2
+    hash: sha256:53a5575f89ad460802d1ae475dab8c3aa01358191f321a540b8e2205500e8591
     note: Experimental CLI contract and compatibility boundary
 
   - path: references/cli-result-schema.json
@@ -672,8 +672,8 @@ files:
 
   - path: evals/test-security.js
     role: evals
-    version: 1
-    hash: sha256:ddb105d32b4d66bdb15daacf58d58cf04136227445e5a25178ef470d5077289b
+    version: 2
+    hash: sha256:927bc6f5df843ede4a1193dbfe6c142a39e8398167694e5c10428b0acf51efc8
     note: Security hardening regression or policy reference
 
   - path: references/network-policy.md
@@ -693,3 +693,9 @@ files:
     version: 1
     hash: sha256:229e6bfe61cb858829cdcc53b8ef1e0a8499dedff25fdc743f91ff2ce854889d
     note: Security hardening regression or policy reference
+
+  - path: evals/test-scan-readiness.js
+    role: evals
+    version: 1
+    hash: sha256:7958e9e7c6d7b2e56c6b4abdbfbbcee699e569137df0089ae45c4ec891ab6b71
+    note: Added by bundle manifest helper

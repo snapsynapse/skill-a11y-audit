@@ -1,12 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-09-07
-previous_version: null
+version: 2
+version_date: 2026-11-19
+previous_version: 1
 change_summary: >
-  Defines the experimental posix-json-v1 process contract for the audit
-  adapter.
+  Clarifies scan readiness and strict native gate arguments.
 ---
 
 # Experimental CLI Contract
@@ -14,6 +13,11 @@ change_summary: >
 `scripts/run-audit.js` preserves its existing behavior unless the caller
 explicitly passes `--contract posix-json-v1`. The selector is experimental. It
 does not change the request schema or any helper-script or Action default.
+
+All gate modes require successful HTML target responses. Missing, non-HTML,
+404 and 500 responses are operational failures even when `fail_on` is `none`.
+The native scanner rejects unknown, repeated and missing option values before
+browser work starts.
 
 ## Process boundary
 

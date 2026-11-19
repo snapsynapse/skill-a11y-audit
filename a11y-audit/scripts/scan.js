@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 16
-version_date: 2026-10-26
-previous_version: 15
+version: 17
+version_date: 2026-11-19
+previous_version: 16
 change_summary: >
-  Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
+  Requires valid scan targets for every gate and rejects ambiguous CLI options.
 */
 
 const fs = require('fs');
@@ -30,15 +30,27 @@ const { webUrl, approvedOrigins, requireApprovedUrl, fetchResource, guardNavigat
 
 function parseArgs(argv) {
   const args = {};
+  const valueFlags = new Set([
+    'root', 'urls', 'output', 'browser', 'fail-on', 'discover', 'baseline',
+    'write-baseline', 'axe-version', 'install-timeout-ms', 'sitemap',
+    'sitemap-find', 'sitemap-replace', 'sitemap-exclude', 'allow-origin',
+    'storage-state', 'auth-targets',
+  ]);
+  const booleanFlags = new Set(['summary', 'no-sandbox', 'allow-axe-version-mismatch']);
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (!arg.startsWith('--')) continue;
+    if (!arg.startsWith('--')) throw new Error(`Unexpected argument: ${arg}`);
     const key = arg.slice(2);
+    if (!valueFlags.has(key) && !booleanFlags.has(key)) throw new Error(`Unknown option: ${arg}`);
+    if (Object.hasOwn(args, key)) throw new Error(`Repeated option: ${arg}`);
     const next = argv[i + 1];
-    if (!next || next.startsWith('--')) {
-      args[key] = true;
+    if (booleanFlags.has(key)) {
+      if (next === 'true' || next === 'false') { args[key] = next; i += 1; }
+      else args[key] = true;
       continue;
     }
+    if (!next || next.startsWith('--')) throw new Error(`${arg} requires a value.`);
+    if (!next.trim()) throw new Error(`${arg} requires a non-empty value.`);
     args[key] = next;
     i += 1;
   }
@@ -695,16 +707,14 @@ async function run() {
         const response = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
         checkNavigation();
         if (auth) await assertAuth(page, response, auth.byUrl.get(url));
-        if (failOn === 'major') {
-          if (!response) throw new Error('Required scan target returned no HTTP response.');
-          const status = response.status();
-          const contentType = response.headers()['content-type'] || '';
-          if (!response.ok()) {
-            throw new Error(`Required scan target returned HTTP ${status}.`);
-          }
-          if (!/^(text\/html|application\/xhtml\+xml)(?:;|$)/i.test(contentType)) {
-            throw new Error(`Required scan target returned non-HTML content (${contentType || 'missing content-type'}).`);
-          }
+        if (!response) throw new Error('Required scan target returned no HTTP response.');
+        const status = response.status();
+        const contentType = response.headers()['content-type'] || '';
+        if (!response.ok()) {
+          throw new Error(`Required scan target returned HTTP ${status}.`);
+        }
+        if (!/^(text\/html|application\/xhtml\+xml)(?:;|$)/i.test(contentType)) {
+          throw new Error(`Required scan target returned non-HTML content (${contentType || 'missing content-type'}).`);
         }
         await page.evaluate(axeSource);
         let axe = await page.evaluate(async () => {

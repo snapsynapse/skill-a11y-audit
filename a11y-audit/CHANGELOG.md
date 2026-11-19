@@ -1,14 +1,20 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 52
+version: 53
 version_date: 2026-11-19
-previous_version: 51
+previous_version: 52
 change_summary: >
-  Records Pages and root validation fixes pending release.
+  Records scanner readiness and strict native argument handling.
 ---
 
 # Changelog
+
+## Unreleased scanner readiness -- 2026-11-19
+
+- Every scan gate now requires a successful HTML response from each target. Missing, non-HTML, 404 and 500 responses remain operational failures with partial evidence.
+- Native argument parsing rejects unknown, repeated, missing and empty option values before browser work. Local readiness and parser regression checks cover these outcomes.
+- The published assistant guide remains pinned to v3.3.0 bytes while candidate scanner files change.
 
 ## Unreleased Pages and root validation -- 2026-11-19
 

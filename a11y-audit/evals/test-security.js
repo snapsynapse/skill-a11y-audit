@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-10-26
-previous_version: null
+version: 2
+version_date: 2026-11-18
+previous_version: 1
 change_summary: >
-  Reproduces security failures and verifies policy, fetch budgets and browser defaults.
+  Keeps the permitted redirect control HTML-ready under the stricter target contract.
 */
 'use strict';
 const assert = require('node:assert/strict');
@@ -74,7 +74,11 @@ async function main() {
     assert.throws(() => browserLaunchOptions('false'));
   });
   let otherHits = 0;
-  const other = http.createServer((req, res) => { otherHits++; res.end('<!doctype html><title>Other</title><main>Other</main>'); });
+  const other = http.createServer((req, res) => {
+    otherHits++;
+    res.setHeader('content-type', 'text/html');
+    res.end('<!doctype html><title>Other</title><main>Other</main>');
+  });
   await listen(other);
   const otherOrigin = `http://127.0.0.1:${other.address().port}`;
   let origin;
