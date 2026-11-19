@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 4
-version_date: 2026-10-26
-previous_version: 3
+version: 5
+version_date: 2026-11-18
+previous_version: 4
 change_summary: >
-  Distinguishes candidate network defaults from authenticated input guarantees.
+  Describes regular generated artifact uploads and current published guide identity.
 ---
 
 # Authenticated scan inputs
@@ -68,8 +68,10 @@ fixed diagnostic. This protects supplied values, not arbitrary sensitive page
 content or transformed credentials; use synthetic accounts and treat reports
 as potentially private. State paths are visible in adapter plans, but state
 contents are not included. Input/output aliases are rejected. The Action
-checks all uploaded artifact paths before discovery and prevents upload if
-that check fails. Do not replace inputs or outputs concurrently during a run.
+accepts only explicit regular generated artifact files for upload, selects
+files from enabled stages, and revalidates paths immediately before collection.
+Nested symlink and hardlink aliases to authentication state fail the guard.
+Do not replace inputs or outputs concurrently during a run.
 
 Discovery remains unauthenticated. Use explicit URLs or a reviewed discover
 plan with the scanner, explicit `urls` in the Action, or publicly discoverable
@@ -83,8 +85,8 @@ blocked cross-origin requests, and terminal adapter success/failure.
 `npm run validate` includes input-validation and artifact-alias regressions.
 
 Bounded journeys, state-specific baseline identity, and native Playwright
-execution remain separate roadmap work. Draft guide 0.3.18 carries candidate scanner pins and a matching sidecar.
+execution remain separate roadmap work. Published guide 0.3.18 pins v3.3.0
+release bytes; unreleased local remediation has separate validation.
 The scanner verifies its local executable dependencies before loading them.
 Guide actions remain public-only; authenticated scans need separate user
-authorization. The draft manifest names the intended v3.3.0 release URL.
-Publication and hosted acceptance remain later release gates.
+authorization. Future guide changes require a separately authorized release.

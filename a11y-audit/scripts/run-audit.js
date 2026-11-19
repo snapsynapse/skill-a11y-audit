@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 5
-version_date: 2026-10-26
-previous_version: 4
+version: 6
+version_date: 2026-11-19
+previous_version: 5
 change_summary: >
-  Propagates explicit approved origins and sandbox configuration through the adapter.
+  Protects adapter output paths and retains shaped partial evidence on failures.
 */
 
 const fs = require('fs');
@@ -16,6 +16,7 @@ const { isDeepStrictEqual } = require('util');
 const { buildAuditEvidence, evaluateMajorGate } = require('./scan.js');
 
 const { protectAuthFiles } = require('./auth-state.js');
+const { assertSeparateOutputs } = require('./output-safety.js');
 
 const SCHEMA_VERSION = 1;
 const SCRIPT_DIR = __dirname;
@@ -539,6 +540,14 @@ function preflightContractPlan(plan) {
       }
     }
   }
+  try {
+    assertSeparateOutputs(plan.protectedPaths, activeOutputs);
+  } catch (error) {
+    throw Object.assign(error, {
+      contractExitCode: /unexpected file type/.test(error.message) ? EX_CANTCREAT : EX_DATAERR,
+      contractErrorId: /unexpected file type/.test(error.message) ? 'output-cannot-create' : 'output-path-collision',
+    });
+  }
 }
 
 function plannedContractResult(plan, dryRun = false) {
@@ -600,7 +609,22 @@ function prepareContractStage(entry, plan, sequence) {
   return { entry: { ...entry, args }, declared, temporary, temporaryDir: null };
 }
 
-function publishStageOutputs(prepared) {
+function assertTemporaryOutputs(prepared, plan) {
+  const workspaceReal = fs.realpathSync(plan.workspace);
+  for (const temporary of prepared.temporary) {
+    if (!fs.lstatSync(temporary).isFile()) {
+      throw new Error(`Generated artifact must be a regular file: ${temporary}`);
+    }
+    const relative = path.relative(workspaceReal, fs.realpathSync(temporary));
+    if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+      throw new Error(`Generated artifact escapes workspace: ${temporary}`);
+    }
+  }
+  assertSeparateOutputs(plan.protectedPaths, prepared.temporary);
+}
+
+function publishStageOutputs(prepared, plan) {
+  assertTemporaryOutputs(prepared, plan);
   const published = [];
   for (let index = 0; index < prepared.declared.length; index += 1) {
     try {
@@ -813,12 +837,13 @@ function runContractPlan(plan, dependencies = {}) {
 
     if (entry.name === 'scan' && [0, 2, 3].includes(stageResult.exit_code)) {
       try {
+        assertTemporaryOutputs(prepared, plan);
         result.gate.status = verifyScanOutcome(
           prepared.temporary[0],
           plan.gateMode,
           stageResult.exit_code
         );
-        publishStageOutputs(prepared);
+        publishStageOutputs(prepared, plan);
       } catch (error) {
         stageResult.status = 'failed';
         discardTemporaryOutputs(prepared);
@@ -839,6 +864,29 @@ function runContractPlan(plan, dependencies = {}) {
 
     if (stageResult.exit_code !== 0) {
       stageResult.status = 'failed';
+      // A failed discovery or scan can still contain useful partial evidence.
+      // Publish only a shaped operational-failure artifact; never infer a gate.
+      try {
+        if (entry.name === 'discover' || entry.name === 'scan') {
+          assertTemporaryOutputs(prepared, plan);
+          const partial = parseGeneratedJson(prepared.temporary[0], `${entry.name}-partial`);
+          const validFailure = entry.name === 'discover'
+            ? typeof partial.error === 'string' && partial.error.length > 0
+            : Array.isArray(partial.urls) && Array.isArray(partial.results)
+              && Array.isArray(partial.errors) && partial.errors.length > 0
+              && partial.errors.every(item => item && typeof item.url === 'string'
+                && typeof item.error === 'string' && item.error.length > 0);
+          if (validFailure) {
+            if (entry.name === 'scan') {
+              partial.gate = null;
+              partial.baseline = null;
+              partial.operational_status = 'failed';
+              fs.writeFileSync(prepared.temporary[0], JSON.stringify(partial, null, 2));
+            }
+            publishStageOutputs(prepared, plan);
+          }
+        }
+      } catch { /* A missing or malformed child artifact is not evidence. */ }
       discardTemporaryOutputs(prepared);
       return failContractResult(plan, result, new Error(`Child stage failed: ${entry.name}`), {
         id: 'child-stage-failed',
@@ -850,6 +898,7 @@ function runContractPlan(plan, dependencies = {}) {
     try {
       const outputs = prepared.temporary;
       if (entry.name === 'discover' || entry.name === 'select') {
+        assertTemporaryOutputs(prepared, plan);
         parseGeneratedJson(outputs[0], `${entry.name}-result`);
       } else if (entry.name === 'report') {
         for (const output of outputs) {
@@ -859,7 +908,7 @@ function runContractPlan(plan, dependencies = {}) {
           );
         }
       }
-      publishStageOutputs(prepared);
+      publishStageOutputs(prepared, plan);
       if (entry.name === 'report') {
         result.report_files = prepared.declared
           .map((value) => relativeToWorkspace(plan.workspace, value));
@@ -922,6 +971,12 @@ function writeEnvelope(runPlan, envelope) {
 }
 
 function runPlan(runPlan) {
+  assertSeparateOutputs(runPlan.protectedPaths, [
+    runPlan.artifacts.run,
+    ...runPlan.stages.map(entry => entry.name === 'report'
+      ? runPlan.artifacts.report_dir : runPlan.artifacts[entry.name === 'select' ? 'selection' : entry.name]),
+  ], { directories: runPlan.stages.some(entry => entry.name === 'report')
+    ? [runPlan.artifacts.report_dir] : [] });
   fs.mkdirSync(runPlan.artifactsDir, { recursive: true });
   const envelope = {
     ...runPlan.envelope,

@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 34
+version: 35
 version_date: 2026-11-19
-previous_version: 33
+previous_version: 34
 change_summary: >
-  Rejects partial discovery plans and runs bounded sitemap regressions.
+  Checks adapter partial evidence and authenticated output containment.
 */
 
 const assert = require('assert');
@@ -1510,6 +1510,9 @@ test('eval-9 preserves explicitly approved cross-origin sitemap URLs', () => run
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
 test('security regressions fail closed and bound network work', () => runNode(['a11y-audit/evals/test-security.js']));
 test('discovery budgets, required children, cycles and XML boundaries', () => runNode(['a11y-audit/evals/test-discovery-boundaries.js']));
+test('required sitemap failures propagate with partial evidence', () => runNode(['a11y-audit/evals/test-discovery-propagation.js']));
+test('scanner argument and input preservation boundaries', () => runNode(['a11y-audit/evals/test-scan-input-boundaries.js']));
+test('authenticated upload artifact guard', () => runNode(['a11y-audit/evals/test-auth-artifact-guard.js']));
 test('npm audit advisory reference graph', () => runNode(['scripts/test-audit-deps.mjs']));
 test('site staging symlink containment', () => runNode(['scripts/test-build-site-security.mjs']));
 test('search XML decoder copies', () => runNode(['scripts/test-search-decoder.mjs']));

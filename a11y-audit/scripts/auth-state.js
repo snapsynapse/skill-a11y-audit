@@ -1,15 +1,17 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-10-03
-previous_version: null
+version: 2
+version_date: 2026-11-19
+previous_version: 1
 change_summary: >
-  Validates bounded authentication inputs and isolates each authenticated target.
+  Reuses output containment checks and validates generated artifact files.
 */
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const crypto = require('crypto');
+const { assertSeparateOutputs } = require('./output-safety.js');
 
 function keys(value, allowed) {
   assert(value && typeof value === 'object' && !Array.isArray(value));
@@ -26,21 +28,30 @@ function text(value) { assert(typeof value === 'string' && value.length > 0); }
 function protectAuthFiles(inputs, outputs) {
   try {
     const resolved = inputs.map(p => fs.realpathSync(path.resolve(p)));
-    for (const output of outputs.filter(Boolean)) {
-      const absolute = path.resolve(output);
-      let ancestor = absolute;
-      while (!fs.existsSync(ancestor)) ancestor = path.dirname(ancestor);
-      const real = path.resolve(fs.realpathSync(ancestor), path.relative(ancestor, absolute));
-      assert(!resolved.some(input => input === real || input.startsWith(real + path.sep)));
-      if (fs.existsSync(absolute)) {
-        const stat = fs.statSync(absolute);
-        assert(!resolved.some(input => {
-          const other = fs.statSync(input);
-          return other.dev === stat.dev && other.ino === stat.ino;
-        }));
-      }
-    }
+    assertSeparateOutputs(resolved, outputs);
   } catch { throw new Error('Authentication files must exist and remain separate from all output and artifact paths.'); }
+}
+function collectArtifactPaths(inputs, outputs, stages) {
+  if (inputs.some(Boolean)) {
+    assert(inputs.length === 2 && inputs.every(Boolean), 'Both authentication inputs are required.');
+    protectAuthFiles(inputs, Object.values(outputs));
+  }
+  const paths = [];
+  for (const [name, output] of Object.entries(outputs)) {
+    const outcome = stages[name];
+    assert(['success', 'failure', 'cancelled', 'skipped'].includes(outcome), `Unknown ${name} stage outcome.`);
+    if (outcome === 'skipped') continue;
+    assert(output && !/[!*?\[\]\r\n]/.test(output), `Unsafe ${name} artifact path.`);
+    let stat;
+    try { stat = fs.lstatSync(path.resolve(output)); }
+    catch (error) {
+      if (error.code === 'ENOENT' && outcome !== 'success') continue;
+      throw error;
+    }
+    assert(stat.isFile(), `Artifact ${name} must be a regular file.`);
+    paths.push(output);
+  }
+  return paths;
 }
 function loadAuth(statePath, targetsPath, urls, outputs = []) {
   if (statePath === undefined && targetsPath === undefined) return null;
@@ -140,14 +151,23 @@ async function assertAuth(page, response, assertion) {
   await page.waitForSelector(assertion.selector, { visible: true, timeout: 5000 });
   assert(page.url() === assertion.expected, 'Authenticated target URL changed while waiting.');
 }
-module.exports = { loadAuth, prepareAuth, assertAuth, protectAuthFiles };
+module.exports = { loadAuth, prepareAuth, assertAuth, protectAuthFiles, collectArtifactPaths };
 if (require.main === module) {
   try {
-    const [state, targets, ...outputs] = process.argv.slice(2);
-    if (state || targets) {
-      assert(state && targets);
+    if (process.argv[2] === '--upload-paths') {
+      const inputs = [process.env.STORAGE_STATE, process.env.AUTH_TARGETS];
+      const outputs = { scan: process.env.OUTPUT, discover: process.env.DISCOVER_OUTPUT, selection: process.env.SELECTION_OUTPUT };
+      const stages = { scan: process.env.SCAN_STAGE, discover: process.env.DISCOVER_STAGE, selection: process.env.SELECTION_STAGE };
+      const paths = collectArtifactPaths(inputs, outputs, stages);
+      const delimiter = `A11Y_PATHS_${crypto.randomBytes(12).toString('hex')}`;
+      fs.appendFileSync(process.env.GITHUB_OUTPUT, `paths<<${delimiter}\n${paths.join('\n')}\n${delimiter}\n`);
+    } else {
+      const [state, targets, ...outputs] = process.argv.slice(2);
       assert(outputs.every(output => output && !/[!*?\[\]\r\n]/.test(output)));
-      protectAuthFiles([state, targets], outputs);
+      if (state || targets) {
+        assert(state && targets);
+        protectAuthFiles([state, targets], outputs);
+      }
     }
   } catch { console.error('Unsafe authentication artifact configuration.'); process.exitCode = 1; }
 }

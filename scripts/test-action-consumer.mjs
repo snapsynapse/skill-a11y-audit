@@ -63,10 +63,11 @@ const conditions = new Map([
   [undefined, true], ["inputs.serve-path != ''", true], ["inputs.discover-url != ''", true],
   ["inputs.discover-url != '' && inputs.surface-map != '' && (inputs.changed-files != '' || inputs.changed-base != '')", true],
   ["always() && inputs.serve-path != ''", true], ["always() && steps.auth-paths.outcome == 'success' && inputs.upload-artifact == 'true'", false],
+  ["always() && steps.artifact-paths.outcome == 'success' && steps.artifact-paths.outputs.paths != ''", false],
 ]);
 const env = { ...process.env, RUNNER_TEMP: runtime, GITHUB_WORKSPACE: workspace,
   PUPPETEER_CACHE_DIR: path.join(temp, 'browser-cache') };
-// The first pass must prove default installation against an empty browser cache.
+// The first pass proves default installation against an empty browser cache.
 delete env.PUPPETEER_SKIP_DOWNLOAD;
 delete env.PUPPETEER_SKIP_CHROME_DOWNLOAD;
 delete env.PUPPETEER_SKIP_CHROME_HEADLESS_SHELL_DOWNLOAD;

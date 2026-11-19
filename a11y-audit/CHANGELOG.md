@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 54
+version: 56
 version_date: 2026-11-19
-previous_version: 53
+previous_version: 55
 change_summary: >
-  Records complete and bounded sitemap discovery pending release.
+  Records owner-only atomic artifacts after security review.
 ---
 
 # Changelog
+
+## Unreleased output and auth containment -- 2026-11-19
+
+- Native and adapter paths reject accepted-input aliases before writing. Atomic scanner and baseline JSON publication creates owner-only files, including when replacing an existing private artifact. Failed discovery or scan stages retain only shaped partial evidence without gate acceptance.
+- Authenticated Action uploads select generated regular files and revalidate them before collection. Local input, adapter and artifact regressions cover symlink, hardlink, ancestor and stage-outcome boundaries.
 
 ## Unreleased discovery completeness -- 2026-11-19
 

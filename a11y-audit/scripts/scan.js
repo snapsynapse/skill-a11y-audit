@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 18
+version: 20
 version_date: 2026-11-19
-previous_version: 17
+previous_version: 19
 change_summary: >
-  Rejects incomplete discovery plans before scanning selected targets.
+  Pins owner-only atomic JSON publication for scan and baseline artifacts.
 */
 
 const fs = require('fs');
@@ -15,7 +15,7 @@ const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { execSync, spawnSync } = require('child_process');
 // The guide pins this entry point; bind its local executable dependencies too.
-const LOCAL_SCRIPT_HASHES = {"network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc", "auth-state.js": "4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d"};
+const LOCAL_SCRIPT_HASHES = {"network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc", "auth-state.js": "87d9de544b08108ea980c90810a75f6f253943f4785fc8ca63bc8fa72b1fa9d8", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d", "output-safety.js": "a76f2a7678a6cf4757018641a46d08566fdccc55b548d0ebd3d08877edf797b4"};
 for (const [name, expected] of Object.entries(LOCAL_SCRIPT_HASHES)) {
   const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, name))).digest('hex');
   if (actual !== expected) throw new Error(`Scanner dependency integrity mismatch: ${name}`);
@@ -23,6 +23,7 @@ for (const [name, expected] of Object.entries(LOCAL_SCRIPT_HASHES)) {
 const { loadAuth, prepareAuth, assertAuth } = require('./auth-state.js');
 const { assertSupportedNode } = require('./check-runtime.js');
 const { webUrl, approvedOrigins, requireApprovedUrl, fetchResource, guardNavigation } = require('./network-policy.js');
+const { assertSeparateOutputs, writeJsonAtomic } = require('./output-safety.js');
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -595,6 +596,9 @@ async function run() {
   const rootDir = path.resolve(args.root || process.cwd());
   let urls = splitCsv(args.urls);
   const outputPath = path.resolve(args.output || path.join(process.cwd(), 'a11y-scan-results.json'));
+  const baselineOutput = typeof args['write-baseline'] === 'string' ? path.resolve(args['write-baseline']) : null;
+  assertSeparateOutputs([args.discover, args.baseline, args['storage-state'], args['auth-targets']],
+    [outputPath, baselineOutput]);
   let browserLib;
   try {
     browserLib = validateBrowserLib(args.browser || 'puppeteer');
@@ -770,9 +774,8 @@ async function run() {
     errors,
   };
 
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   if (errors.length > 0) {
-    fs.writeFileSync(outputPath, JSON.stringify({ ...basePayload, baseline: null }, null, 2));
+    writeJsonAtomic(outputPath, { ...basePayload, baseline: null });
     console.error(`a11y scan: ${errors.length} page(s) failed; partial results written to ${outputPath}`);
     process.exit(1);
   }
@@ -807,12 +810,10 @@ async function run() {
     ...basePayload,
     baseline: baselineComparison,
   };
-  fs.writeFileSync(outputPath, JSON.stringify(payload, null, 2));
+  writeJsonAtomic(outputPath, payload);
 
   if (typeof args['write-baseline'] === 'string') {
-    const baselineOutput = path.resolve(args['write-baseline']);
-    fs.mkdirSync(path.dirname(baselineOutput), { recursive: true });
-    fs.writeFileSync(baselineOutput, JSON.stringify(buildBaseline(findings, axeVersion), null, 2));
+    writeJsonAtomic(baselineOutput, buildBaseline(findings, axeVersion));
     console.error(`a11y baseline: wrote ${findings.length} accepted finding(s) to ${baselineOutput}`);
   }
 

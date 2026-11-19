@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
+version: 4
 version_date: 2026-11-19
-previous_version: 2
+previous_version: 3
 change_summary: >
-  Rejects incomplete discovery plans in scanner and selector consumers.
+  Documents accepted-input preflight and safe partial adapter artifacts.
 ---
 
 # Experimental CLI Contract
@@ -20,6 +20,11 @@ The native scanner rejects unknown, repeated and missing option values before
 browser work starts.
 Scanner and changed-surface selection reject a discovery plan carrying an
 incomplete-error field, even if it retains a non-empty partial scan list.
+Native and legacy adapter outputs reject lexical, symlink, hardlink and
+ancestor aliases of accepted inputs before browser or stage work starts.
+The POSIX adapter retains a failed discovery or scan's shaped partial artifact
+for diagnosis. It strips scan gate claims, marks the scan artifact
+operationally failed, and never treats partial evidence as acceptance.
 
 ## Process boundary
 
