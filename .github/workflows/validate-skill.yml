@@ -120,6 +120,9 @@ jobs:
       - name: Verify operational readiness across gate modes
         run: node a11y-audit/evals/test-scan-readiness.js
 
+      - name: Prove baseline-first local example
+        run: node scripts/test-baseline-demo.mjs
+
       - name: Authenticated browser eval
         run: npm run eval:auth
 

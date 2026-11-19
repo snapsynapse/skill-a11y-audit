@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 62
+bundle_version: 63
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -192,8 +192,8 @@ dependencies:
 files:
   - path: SKILL.md
     role: skill
-    version: 29
-    hash: sha256:55036d141490750dc7e1289bae990437ab60c8665a4b31881a391426ee65e001
+    version: 30
+    hash: sha256:5e59e6c7cf30352d19a57a74b1b446c1f40d7a6053bf78309b2e4805c7910a5c
     note: Documents the additive major-findings acceptance mode
 
   - path: evals/evals.json
@@ -204,14 +204,14 @@ files:
 
   - path: ROADMAP.md
     role: reference
-    version: 12
-    hash: sha256:044c2b4535fcfa2603358704fe9b4a0b8a7b422971029111ced9dab05abe56a2
+    version: 13
+    hash: sha256:0d38e904e2018b66c66c03c9c8c9230f096034983688b1ee80b4144af745c42d
     note: Records dependency security maintenance after v3.2.0 publication
 
   - path: CHANGELOG.md
     role: reference
-    version: 62
-    hash: sha256:9634f76da92f6cd627df2a4be6b49f10b4bd73aa1e7014d02386e49e44da4ea5
+    version: 63
+    hash: sha256:607f8008efedb933868f3615d4f82c90ac71287e7894c8f3876f2512bc3aac43
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 37
-    hash: sha256:91a84d35678125b5f5a41f3d9345c0d0a5580e5f8d5dc5a1fd0ec03b17954ea9
+    version: 38
+    hash: sha256:ae5fc3d1b67eccb819771bf470eb23b6e416b74bcf0deecfe47b96d56f36ae32
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -504,8 +504,8 @@ files:
 
   - path: assets/ci/github-actions/accessibility-audit.yml
     role: asset
-    version: 14
-    hash: sha256:718559f4ae5934aaa7b68f21be04bc6d563d689bade9dc6873fcf2128b156c17
+    version: 15
+    hash: sha256:33a10e6a4c6a7730f5bb77017f367eed340dab710a202148ef50030ca2e7e09b
     note: Pins the prepared v3.3.0 Action candidate.
 
   - path: assets/ci/github-actions/surface-map.example.json
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 52
+    version: 56
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -660,8 +660,8 @@ files:
 
   - path: references/authenticated-scans.md
     role: reference
-    version: 5
-    hash: sha256:509a154f2e79352e15a446bb3f3e2aca5875ebd678d7d8e1dc1fa511a34a3835
+    version: 6
+    hash: sha256:133efaff6021f3f9dd06b4c963d630e69afb62ce5437ea6895aeb86226b6ebbb
     note: Distinguishes candidate network defaults from authenticated input guarantees.
 
   - path: evals/fixtures/eval-24/network-cases.json

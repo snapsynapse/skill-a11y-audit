@@ -4,8 +4,8 @@ Assistant Guide: skill-a11y-audit
 identifier: assistant-guide
 profile: human-verifiable-assistant-guide
 profile-version: 0.7.0
-guide-version: 0.3.18
-applies-to: skill-a11y-audit 3.3.x
+guide-version: 0.3.19
+applies-to: skill-a11y-audit 3.4.x
 canonical-url: https://skilla11y.dev/.well-known/assistant-guide.txt
 repository-url: https://github.com/snapsynapse/skill-a11y-audit
 source-path: /assistant-guide.txt
@@ -18,7 +18,7 @@ manifest-url: https://skilla11y.dev/.well-known/assistant-guide-manifest.txt
 [/assistant-guide-metadata]
 
 Task scope
-Requires Node.js 22.12.0 or later. Current release: v3.3.0.
+Requires Node.js 22.12.0 or later. Current release: v3.4.0.
 This guide covers acquiring skill-a11y-audit and running a bounded local
 accessibility audit, including an optional reviewed baseline for new-finding
 CI gates. It does not authorize production deployment, access to private or
@@ -66,7 +66,7 @@ Actions
 id: acquire-skill
 class: networked, persistence-changing
 approval: required
-command: git clone --branch v3.3.0 --depth 1 https://github.com/snapsynapse/skill-a11y-audit SKILL_REPO
+command: git clone --branch v3.4.0 --depth 1 https://github.com/snapsynapse/skill-a11y-audit SKILL_REPO
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: github.com
@@ -81,7 +81,7 @@ command: node SKILL_DIR/scripts/discover.js --url TARGET_URL --group-map ROUTE_M
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: TARGET_URL
-exec-sha256: f26f27e8ebe93aa39bec20f8afad1bd3b70e4ebdd19fb86dcce0fe09b7be732c
+exec-sha256: be8d5f1c548c03ea686e69496e2f384aa17dadfae84a7b24e0f092015c89acf6
 notes: ROUTE_MAP is reviewed route-group JSON; discovery writes a representative plan.
 [/action]
 
@@ -92,7 +92,7 @@ approval: required
 command: node S/scripts/select-changed-surfaces.js --discover P --map M --group-map R --changed-files F --output O
 runner: argv
 cwd: TARGET_WORKSPACE
-exec-sha256: a6ea36588704409058b66cbce2042214234f270dabd2d85f0dd29748e3e74f63
+exec-sha256: 86521618a657f0a1faac8a75cb9af741d136b40afd2886da20470748ffb8f0e0
 notes: S is SKILL_DIR; P plan; M ownership JSON; R route-group JSON; F changed paths; O output.
 [/action]
 
@@ -104,7 +104,7 @@ command: node SKILL_DIR/scripts/scan.js --discover SCAN_PLAN_JSON --output SCAN_
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URLs in SCAN_PLAN_JSON, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad
+exec-sha256: 513fc335e11f22671da6b280c50d61cc1c5531e7bd3d9f9a83821fc4da4ee8e8
 notes: May install missing packages, replace stale managed Puppeteer, and download Chrome.
 [/action]
 
@@ -116,7 +116,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --write-baseline BASELIN
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad
+exec-sha256: 513fc335e11f22671da6b280c50d61cc1c5531e7bd3d9f9a83821fc4da4ee8e8
 notes: Replaces a baseline only after human review; acceptance is not conformance.
 [/action]
 
@@ -128,7 +128,7 @@ command: node SKILL_DIR/scripts/scan.js --urls URL_LIST --baseline BASELINE_JSON
 runner: argv
 cwd: TARGET_WORKSPACE
 egress: URL_LIST, registry.npmjs.org, storage.googleapis.com
-exec-sha256: 904cc009bbd063562d785274b4b34b61a9db4115d722134079ba0fd894f86dad
+exec-sha256: 513fc335e11f22671da6b280c50d61cc1c5531e7bd3d9f9a83821fc4da4ee8e8
 notes: Stops on axe-core drift and reports accepted, new, and resolved findings.
 [/action]
 
@@ -139,7 +139,7 @@ approval: required
 command: node SKILL_DIR/scripts/report.js --input SCAN_JSON --output-dir OUTPUT_DIR
 runner: argv
 cwd: TARGET_WORKSPACE
-exec-sha256: 99489a06d2cdaf6904ea4e0c4563f8d6403cb457fcd5744c99de1a302e818f05
+exec-sha256: a12f61ece2fcec98f4ac9fc589aba74c8c0bc1e1ccb4d527259207c083f56aee
 notes: Writes the audit report only under the approved output directory.
 [/action]
 

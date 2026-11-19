@@ -1,0 +1,48 @@
+{
+  "runtime": "v24.22.3",
+  "axe_version": "4.12.1",
+  "browser_version": "25.16.0",
+  "candidate_baseline_sha256": "edd6807de063e6c4a93649892bfde5f522113a0a3c6caebdd5997a8c5e4ba195",
+  "initial_findings": [
+    {
+      "fingerprint": "08300d428f59ce0af287de5f67967a36e6b6a11ecec416b8bbc382de2c5c9394",
+      "rule": "image-alt",
+      "impact": "critical",
+      "route": "/demo",
+      "url": "http://127.0.0.1:49285/demo",
+      "target": "#existing-image"
+    }
+  ],
+  "outcomes": [
+    {
+      "state": "unchanged",
+      "exit_code": 0,
+      "existing_count": 1,
+      "new_count": 0,
+      "new_findings": []
+    },
+    {
+      "state": "new",
+      "exit_code": 2,
+      "existing_count": 1,
+      "new_count": 1,
+      "new_findings": [
+        {
+          "fingerprint": "66d3c310fbd0a8a6b3bc3f6cf7550c6ddfdc29f14769cbe123b4ccece2348ac5",
+          "rule": "button-name",
+          "impact": "critical",
+          "route": "/demo",
+          "url": "http://127.0.0.1:49285/demo",
+          "target": "#new-button"
+        }
+      ]
+    },
+    {
+      "state": "restored",
+      "exit_code": 0,
+      "existing_count": 1,
+      "new_count": 0,
+      "new_findings": []
+    }
+  ]
+}

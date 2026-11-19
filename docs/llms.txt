@@ -4,11 +4,12 @@
 > Template-aware sampling, stable finding fingerprints, and accepted
 > baselines let CI block new barriers without requiring zero existing debt.
 
-Documentation version: 3.3.0. Updated: 2026-10-26.
+Documentation version: 3.4.0. Updated: 2026-11-19.
 Requires Node.js 22.12.0 or later. Managed dependencies: Puppeteer 25.16.0
 and axe-core 4.12.1. The reusable Action defaults to Node 22.
-v3.3.0 enables sandboxing and explicit target-origin controls.
-Release-specific source and Action examples pin v3.3.0.
+v3.4.0 keeps sandboxing and approved origins, and requires complete discovery
+and successful HTML target readiness before any finding gate can pass.
+Release-specific source and Action examples pin v3.4.0.
 
 ## What this skill does
 
@@ -18,7 +19,7 @@ Release-specific source and Action examples pin v3.3.0.
 - Produces structured reports with prioritized findings and fix guidance
 - Tracks progress between audits (delta comparison)
 - Creates reviewable accepted baselines and can fail CI only on new findings
-- Installs the complete managed graph when packages are missing or skill-local Puppeteer is stale
+- Installs the complete managed graph when packages are missing or installed lock identity is stale
 - Managed graph excludes extract-zip; project/global fallback packages require their own dependency audit
 - Browser downloads need installation authority; skip-download requires a matching preinstalled browser
 
@@ -99,6 +100,6 @@ The agent selects final delivery using the workspace context.
   that every agent or model has been tested with v3.
 
 Authenticated inputs: pair --storage-state with --auth-targets for exact URL and visible-selector assertions. Cookies and local storage only; discovery stays unauthenticated. See a11y-audit/references/authenticated-scans.md in the repository.
-Guide 0.3.18 acquires v3.3.0; local checks do not establish hosted acceptance.
+Guide 0.3.19 acquires v3.4.0; local checks do not establish hosted acceptance.
 Security defaults: approved sitemap/navigation origins, bounded fetches, sandboxed Chrome and loopback-only Action serving.
 Read a11y-audit/references/network-policy.md before configuring additional origins or a sandbox override.

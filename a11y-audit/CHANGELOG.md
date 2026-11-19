@@ -1,52 +1,58 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 62
+version: 63
 version_date: 2026-11-19
-previous_version: 61
+previous_version: 62
 change_summary: >
-  Records the report pin on the verified managed dependency graph.
+  Prepares v3.4.0 with guide 0.3.19 and baseline-first adoption evidence.
 ---
 
 # Changelog
 
-## Unreleased report executable integrity -- 2026-11-19
+## v3.4.0 -- 2026-11-19
+
+- Package 3.4.0 and bundle revision 63 combine the separately reviewed trust-boundary repairs below. Assistant guide 0.3.19 pins the candidate discover, select, scan and report executables and acquires the planned v3.4.0 tag. The prior human review date is preserved.
+- A synthetic three-state baseline example shows unchanged, new and restored findings against one candidate baseline; it does not accept production debt.
+- Release notes, Action starter and site references target v3.4.0. Hosted checks, tag, assets and deployment require separate verification.
+
+### report executable integrity -- 2026-11-19
 
 - `report.js` verifies the scanner's exact bytes before loading report evidence helpers; the scanner binds its local executable imports before use.
 - A mutation fixture rejects changed dependencies before sentinel execution while legitimate report generation remains available.
 
-## Unreleased managed dependency identity -- 2026-11-19
+### managed dependency identity -- 2026-11-19
 
 - Before reusing skill-managed dependencies, the scanner checks a completed-install marker, committed lock digest, installed lock graph, actual transitive package versions, and pinned axe-core and Puppeteer versions. Both reuse and post-install checks share one verifier and derive the lock path from the package directory. Failed or stale installs require a fresh locked installation.
 - Local regression fixtures cover transitive lock drift, top-level version drift, missing markers and interrupted installation. External project and global dependency graphs remain outside this managed-lock guarantee.
 
-## Unreleased loopback containment -- 2026-11-19
+### loopback containment -- 2026-11-19
 
 - The temporary Action server refuses selected symlink and special-file aliases, including outward, hidden, index, fallback and encoded-path cases. An unrelated unsafe fallback or extension alias does not block a regular file or index page.
 - The isolated Action consumer exercises forbidden aliases and visible controls.
 
-## Unreleased output and auth containment -- 2026-11-19
+### output and auth containment -- 2026-11-19
 
 - Native and adapter paths reject accepted-input aliases before writing. Atomic scanner and baseline JSON publication creates owner-only files, including when replacing an existing private artifact. Failed discovery or scan stages retain only shaped partial evidence without gate acceptance.
 - Authenticated Action uploads select generated regular files and revalidate them before collection. Local input, adapter and artifact regressions cover symlink, hardlink, ancestor and stage-outcome boundaries.
 
-## Unreleased discovery completeness -- 2026-11-19
+### discovery completeness -- 2026-11-19
 
 - Required sitemap-index children, malformed responses, cycles and whole-run budget exhaustion now produce incomplete plans with retained partial diagnostics.
 - XML text decodes once, malformed links do not discard valid siblings, and scanner and changed-surface consumers reject incomplete plans.
 - Focused discovery boundary regressions cover required children, cycles, aggregate work limits and entity handling.
 
-## Unreleased scanner readiness -- 2026-11-19
+### scanner readiness -- 2026-11-19
 
 - Every scan gate now requires a successful HTML response from each target. Missing, non-HTML, 404 and 500 responses remain operational failures with partial evidence.
 - Native argument parsing rejects unknown, repeated, missing and empty option values before browser work. Local readiness and parser regression checks cover these outcomes.
-- The published assistant guide remains pinned to v3.3.0 bytes while candidate scanner files change.
+- During preparation, guide 0.3.18 remained pinned to published v3.3.0 bytes while candidate scanner files changed.
 
-## Unreleased Pages and root validation -- 2026-11-19
+### Pages and root validation -- 2026-11-19
 
 - Pages verifies release and staged guide, executable and provenance bytes before deployment, with the verifier script itself pinned in the workflow.
 - Root search validators decode XML entities in one pass; the site builder rejects symlink and special-file escapes; the npm audit gate validates advisory reference graphs.
-- Local regression checks cover these boundaries. The published v3.3.0 guide and release remain unchanged.
+- Local regression checks covered these boundaries before the v3.4.0 candidate guide and release were prepared.
 
 ## v3.3.0 -- 2026-10-26
 

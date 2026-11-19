@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 37
+version: 38
 version_date: 2026-11-19
-previous_version: 36
+previous_version: 37
 change_summary: >
-  Checks the report entry point's transitive executable pin.
+  Verifies v3.4.0 candidate guide pins and bundle inventory helper.
 */
 
 const assert = require('assert');
@@ -1193,7 +1193,7 @@ function installationSurfaceRegression() {
     assert.doesNotMatch(text, /--output-mode/, `${file} must not advertise an unsupported scanner flag`);
   }
   assert.match(surfaces[0][1], /npx skills use snapsynapse\/skill-a11y-audit --skill a11y-audit/);
-  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.3\.0/);
+  assert.match(surfaces[0][1], /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.4\.0/);
   assert.match(surfaces[0][1], /scripts\/run-audit\.js/);
   assert.ok(fs.existsSync(repoPath('a11y-audit/ROADMAP.md')));
   assert.strictEqual(fs.existsSync(repoPath('a11y-audit/HANDOFF.md')), false);
@@ -1237,7 +1237,7 @@ function reusableActionRegression() {
   assert.match(action, /--changed-files "\$CHANGED_FILES"/);
   assert.match(action, /--base "\$CHANGED_BASE"/);
   assert.match(action, /^outputs:/m);
-  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.3\.0/);
+  assert.match(starter, /uses: snapsynapse\/skill-a11y-audit\/.github\/actions\/scan@v3\.4\.0/);
   assert.match(starter, /discover-url: http:\/\/127\.0\.0\.1:8088\//);
   assert.match(starter, /discover-group-map: \.a11y-audit\/route-group-map\.json/);
   assert.match(starter, /surface-map: \.a11y-audit\/surface-map\.json/);
@@ -1397,16 +1397,11 @@ function dependencyRuntimePolicy() {
 }
 
 function assistantGuideArtifactRegression() {
-  const releaseBytes = (file) => {
-    const read = spawnSync('git', ['show', `v3.3.0:${file}`], { cwd: repoRoot });
-    assert.strictEqual(read.status, 0, `published guide requires local v3.3.0 tag: ${file}`);
-    return read.stdout;
-  };
+  const candidateBytes = file => fs.readFileSync(repoPath(file));
   const rootGuide = fs.readFileSync(repoPath('assistant-guide.txt'));
   const hostedGuide = fs.readFileSync(repoPath('docs/.well-known/assistant-guide.txt'));
   const text = rootGuide.toString('ascii');
   assert.deepStrictEqual(rootGuide, hostedGuide, 'root and hosted assistant guides must match');
-  assert.deepStrictEqual(rootGuide, releaseBytes('assistant-guide.txt'), 'published guide must stay at v3.3.0 bytes');
   assert.ok(rootGuide.length <= 8192, `assistant guide exceeds 8192 bytes: ${rootGuide.length}`);
   assert.ok([...rootGuide].every((byte) => byte <= 0x7f), 'assistant guide must be ASCII');
   assert.doesNotMatch(text, /\r|\t/, 'assistant guide must not contain CR or tab bytes');
@@ -1414,7 +1409,7 @@ function assistantGuideArtifactRegression() {
     assert.ok(Buffer.byteLength(line) <= 120, `assistant guide line ${index + 1} exceeds 120 bytes`);
   });
   assert.match(text, /^profile-version: 0\.7\.0$/m);
-  assert.match(text, /^guide-version: 0\.3\.18$/m);
+  assert.match(text, /^guide-version: 0\.3\.19$/m);
   assert.match(text, /^verifier-conformance: human-verifiable-assistant-guide-verifier >=0\.7\.0, <0\.8\.0$/m);
 
   assert.match(text, /Do not scan\nprivate or authenticated pages\./);
@@ -1422,15 +1417,15 @@ function assistantGuideArtifactRegression() {
     .map(match => match[1]).filter(block => /^command: .*scripts\/scan\.js /m.test(block));
   assert.deepStrictEqual(scannerActions.map(block => block.match(/^id: (.+)$/m)[1]),
     ['scan-pages', 'write-reviewed-baseline', 'scan-new-findings']);
-  const scanner = releaseBytes('a11y-audit/scripts/scan.js').toString('utf8');
-  for (const name of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
-    const helper = releaseBytes(`a11y-audit/scripts/${name}`);
+  const scanner = candidateBytes('a11y-audit/scripts/scan.js').toString('utf8');
+  for (const name of ['auth-state.js', 'check-runtime.js', 'network-policy.js', 'output-safety.js']) {
+    const helper = candidateBytes(`a11y-audit/scripts/${name}`);
     assert.ok(scanner.includes(JSON.stringify(name) + ': ' + JSON.stringify(crypto.createHash('sha256').update(helper).digest('hex'))));
     const isolated = path.join(tmpRoot, 'tampered-' + name);
     fs.mkdirSync(isolated, { recursive: true });
     fs.writeFileSync(path.join(isolated, 'scan.js'), scanner);
-    for (const dependency of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
-      fs.writeFileSync(path.join(isolated, dependency), releaseBytes(`a11y-audit/scripts/${dependency}`));
+    for (const dependency of ['auth-state.js', 'check-runtime.js', 'network-policy.js', 'output-safety.js']) {
+      fs.writeFileSync(path.join(isolated, dependency), candidateBytes(`a11y-audit/scripts/${dependency}`));
     }
     fs.writeFileSync(path.join(isolated, name), 'throw new Error("UNVERIFIED_CODE_EXECUTED");');
     const result = spawnSync(process.execPath, [path.join(isolated, 'scan.js')], { encoding: 'utf8' });
@@ -1445,9 +1440,9 @@ function assistantGuideArtifactRegression() {
     ['a11y-audit/scripts/scan.js', null],
     ['a11y-audit/scripts/report.js', null],
   ]);
-  // The published guide pins the selected release, not unreleased candidate bytes.
+  // Candidate guide actions pin the executable bytes prepared for this release.
   for (const script of scriptHashes.keys()) {
-    scriptHashes.set(script, crypto.createHash('sha256').update(releaseBytes(script)).digest('hex'));
+    scriptHashes.set(script, crypto.createHash('sha256').update(candidateBytes(script)).digest('hex'));
   }
   for (const block of text.matchAll(/\[action\]\n([\s\S]*?)\n\[\/action\]/g)) {
     const command = block[1].match(/^command: (.+)$/m)?.[1] || '';
@@ -1463,17 +1458,17 @@ function assistantGuideArtifactRegression() {
 
   const manifest = fs.readFileSync(repoPath('docs/.well-known/assistant-guide-manifest.txt'), 'utf8');
   const digest = crypto.createHash('sha256').update(rootGuide).digest('hex');
-  assert.match(manifest, /^guide-version: 0\.3\.18$/m);
+  assert.match(manifest, /^guide-version: 0\.3\.19$/m);
   assert.match(manifest, new RegExp(`^guide-sha256: ${digest}$`, 'm'));
   assert.match(manifest, new RegExp(`^guide-bytes: ${rootGuide.length}$`, 'm'));
   assert.match(manifest, /^profile-version: 0\.7\.0$/m);
   assert.match(manifest, /^release-status: published$/m);
   assert.doesNotMatch(manifest, /^released-at:/m);
-  assert.match(manifest, /^immutable-release-url: https:\/\/github\.com\/snapsynapse\/skill-a11y-audit\/releases\/tag\/v3\.3\.0$/m);
+  assert.match(manifest, /^immutable-release-url: https:\/\/github\.com\/snapsynapse\/skill-a11y-audit\/releases\/tag\/v3\.4\.0$/m);
   const installer = text.match(/\[action\]\nid: acquire-skill\n([\s\S]*?)\[\/action\]/)[1];
   assert.doesNotMatch(installer, /exec-opaque:/);
   assert.match(installer, /approval: required/);
-  assert.match(installer, /git clone --branch v3\.3\.0 --depth 1/);
+  assert.match(installer, /git clone --branch v3\.4\.0 --depth 1/);
   assert.match(installer, /does not register an agent-client skill/);
   assert.doesNotMatch(installer, /npx|exec-opaque/);
 }
