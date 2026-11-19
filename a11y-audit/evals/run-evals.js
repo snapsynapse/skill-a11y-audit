@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 35
+version: 36
 version_date: 2026-11-19
-previous_version: 34
+previous_version: 35
 change_summary: >
-  Checks adapter partial evidence and authenticated output containment.
+  Checks managed installed dependency identity and lock marker behavior.
 */
 
 const assert = require('assert');
@@ -464,13 +464,15 @@ function scannerBrowserValidation() {
     /Invalid --axe-version/
   );
   const scanSource = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
-  assert.match(scanSource, /\['ci', '--prefix', SKILL_DEPS_DIR, '--no-audit', '--no-fund'\]/);
+  assert.match(scanSource, /\['ci', '--prefix', depsDir, '--no-audit', '--no-fund'\]/);
   assert.match(scanSource, /const PINNED_VERSIONS = \{[\s\S]*'axe-core': '4\.12\.1'/);
   assert.doesNotMatch(scanSource, /execSync\(`npm install/);
 }
 
 function scannerDependencyResilience() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  const depsDir = tmpPath('dependency-resilience');
+  resetDir(depsDir);
   assert.strictEqual(scan.parsePositiveInteger('240000', '--install-timeout-ms'), 240000);
   assert.throws(() => scan.parsePositiveInteger('0', '--install-timeout-ms'), /positive integer/);
 
@@ -482,6 +484,8 @@ function scannerDependencyResilience() {
     { status: 0, signal: null, stderr: '' },
   ];
   scan.installDependencySet({
+    axeVersion: '4.12.2',
+    depsDir,
     timeoutMs: 54321,
     spawn(command, args, options) {
       calls.push({ command, args, options });
@@ -492,11 +496,13 @@ function scannerDependencyResilience() {
   assert.strictEqual(calls.length, 3);
   assert.deepStrictEqual(sleeps, [1000, 2000]);
   assert.deepStrictEqual(calls[0].args, [
-    'ci', '--prefix', path.resolve(repoPath('a11y-audit/deps')), '--no-audit', '--no-fund',
+    'install', '--prefix', depsDir, '--no-save', '--package-lock=false',
+    '--no-audit', '--no-fund', 'axe-core@4.12.2', 'puppeteer@25.16.0',
   ]);
   assert.strictEqual(calls[0].options.timeout, 54321);
 
   assert.throws(() => scan.installDependencySet({
+    depsDir,
     timeoutMs: 10,
     attempts: 1,
     spawn() {
@@ -1512,6 +1518,7 @@ test('security regressions fail closed and bound network work', () => runNode(['
 test('discovery budgets, required children, cycles and XML boundaries', () => runNode(['a11y-audit/evals/test-discovery-boundaries.js']));
 test('required sitemap failures propagate with partial evidence', () => runNode(['a11y-audit/evals/test-discovery-propagation.js']));
 test('scanner argument and input preservation boundaries', () => runNode(['a11y-audit/evals/test-scan-input-boundaries.js']));
+test('managed installed dependency identity', () => runNode(['a11y-audit/evals/test-managed-dependency-identity.js']));
 test('authenticated upload artifact guard', () => runNode(['a11y-audit/evals/test-auth-artifact-guard.js']));
 test('npm audit advisory reference graph', () => runNode(['scripts/test-audit-deps.mjs']));
 test('site staging symlink containment', () => runNode(['scripts/test-build-site-security.mjs']));

@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 58
+bundle_version: 60
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 58
-    hash: sha256:6779e60b571e46ad8214c8b614241670dcdeb71c7e83eafd46a221ab93879fcb
+    version: 60
+    hash: sha256:4edc6eacfb8ced3bbdc22a3a19de3eeec744875a8f1a5e496f15b4628811033e
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 35
-    hash: sha256:edc854ac729199ae34af90e0f1e9db10ff62e2c31b2c46b8bb64ddecbf0c4ee2
+    version: 36
+    hash: sha256:77993ef267218c9ab3a6a4fcfe385f62ee205c6eca54cd34e70b351c60c74941
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -426,8 +426,8 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 20
-    hash: sha256:434a274943610907e6ee841388d78f04724892d8d32fb34ac8b0487af6e0ba45
+    version: 22
+    hash: sha256:ec1ff46e43d4c1a09ff2b803db368c59699d77e7616b7607918db43339a85a2f
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 48
+    version: 50
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -624,8 +624,8 @@ files:
 
   - path: references/runtime-compatibility.md
     role: reference
-    version: 3
-    hash: sha256:59d110e6e7872ff1cffafcabad2624bbeaf6ab104ef1567f10acd88f7992567e
+    version: 4
+    hash: sha256:ecedcc082fb37815f81b3ffe65bb9a4eba2572f2960fc8b010089468db56c109
     note: Documents the v3.3.0 candidate browser graph and sandbox policy.
 
   - path: references/cli-contract.md
@@ -728,4 +728,10 @@ files:
     role: script
     version: 2
     hash: sha256:a76f2a7678a6cf4757018641a46d08566fdccc55b548d0ebd3d08877edf797b4
+    note: Added by bundle manifest helper
+
+  - path: evals/test-managed-dependency-identity.js
+    role: evals
+    version: 2
+    hash: sha256:3f494881feffc9dc9b6588ff143d58f066caf7bd84fe2bef3d2088cf9d3bab23
     note: Added by bundle manifest helper
