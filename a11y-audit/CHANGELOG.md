@@ -1,14 +1,20 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 51
-version_date: 2026-10-26
-previous_version: 50
+version: 52
+version_date: 2026-11-19
+previous_version: 51
 change_summary: >
-  Records the six security remediations and v3.3.0 review preparation.
+  Records Pages and root validation fixes pending release.
 ---
 
 # Changelog
+
+## Unreleased Pages and root validation -- 2026-11-19
+
+- Pages verifies release and staged guide, executable and provenance bytes before deployment, with the verifier script itself pinned in the workflow.
+- Root search validators decode XML entities in one pass; the site builder rejects symlink and special-file escapes; the npm audit gate validates advisory reference graphs.
+- Local regression checks cover these boundaries. The published v3.3.0 guide and release remain unchanged.
 
 ## v3.3.0 -- 2026-10-26
 

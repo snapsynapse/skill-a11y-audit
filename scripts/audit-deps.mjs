@@ -10,6 +10,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const BLOCKING = new Set(['high', 'critical']);
+const SEVERITIES = ['info', 'low', 'moderate', 'high', 'critical'];
 const ROOT = process.cwd();
 const arg = name => {
     const found = process.argv.find(value => value.startsWith(`--${name}=`));
@@ -40,12 +41,57 @@ function runAudit() {
         || (result.status === 1 && totals.total === 0)) {
       throw new Error('npm audit did not return a complete, consistent vulnerability report; coverage is unavailable.');
     }
-    for (const vulnerability of Object.values(report.vulnerabilities)) {
-      if (!object(vulnerability) || !['info', 'low', 'moderate', 'high', 'critical'].includes(vulnerability.severity)
+    const buckets = Object.fromEntries(SEVERITIES.map(level => [level, 0]));
+    for (const [name, vulnerability] of Object.entries(report.vulnerabilities)) {
+      if (!object(vulnerability) || !SEVERITIES.includes(vulnerability.severity)
           || !Array.isArray(vulnerability.via) || vulnerability.via.length === 0
           || !vulnerability.via.every(via => typeof via === 'string' || (object(via)
             && typeof via.name === 'string' && typeof via.url === 'string'
-            && ['info', 'low', 'moderate', 'high', 'critical'].includes(via.severity)))) {
+            && SEVERITIES.includes(via.severity)))) {
+        throw new Error('npm audit returned malformed advisory data; coverage is unavailable.');
+      }
+      buckets[vulnerability.severity] += 1;
+      if (vulnerability.name !== undefined && vulnerability.name !== name) {
+        throw new Error('npm audit returned malformed advisory data; coverage is unavailable.');
+      }
+    }
+    if (SEVERITIES.some(level => buckets[level] !== totals[level])) {
+      throw new Error('npm audit did not return a complete, consistent vulnerability report; coverage is unavailable.');
+    }
+    // A `via` string is a package reference, never an advisory. Propagate
+    // concrete advisory severity backward through the graph. Cycles with a
+    // real advisory are valid; dangling and advisory-free cycles are not.
+    const maximum = new Map();
+    const parents = new Map();
+    const pending = [];
+    for (const [name, vulnerability] of Object.entries(report.vulnerabilities)) {
+      for (const via of vulnerability.via) {
+        if (typeof via !== 'string') {
+          const level = SEVERITIES.indexOf(via.severity);
+          if (level > (maximum.get(name) ?? -1)) {
+            maximum.set(name, level);
+            pending.push(name);
+          }
+          continue;
+        }
+        if (!Object.hasOwn(report.vulnerabilities, via)) {
+          throw new Error('npm audit returned malformed advisory data; coverage is unavailable.');
+        }
+        if (!parents.has(via)) parents.set(via, []);
+        parents.get(via).push(name);
+      }
+    }
+    for (let index = 0; index < pending.length; index += 1) {
+      const child = pending[index];
+      const level = maximum.get(child);
+      for (const parent of parents.get(child) ?? []) {
+        if (level <= (maximum.get(parent) ?? -1)) continue;
+        maximum.set(parent, level);
+        pending.push(parent);
+      }
+    }
+    for (const [name, vulnerability] of Object.entries(report.vulnerabilities)) {
+      if (SEVERITIES[maximum.get(name)] !== vulnerability.severity) {
         throw new Error('npm audit returned malformed advisory data; coverage is unavailable.');
       }
     }

@@ -7,7 +7,6 @@ on:
       - 'docs/**'
       - 'a11y-audit/references/output-schema.json'
       - 'a11y-audit/references/cli-result-schema.json'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -39,6 +38,7 @@ jobs:
       - name: Verify offline search contract
         run: npm run check:search
       - name: Wait for matching published release
+        id: release
         timeout-minutes: 12
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,6 +51,7 @@ jobs:
             assets=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" \
               --jq 'select(.draft == false and .prerelease == false) | [.assets[].name] | sort | join(",")' 2>/dev/null || true)
             if { [ "$relationship" = identical ] || [ "$relationship" = ahead ]; } && [ "$assets" = "$expected" ]; then
+              echo "tag=$tag" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Waiting for matching $tag release and assets ($attempt/40)"
@@ -58,6 +59,16 @@ jobs:
           done
           echo "Matching published $tag release and assets are not ready for $GITHUB_SHA" >&2
           exit 1
+      - name: Checkout selected release identity
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          path: .release-identity
+          persist-credentials: false
+      - name: Verify release and Pages byte identity
+        run: |
+          echo '4e7f8ef50a18bb84e40cd18c660206cc84101e1f3757052067aa8a6a9ac7e088  scripts/verify-release-site-identity.mjs' | sha256sum --check
+          node scripts/verify-release-site-identity.mjs .release-identity . _site
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site

@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 31
-version_date: 2026-10-26
-previous_version: 30
+version: 32
+version_date: 2026-11-19
+previous_version: 31
 change_summary: >
-  Validates security behavior, helper integrity and versioned guide synchronization.
+  Registers Pages, search, audit and release identity regression checks.
 */
 
 const assert = require('assert');
@@ -1492,6 +1492,10 @@ if (validateMode) {
 test('eval-9 preserves explicitly approved cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
 test('security regressions fail closed and bound network work', () => runNode(['a11y-audit/evals/test-security.js']));
+test('npm audit advisory reference graph', () => runNode(['scripts/test-audit-deps.mjs']));
+test('site staging symlink containment', () => runNode(['scripts/test-build-site-security.mjs']));
+test('search XML decoder copies', () => runNode(['scripts/test-search-decoder.mjs']));
+test('release-to-site byte identity', () => runNode(['scripts/test-release-site-identity.mjs']));
 test('eval-12 blocks cross-origin sitemaps unless explicitly allowed', () => runDiscoverFixture('eval-12'));
 test('eval-19 targets mapped changed surfaces and falls back conservatively', eval19ChangedSurfaceSelection);
 test('eval-20 groups flat routes and always includes directly changed pages', eval20FlatRouteGroupingAndDirectPages);
