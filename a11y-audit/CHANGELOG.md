@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 56
+version: 58
 version_date: 2026-11-19
-previous_version: 55
+previous_version: 57
 change_summary: >
-  Records owner-only atomic artifacts after security review.
+  Records selective loopback path checks after code review.
 ---
 
 # Changelog
+
+## Unreleased loopback containment -- 2026-11-19
+
+- The temporary Action server refuses selected symlink and special-file aliases, including outward, hidden, index, fallback and encoded-path cases. An unrelated unsafe fallback or extension alias does not block a regular file or index page.
+- The isolated Action consumer exercises forbidden aliases and visible controls.
 
 ## Unreleased output and auth containment -- 2026-11-19
 

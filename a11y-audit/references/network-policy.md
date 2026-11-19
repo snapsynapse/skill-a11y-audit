@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 4
 version_date: 2026-11-19
-previous_version: 1
+previous_version: 3
 change_summary: >
-  Defines required sitemap-child completeness and whole-discovery budgets.
+  Limits loopback containment checks to the selected static or fallback path.
 ---
 
 # Network and browser policy
@@ -49,4 +49,4 @@ The repository's Ubuntu browser CI explicitly opts into the override only in its
 
 ## Temporary Action server
 
-When `serve-path` is supplied, the Action binds the temporary HTTP server to `127.0.0.1`, disables directory listings, and refuses dotfiles. Existing index pages remain available. Select a public build directory; other processes on the same runner can still access a loopback server. No server starts when `serve-path` is empty.
+When `serve-path` is supplied, the Action binds the temporary HTTP server to `127.0.0.1`, disables directory listings, and refuses dotfiles. It also rejects symlink and special-file paths selected as the requested file, index, extension, or fallback. An unrelated unsafe fallback does not block a valid regular file. Existing regular index pages remain available. Select a public build directory; other processes on the same runner can still access a loopback server. No server starts when `serve-path` is empty.

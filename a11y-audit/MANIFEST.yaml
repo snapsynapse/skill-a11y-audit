@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 56
+bundle_version: 58
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 56
-    hash: sha256:8c48fe6fae6f0b7ce3954643cde676678bd13e24df5b3f5b7c3f05cbd7ea7936
+    version: 58
+    hash: sha256:6779e60b571e46ad8214c8b614241670dcdeb71c7e83eafd46a221ab93879fcb
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 46
+    version: 48
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -678,8 +678,8 @@ files:
 
   - path: references/network-policy.md
     role: reference
-    version: 2
-    hash: sha256:68fec8f2404e9c523319fad1e952c0bc2b88bc907ec91186aa81f619bc0c2ee4
+    version: 4
+    hash: sha256:92185e80f95fac60c2ea2021888fd81a4646c0662bf09d7047c4eac479dab23c
     note: Security hardening regression or policy reference
 
   - path: scripts/network-policy.js
@@ -690,8 +690,8 @@ files:
 
   - path: scripts/serve-local.js
     role: script
-    version: 1
-    hash: sha256:229e6bfe61cb858829cdcc53b8ef1e0a8499dedff25fdc743f91ff2ce854889d
+    version: 3
+    hash: sha256:f7dfe6513057f679acf3bb4306cb92b91cb1d50535dfa158e468fb2048e6cf8b
     note: Security hardening regression or policy reference
 
   - path: evals/test-scan-readiness.js
