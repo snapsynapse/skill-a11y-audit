@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 61
+bundle_version: 62
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 61
-    hash: sha256:21f39cf328a614ee34fa8bc1cb0b5c4897714f8aec2dea0a8c0708cfb79de78c
+    version: 62
+    hash: sha256:9634f76da92f6cd627df2a4be6b49f10b4bd73aa1e7014d02386e49e44da4ea5
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 36
-    hash: sha256:77993ef267218c9ab3a6a4fcfe385f62ee205c6eca54cd34e70b351c60c74941
+    version: 37
+    hash: sha256:91a84d35678125b5f5a41f3d9345c0d0a5580e5f8d5dc5a1fd0ec03b17954ea9
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -450,8 +450,8 @@ files:
 
   - path: scripts/report.js
     role: script
-    version: 7
-    hash: sha256:99489a06d2cdaf6904ea4e0c4563f8d6403cb457fcd5744c99de1a302e818f05
+    version: 9
+    hash: sha256:a12f61ece2fcec98f4ac9fc589aba74c8c0bc1e1ccb4d527259207c083f56aee
     note: Reports major-gate acceptance and incomplete-review evidence
 
   - path: scripts/discover.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 51
+    version: 52
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 

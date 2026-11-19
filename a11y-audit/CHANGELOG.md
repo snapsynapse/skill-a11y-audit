@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 61
+version: 62
 version_date: 2026-11-19
-previous_version: 60
+previous_version: 61
 change_summary: >
-  Rejects drifted transitive package metadata during managed reuse.
+  Records the report pin on the verified managed dependency graph.
 ---
 
 # Changelog
+
+## Unreleased report executable integrity -- 2026-11-19
+
+- `report.js` verifies the scanner's exact bytes before loading report evidence helpers; the scanner binds its local executable imports before use.
+- A mutation fixture rejects changed dependencies before sentinel execution while legitimate report generation remains available.
 
 ## Unreleased managed dependency identity -- 2026-11-19
 
