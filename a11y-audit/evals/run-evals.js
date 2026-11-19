@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 33
+version: 34
 version_date: 2026-11-19
-previous_version: 32
+previous_version: 33
 change_summary: >
-  Keeps the published guide pinned while readiness checks change candidate scanner bytes.
+  Rejects partial discovery plans and runs bounded sitemap regressions.
 */
 
 const assert = require('assert');
@@ -529,6 +529,12 @@ function scannerDiscoverPlanRegression() {
   assert.throws(() => scan.validateScanUrl('file:///etc/passwd'), /Unsupported scan URL protocol/);
   fs.writeFileSync(planPath, JSON.stringify({ scanList: [] }));
   assert.throws(() => scan.loadUrlsFromDiscoverPlan(planPath), /non-empty scanList/);
+  fs.writeFileSync(planPath, JSON.stringify({ error: 'required-sitemap-unavailable',
+    scanList: ['https://example.com/'] }));
+  assert.throws(() => scan.loadUrlsFromDiscoverPlan(planPath), /incomplete/);
+  const selector = require(repoPath('a11y-audit/scripts/select-changed-surfaces.js'));
+  assert.throws(() => selector.validateDiscoveryPlan({ error: 'discovery-deadline',
+    scanList: ['https://example.com/'], groups: [{ pattern: 'root', urls: ['https://example.com/'] }] }), /incomplete/);
 }
 
 function eval19ChangedSurfaceSelection() {
@@ -1503,6 +1509,7 @@ if (validateMode) {
 test('eval-9 preserves explicitly approved cross-origin sitemap URLs', () => runDiscoverFixture('eval-9'));
 test('eval-10 keeps discovery deterministic', () => runDiscoverFixture('eval-10'));
 test('security regressions fail closed and bound network work', () => runNode(['a11y-audit/evals/test-security.js']));
+test('discovery budgets, required children, cycles and XML boundaries', () => runNode(['a11y-audit/evals/test-discovery-boundaries.js']));
 test('npm audit advisory reference graph', () => runNode(['scripts/test-audit-deps.mjs']));
 test('site staging symlink containment', () => runNode(['scripts/test-build-site-security.mjs']));
 test('search XML decoder copies', () => runNode(['scripts/test-search-decoder.mjs']));

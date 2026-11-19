@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 53
+bundle_version: 54
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 53
-    hash: sha256:c201c4f9b0a3ebd52b795b83a551355de21b79a1239e95e6d967cf404fe36cc0
+    version: 54
+    hash: sha256:6580046a6d8cce59c26e39d1fdaaacd0b8da8e2b3b0510fa514dc8a2ab43b70f
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 33
-    hash: sha256:cae7b7fc6af86bf4bf1844b51d7a536d8596561468a1daeb98014083357bcf4a
+    version: 34
+    hash: sha256:f3f0bed6800bfe7b19ff33908a2569a12deb09d1449386074f6613efa71e6340
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -426,8 +426,8 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 17
-    hash: sha256:4b6ed55ea08dc1f1e81a07629d3c8000b13fb14481a5cb8c5d6ecbbb3d4659ef
+    version: 18
+    hash: sha256:792031128319f27b34d5a42252add2699d038101ec382f0027682b899f7f597f
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
@@ -456,14 +456,14 @@ files:
 
   - path: scripts/discover.js
     role: script
-    version: 6
-    hash: sha256:f26f27e8ebe93aa39bec20f8afad1bd3b70e4ebdd19fb86dcce0fe09b7be732c
+    version: 7
+    hash: sha256:be8d5f1c548c03ea686e69496e2f384aa17dadfae84a7b24e0f092015c89acf6
     note: Filters sitemap targets to approved origins and uses shared bounded HTTP reads.
 
   - path: scripts/select-changed-surfaces.js
     role: script
-    version: 3
-    hash: sha256:a6ea36588704409058b66cbce2042214234f270dabd2d85f0dd29748e3e74f63
+    version: 4
+    hash: sha256:86521618a657f0a1faac8a75cb9af741d136b40afd2886da20470748ffb8f0e0
     note: Schema-v2 direct changed pages with explicit ambiguity fallback
 
   - path: .gitignore
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 43
+    version: 44
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -630,8 +630,8 @@ files:
 
   - path: references/cli-contract.md
     role: reference
-    version: 2
-    hash: sha256:53a5575f89ad460802d1ae475dab8c3aa01358191f321a540b8e2205500e8591
+    version: 3
+    hash: sha256:52f702619e9ea0725e6953c25e70f472d00ae19f3d51a443644497fcf5c003b7
     note: Experimental CLI contract and compatibility boundary
 
   - path: references/cli-result-schema.json
@@ -678,8 +678,8 @@ files:
 
   - path: references/network-policy.md
     role: reference
-    version: 1
-    hash: sha256:a5f407cc239f2adc1ec42092ae36a0ddcb58a21616811639310e06f1ff81d3de
+    version: 2
+    hash: sha256:68fec8f2404e9c523319fad1e952c0bc2b88bc907ec91186aa81f619bc0c2ee4
     note: Security hardening regression or policy reference
 
   - path: scripts/network-policy.js
@@ -698,4 +698,10 @@ files:
     role: evals
     version: 1
     hash: sha256:7958e9e7c6d7b2e56c6b4abdbfbbcee699e569137df0089ae45c4ec891ab6b71
+    note: Added by bundle manifest helper
+
+  - path: evals/test-discovery-boundaries.js
+    role: evals
+    version: 1
+    hash: sha256:5466a04cb354552585fb46f84e0fe557e9df06d273e9781c63abfd018c0d7391
     note: Added by bundle manifest helper

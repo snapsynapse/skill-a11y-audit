@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 17
+version: 18
 version_date: 2026-11-19
-previous_version: 16
+previous_version: 17
 change_summary: >
-  Requires valid scan targets for every gate and rejects ambiguous CLI options.
+  Rejects incomplete discovery plans before scanning selected targets.
 */
 
 const fs = require('fs');
@@ -86,6 +86,9 @@ function loadUrlsFromDiscoverPlan(discoverPath, allowedOrigins = []) {
     plan = JSON.parse(fs.readFileSync(path.resolve(discoverPath), 'utf8'));
   } catch (err) {
     throw new Error(`Unable to read discover plan ${discoverPath}: ${err.message}`);
+  }
+  if (typeof plan.error === 'string' && plan.error.length > 0) {
+    throw new Error(`Discover plan is incomplete: ${plan.error}`);
   }
   if (!Array.isArray(plan.scanList) || plan.scanList.length === 0) {
     throw new Error(`Discover plan ${discoverPath} must contain a non-empty scanList array.`);

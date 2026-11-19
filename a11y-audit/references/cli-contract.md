@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 2
+version: 3
 version_date: 2026-11-19
-previous_version: 1
+previous_version: 2
 change_summary: >
-  Clarifies scan readiness and strict native gate arguments.
+  Rejects incomplete discovery plans in scanner and selector consumers.
 ---
 
 # Experimental CLI Contract
@@ -18,6 +18,8 @@ All gate modes require successful HTML target responses. Missing, non-HTML,
 404 and 500 responses are operational failures even when `fail_on` is `none`.
 The native scanner rejects unknown, repeated and missing option values before
 browser work starts.
+Scanner and changed-surface selection reject a discovery plan carrying an
+incomplete-error field, even if it retains a non-empty partial scan list.
 
 ## Process boundary
 
