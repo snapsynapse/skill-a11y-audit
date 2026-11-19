@@ -46,11 +46,15 @@
     "local_node_fetch": "failed; curl and hosted run succeeded"
   },
   "hosted_guidecheck": {
-    "status": "not_run",
-    "local_level": 3,
-    "local_blockers": 0,
-    "local_warnings": 0,
-    "anchor": "immutable repository guide copy fetched independently; local-file mode does not establish Level 4"
+    "status": "evaluated",
+    "evaluated_at": "2026-11-19T17:00:27.352792Z",
+    "guide_sha256": "2c3b2eeb6c574cc18f32e7ee0582b6b8463ee618c9d28884a97ba5962f1effeb",
+    "achieved_level": 3,
+    "blocking_findings": 0,
+    "warnings": 1,
+    "anchor_status": "repository-file present-matches; hosted verification unverified",
+    "limitation": "Current hosted verifier awards Levels 1 through 3 only; Level 4 unavailable",
+    "report": "v3.4.0-hosted-guidecheck.json"
   },
   "post_merge_validation": {
     "run_id": 44493550035,
