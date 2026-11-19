@@ -1,18 +1,18 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 60
+version: 61
 version_date: 2026-11-19
-previous_version: 59
+previous_version: 60
 change_summary: >
-  Shares managed install checks and derives its lock path from the package directory.
+  Rejects drifted transitive package metadata during managed reuse.
 ---
 
 # Changelog
 
 ## Unreleased managed dependency identity -- 2026-11-19
 
-- Before reusing skill-managed dependencies, the scanner checks a completed-install marker, committed lock digest, installed lock graph, and pinned axe-core and Puppeteer versions. Both reuse and post-install checks share one verifier and derive the lock path from the package directory. Failed or stale installs require a fresh locked installation.
+- Before reusing skill-managed dependencies, the scanner checks a completed-install marker, committed lock digest, installed lock graph, actual transitive package versions, and pinned axe-core and Puppeteer versions. Both reuse and post-install checks share one verifier and derive the lock path from the package directory. Failed or stale installs require a fresh locked installation.
 - Local regression fixtures cover transitive lock drift, top-level version drift, missing markers and interrupted installation. External project and global dependency graphs remain outside this managed-lock guarantee.
 
 ## Unreleased loopback containment -- 2026-11-19

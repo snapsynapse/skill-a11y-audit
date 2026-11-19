@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 60
+bundle_version: 61
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 60
-    hash: sha256:4edc6eacfb8ced3bbdc22a3a19de3eeec744875a8f1a5e496f15b4628811033e
+    version: 61
+    hash: sha256:21f39cf328a614ee34fa8bc1cb0b5c4897714f8aec2dea0a8c0708cfb79de78c
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -426,8 +426,8 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 22
-    hash: sha256:ec1ff46e43d4c1a09ff2b803db368c59699d77e7616b7607918db43339a85a2f
+    version: 23
+    hash: sha256:513fc335e11f22671da6b280c50d61cc1c5531e7bd3d9f9a83821fc4da4ee8e8
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 50
+    version: 51
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -732,6 +732,6 @@ files:
 
   - path: evals/test-managed-dependency-identity.js
     role: evals
-    version: 2
-    hash: sha256:3f494881feffc9dc9b6588ff143d58f066caf7bd84fe2bef3d2088cf9d3bab23
+    version: 3
+    hash: sha256:f9313c2e3cb93b2e1b47f41a60b5db7b768d3e7172c119156718933278a875c1
     note: Added by bundle manifest helper

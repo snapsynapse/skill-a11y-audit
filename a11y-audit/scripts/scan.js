@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 22
+version: 23
 version_date: 2026-11-19
-previous_version: 21
+previous_version: 22
 change_summary: >
-  Shares pinned-version and lock-graph checks for managed installs.
+  Verifies installed transitive package versions against the committed lock.
 */
 
 const fs = require('fs');
@@ -473,16 +473,21 @@ function managedGraphStatus(depsDir) {
     installed = JSON.parse(fs.readFileSync(path.join(depsDir, 'node_modules', '.package-lock.json'), 'utf8'));
   } catch { return 'incomplete managed install'; }
   if (!expected.packages || !installed.packages) return 'incomplete managed install';
+  const pinned = new Map(['axe-core', 'puppeteer'].map(name =>
+    [`node_modules/${name}`, PINNED_VERSIONS[name]]));
   for (const name of ['axe-core', 'puppeteer']) {
-    if (readPkgVersion(path.join(depsDir, 'node_modules', name)) !== PINNED_VERSIONS[name]) {
-      return `managed ${name} version drift`;
-    }
+    if (!expected.packages[`node_modules/${name}`]) return `managed ${name} version drift`;
   }
   for (const [location, entry] of Object.entries(expected.packages)) {
     if (!location || entry.optional) continue;
     const actual = installed.packages[location];
+    const packageVersion = readPkgVersion(path.join(depsDir, location));
+    if (pinned.has(location) && (entry.version !== pinned.get(location)
+      || packageVersion !== pinned.get(location))) {
+      return `managed ${location.slice('node_modules/'.length)} version drift`;
+    }
     if (!actual || actual.version !== entry.version || actual.integrity !== entry.integrity
-      || !fs.existsSync(path.join(depsDir, location, 'package.json'))) {
+      || packageVersion !== entry.version) {
       return `managed dependency drift: ${location}`;
     }
   }
