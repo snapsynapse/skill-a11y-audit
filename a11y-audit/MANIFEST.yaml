@@ -1,6 +1,6 @@
 bundle: a11y-audit
 bundle_version: 51
-bundle_date: 2026-10-26
+bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
   scanning (axe-core via Puppeteer) with configurable standards evidence,
@@ -480,8 +480,8 @@ files:
 
   - path: deps/package-lock.json
     role: config
-    version: 7
-    hash: sha256:eb4eed1460c1bf35f8457265c68e514ceddab917df3b81380da022c499884126
+    version: 8
+    hash: sha256:0c2456f152e1a442c9b394137ee0cac9ede64d38284a7657abf77e77177fcbfc
     note: Reproducible scanner and Action server dependency graph
 
   - path: assets/sample-output/audit-sample.md
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 38
+    version: 39
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
