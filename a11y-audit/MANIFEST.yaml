@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 42
+    version: 43
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -672,8 +672,8 @@ files:
 
   - path: evals/test-security.js
     role: evals
-    version: 1
-    hash: sha256:ddb105d32b4d66bdb15daacf58d58cf04136227445e5a25178ef470d5077289b
+    version: 2
+    hash: sha256:927bc6f5df843ede4a1193dbfe6c142a39e8398167694e5c10428b0acf51efc8
     note: Security hardening regression or policy reference
 
   - path: references/network-policy.md
