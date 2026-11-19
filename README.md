@@ -163,8 +163,9 @@ Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify), report the achieved
 level and SHA-256, then follow its acquisition action with my approval.
 ```
-Guide 0.3.19 acquires v3.4.0 source. Local preparation evidence is retained in
-the release record. Verify the hosted guide and report its achieved level and exact hash before use.
+Guide 0.3.19 acquires v3.4.0 source. The [hosted verification](ops/v3.4.0-hosted-guidecheck.json)
+matched the released guide hash and reached Level 3 with zero blockers and one
+accepted Pages header warning. Verify the current hosted result before use.
 The guide clones release-specific source without registering an agent-client
 skill. Use the Skills CLI below for registration. Every action requires approval.
 
@@ -398,8 +399,9 @@ assistant use:
 
 The guide is a plain-text instruction surface for acquiring release source and
 running public audits. Guide 0.3.19 acquires release-specific source; agent-client registration stays outside its action scope.
-Local verification and the future hosted result are separate release gates. Verify
-the hosted result against the deployed guide hash before use.
+Local and [hosted verification](ops/v3.4.0-hosted-guidecheck.json) are separate evidence.
+The hosted result matched the released guide hash and reached Level 3. The current
+hosted verifier does not award Level 4. Verify the current result before use.
 This form claim does not establish safety or legal conformance.
 
 ## How It Works
