@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 12
-version_date: 2026-10-03
-previous_version: 11
+version: 13
+version_date: 2026-11-19
+previous_version: 12
 change_summary: >
-  Closes the hosted guide compatibility item using published v3.2.0 evidence.
+  Records bounded maintenance direction and the delivered security, compatibility and adoption tranche.
 ---
 
 # Accessibility Audit Roadmap
@@ -66,6 +66,27 @@ separates operational status from gate outcomes, defines terminal JSON, and
 retains legacy behavior. See `references/cli-contract.md`. GuideCheck and
 Portfolio CLI adoption remain separate consumer work, evaluated against their
 own evidence rather than inferred from A11y release acceptance.
+
+## Active maintenance direction
+
+Owner-confirmed direction on 2026-11-16: bounded active development,
+prioritizing security, compatibility, tested CI adoption and baseline clarity.
+Expansion is demand-gated. The feature priorities below are deferred until
+adopter demand justifies a bounded tranche; they are not implementation authority.
+
+The repo-owned [maintenance queue](../ops/maintenance-queue.md) records the
+delivered security and search repairs and remaining adoption checks. The
+[baseline demonstration plan](../ops/baseline-demonstration-plan.md) owns the
+three-state local example and its acceptance boundaries. Process one bounded
+correction or demonstrated adopter CI failure at a time. Keep all existing
+findings visible and require explicit human baseline acceptance; never
+regenerate a baseline merely to obtain a passing gate.
+
+Commit/push/PR, merge/tag/release, deployment, settings changes, paid inference
+and production-data actions require their own authority. The accepted GitHub
+Pages nosniff limitation is not a hosting-migration instruction. Consumer
+upgrades require exact published-pin and baseline compatibility evidence;
+fixture consumer tests do not establish portfolio-wide adoption.
 
 ## Next priorities
 

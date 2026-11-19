@@ -58,7 +58,9 @@ Prefer bundled helpers over ad hoc generation when they fit:
   aggregation, and color-contrast detail extraction deterministically.
 - `scripts/discover.js` identifies template groups on large sites and
   selects representative pages for scanning. Reads sitemap.xml first,
-  falls back to HTML navigation crawl. Outputs a scan plan with
+  falls back to HTML navigation crawl when no accepted sitemap index exists.
+  A failed required index child makes discovery incomplete rather than reducing
+  the plan silently. Outputs a scan plan with
   template groups and a ready-to-use URL list for scan.js. Discovery is
   same-origin by default; use `--allow-cross-origin-sitemaps` only after
   the user approves sitemap-declared cross-origin targets.
@@ -100,8 +102,9 @@ scan.js requires `axe-core` and `puppeteer`. It resolves these in order:
 
 If either package is not found anywhere, scan.js **auto-installs the complete
 scanner dependency set** to the skill-local `deps/` directory in one operation.
-An existing skill-local Puppeteer that differs from the pinned release also
-triggers this install, so old managed browser packages are replaced.
+An existing skill-local graph with a changed lock digest, missing dependency,
+axe-core or Puppeteer version drift, or incomplete installation also triggers
+this install. The marker is written only after successful locked installation.
 The default versions use the committed lockfile through `npm ci`; a deliberate
 `--axe-version` override installs both requested versions without rewriting the
 committed manifests. Installs make three bounded attempts with backoff and omit

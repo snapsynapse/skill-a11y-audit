@@ -5,20 +5,62 @@
 [![skills.sh](https://skills.sh/b/snapsynapse/skill-a11y-audit)](https://skills.sh/snapsynapse/skill-a11y-audit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Open, self-hosted accessibility regression evidence for large web
-estates. Discover representative templates, preserve selector-level
-findings, and prevent AI-generated changes from introducing new barriers
-without requiring a legacy site to reach zero violations first.
+Keep existing accessibility problems visible. Stop the next change from adding another one.
+This self-hosted scanner keeps selector-level findings in a reviewed baseline,
+reports them on every scan, and can fail CI when new findings appear.
 
-v3.3.0 requires Node.js 22.12.0 or later, with managed Puppeteer 25.16.0
-and axe-core 4.12.1. See the [release record](ops/v3.3.0-release-preparation.md)
+## See the baseline gate work
+
+A [local synthetic browser trial](ops/security/evidence/2026-11-18/baseline-demo-local.json)
+kept one existing `image-alt` finding at `/demo` on `#existing-image`. Removing
+the accessible name from `#new-button` added one `button-name` finding:
+
+| Page state | Existing findings | New findings | Native exit |
+|---|---:|---:|---:|
+| Unchanged | 1 | 0 | 0 |
+| Button name removed | 1 | 1 | 2 |
+| Button name restored | 1 | 0 | 0 |
+
+The new `baseline.new_findings` entry records `button-name`, `/demo`,
+`#new-button`, and critical impact. All three comparisons used the same
+candidate baseline bytes. The script starts its own disposable local page,
+inspects the synthetic finding, and tests the unchanged, new, and restored states.
+From a source checkout containing this trial script, use Node.js 22.12.0 or
+later and npm. The locked install may download Puppeteer's matching Chrome;
+keep the same browser cache for install and scan. Run from the repository root:
+
+Literal
+```sh
+npm ci --prefix a11y-audit/deps
+node scripts/test-baseline-demo.mjs
+```
+The script's baseline is a synthetic candidate. On a real site, inspect each
+rule, route, selector, and impact before a human accepts baseline debt.
+`--write-baseline` creates a candidate; the Action never accepts or refreshes
+one automatically. The [CI starter](a11y-audit/assets/ci/github-actions/accessibility-audit.yml)
+shows how to pin the v3.4.0 Action, serve one built page, compare it
+with a reviewed `.a11y-audit/baseline.json`, and retain scan output. A hosted
+red/green consumer run has not been claimed for this local example.
+
+A passing regression check means no new findings in the scanned scope.
+Existing violations still need remediation; this is not accessibility
+conformance certification. `--fail-on major` separately evaluates all current
+critical and serious standards findings, including baseline debt. Operational
+failures such as a missing page, non-HTML response, browser setup failure, or
+incomplete required sitemap fail regardless of finding gate mode. Representative
+template sampling and automated checks leave unscanned states and manual
+assistive-technology checks for separate review.
+
+v3.4.0 requires Node.js 22.12.0 or later, with managed Puppeteer 25.16.0
+and axe-core 4.12.1. See the [release preparation record](ops/v3.4.0-release-preparation.md)
 for verification and publication status.
 
 ## Security execution defaults
 
-v3.3.0 enables Chromium sandboxing, restricts automatic sitemap targets
-and navigation to approved origins, bounds direct sitemap work, and binds the
-Action's temporary server to loopback with dotfiles and directory listings disabled.
+v3.3.0 introduced Chromium sandboxing, approved target origins, direct sitemap
+budgets and loopback Action serving. v3.4.0 adds operational readiness in every
+gate mode, required-child completeness, aggregate discovery budgets and
+symlink containment in the temporary server and site builder.
 The dependency audit gate fails when npm coverage is unavailable or malformed.
 
 Additional origins need an explicit `--allow-origin` list (Action: `allow-origin`,
@@ -26,7 +68,7 @@ adapter: `discovery.allowed_origins`). A separately isolated incompatible runner
 may explicitly use `--no-sandbox` (Action: `no-sandbox`, adapter: `scan.no_sandbox`).
 Read [network and browser policy](a11y-audit/references/network-policy.md) for
 limits, preview-host mappings and residual network-isolation requirements.
-Action examples pin the versioned v3.3.0 release.
+Action examples pin the versioned v3.4.0 release.
 
 ## Authenticated scan inputs
 
@@ -121,7 +163,7 @@ Fetch and verify https://skilla11y.dev/.well-known/assistant-guide.txt
 with GuideCheck (https://guidecheck.org/verify), report the achieved
 level and SHA-256, then follow its acquisition action with my approval.
 ```
-Guide 0.3.18 acquires v3.3.0 source. Verification evidence is retained in
+Guide 0.3.19 acquires v3.4.0 source. Local preparation evidence is retained in
 the release record. Verify the hosted guide and report its achieved level and exact hash before use.
 The guide clones release-specific source without registering an agent-client
 skill. Use the Skills CLI below for registration. Every action requires approval.
@@ -284,7 +326,7 @@ discovery plan, and selection evidence:
 Replace: BUILD_DIR -> repository-relative directory containing the built site
 Customize
 ```yaml
-- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.3.0
+- uses: snapsynapse/skill-a11y-audit/.github/actions/scan@v3.4.0
   with:
     serve-path: BUILD_DIR
     discover-url: http://127.0.0.1:8088/
@@ -355,7 +397,7 @@ assistant use:
 - Repository copy: [assistant-guide.txt](assistant-guide.txt)
 
 The guide is a plain-text instruction surface for acquiring release source and
-running public audits. Guide 0.3.18 acquires release-specific source; agent-client registration stays outside its action scope.
+running public audits. Guide 0.3.19 acquires release-specific source; agent-client registration stays outside its action scope.
 Local verification and the future hosted result are separate release gates. Verify
 the hosted result against the deployed guide hash before use.
 This form claim does not establish safety or legal conformance.
@@ -415,7 +457,7 @@ For skip-download behavior and cache configuration, read
 This repository has three release identifiers because the published
 surfaces move at different compatibility levels:
 
-- `package.json` uses the public repository release line, 3.3.0 for this release.
+- `package.json` uses the public repository release line, 3.4.0 for this release.
 - `a11y-audit/MANIFEST.yaml` uses the internal bundle inventory version,
   incremented whenever the skill bundle changes.
 - `assistant-guide.txt` uses the GuideCheck guide version, incremented
@@ -472,7 +514,7 @@ Detailed map contracts live in
 
 These recorded runs predate v3 and are not v3 consumer-validation claims.
 Release validation checks are listed in the
-[release validation record](ops/v3.3.0-release-preparation.md).
+[release preparation record](ops/v3.4.0-release-preparation.md).
 
 | Site | Pages | Groups | Scanned | Violations | Key findings |
 |------|-------|--------|---------|------------|-------------|

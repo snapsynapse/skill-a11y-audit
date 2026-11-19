@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 5
+version: 6
 version_date: 2026-11-18
-previous_version: 4
+previous_version: 5
 change_summary: >
-  Describes regular generated artifact uploads and current published guide identity.
+  Aligns guide identity and release wording with the v3.4.0 candidate.
 ---
 
 # Authenticated scan inputs
@@ -85,8 +85,8 @@ blocked cross-origin requests, and terminal adapter success/failure.
 `npm run validate` includes input-validation and artifact-alias regressions.
 
 Bounded journeys, state-specific baseline identity, and native Playwright
-execution remain separate roadmap work. Published guide 0.3.18 pins v3.3.0
-release bytes; unreleased local remediation has separate validation.
+execution remain separate roadmap work. Guide 0.3.19 pins v3.4.0 candidate
+release bytes; hosted identity requires separate verification after publication.
 The scanner verifies its local executable dependencies before loading them.
 Guide actions remain public-only; authenticated scans need separate user
 authorization. Future guide changes require a separately authorized release.

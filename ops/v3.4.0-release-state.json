@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "version": "3.4.0",
+  "bundle_version": 63,
+  "guide_version": "0.3.19",
+  "guide_sha256": "2c3b2eeb6c574cc18f32e7ee0582b6b8463ee618c9d28884a97ba5962f1effeb",
+  "remediation_main_commit": "554f93f399e1cd52cd56afa2dd0c2b0f614e530c",
+  "release_pr": null,
+  "release_merge_commit": null,
+  "tag": null,
+  "release": null,
+  "assets": null,
+  "pages": null,
+  "production_search": null,
+  "hosted_guidecheck": null
+}
