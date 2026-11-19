@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 6
-version_date: 2026-10-26
-previous_version: 5
+version: 7
+version_date: 2026-11-19
+previous_version: 6
 change_summary: >
-  Filters sitemap targets to approved origins and uses shared bounded HTTP reads.
+  Bounds complete discovery work and fails incomplete required sitemap indexes.
 */
 
 const fs = require('fs');
@@ -45,7 +45,7 @@ function parseArgs(argv) {
 // ---------------------------------------------------------------------------
 
 async function httpFetch(url, opts = {}) {
-  const resource = await fetchResource(url, opts);
+  const resource = await (opts.fetcher || fetchResource)(url, opts);
   return resource && !resource.blocked ? resource.body : null;
 }
 
@@ -59,10 +59,30 @@ function resolvePublishedUrl(value, baseUrl) {
 
 function parseSitemap(xml) {
   const urls = [];
-  const re = /<loc>(.*?)<\/loc>/g;
+  const re = /<loc\b[^>]*>([\s\S]*?)<\/loc>/gi;
   let m;
-  while ((m = re.exec(xml)) !== null) urls.push(m[1].trim());
+  while ((m = re.exec(xml)) !== null) urls.push(decodeXmlText(m[1]).trim());
   return urls;
+}
+
+function resolvedSitemapEntries(xml, baseUrl) {
+  return parseSitemap(xml).map((entry) => {
+    try { return resolvePublishedUrl(entry, baseUrl); }
+    catch { return entry; }
+  });
+}
+
+// XML entities are replaced in one pass so nested encodings stay encoded.
+function decodeXmlText(value) {
+  const named = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+  return value.replace(/&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9a-f]+);/gi, (entity) => {
+    const body = entity.slice(1, -1);
+    if (body[0] !== '#') return named[body.toLowerCase()] ?? entity;
+    const codePoint = body[1]?.toLowerCase() === 'x'
+      ? Number.parseInt(body.slice(2), 16) : Number.parseInt(body.slice(1), 10);
+    return codePoint > 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+      ? String.fromCodePoint(codePoint) : entity;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -76,8 +96,8 @@ function extractLinks(html, baseUrl) {
   while ((m = re.exec(html)) !== null) {
     let href = m[1];
     if (href.startsWith('mailto:') || href.startsWith('javascript:')) continue;
-    if (!href.startsWith('http')) href = new URL(href, baseUrl).href;
     try {
+      if (!href.startsWith('http')) href = new URL(href, baseUrl).href;
       const u = new URL(href);
       const base = new URL(baseUrl);
       if (u.origin === base.origin) links.add(href);
@@ -446,6 +466,47 @@ async function discover(runtimeUrl, opts = {}) {
     maxRedirects: Number.isFinite(opts.maxRedirects) ? opts.maxRedirects : DEFAULT_MAX_REDIRECTS,
   };
 
+  const now = opts.now || Date.now;
+  const deadlineMs = opts.deadlineMs ?? 120000;
+  if (!Number.isSafeInteger(deadlineMs) || deadlineMs < 0) throw new Error('Invalid discovery limit: deadlineMs');
+  const deadline = now() + deadlineMs;
+  const maxDocuments = opts.maxDocuments ?? 1000;
+  const maxTotalBytes = opts.maxTotalBytes ?? 64 * 1024 * 1024;
+  const maxTargets = opts.maxTargets ?? 100000;
+  for (const [name, value] of Object.entries({ maxDocuments, maxTotalBytes, maxTargets })) {
+    if (!Number.isSafeInteger(value) || value < 1) throw new Error(`Invalid discovery limit: ${name}`);
+  }
+  const fetched = new Map();
+  let documents = 0;
+  let totalBytes = 0;
+  let incomplete = null;
+  const fetchBounded = async (value, options) => {
+    let key;
+    try { key = webUrl(value).href; } catch { key = String(value); }
+    if (fetched.has(key)) return fetched.get(key);
+    const remaining = deadline - now();
+    if (remaining <= 0 || documents >= maxDocuments) {
+      const reason = remaining <= 0 ? 'discovery-deadline' : 'discovery-document-limit';
+      incomplete = reason;
+      return { blocked: true, reason, url: key, origin: null };
+    }
+    documents += 1;
+    const resource = await (opts.fetchResource || fetchResource)(value, {
+      ...options, timeoutMs: Math.max(1, Math.min(remaining, options.timeoutMs ?? remaining)),
+    });
+    if (now() >= deadline) incomplete = 'discovery-deadline';
+    if (resource && !resource.blocked) {
+      totalBytes += resource.bytes ?? Buffer.byteLength(resource.body || '');
+      if (totalBytes > maxTotalBytes) {
+        incomplete = 'discovery-aggregate-bytes';
+        return { blocked: true, reason: incomplete, url: key, origin: resource.origin };
+      }
+    }
+    fetched.set(key, resource);
+    return resource;
+  };
+  fetchOpts.fetcher = fetchBounded;
+
   const sitemapFetchOpts = { ...fetchOpts, allowedOrigins: allowCrossOriginSitemaps ? null : origins };
   let allUrls = [];
   let source = 'unknown';
@@ -463,6 +524,50 @@ async function discover(runtimeUrl, opts = {}) {
     return false;
   };
 
+  const incompleteResult = (urls, extra = {}) => ({
+    error: `Discovery incomplete: ${incomplete}`,
+    source, runtimeUrl, blockedFetches, discoveredUrls: [...new Set(urls)].sort(),
+    totalPages: new Set(urls).size,
+    ...extra,
+    work: { documents, totalBytes, maxDocuments, maxTotalBytes, maxTargets },
+  });
+
+  const readSitemapIndex = async (resource, entries) => {
+    const discoveredUrls = [];
+    const visitedSitemaps = new Set([resource.url]);
+    if (entries.length > maxTargets) incomplete = 'discovery-target-limit';
+    const pending = entries.map(url => ({ url, ancestors: new Set([resource.url]) }));
+    while (pending.length > 0 && !incomplete) {
+      const { url: sub, ancestors } = pending.shift();
+      if (ancestors.has(sub)) {
+        incomplete = 'required-sitemap-cycle';
+        recordBlocked({ blocked: true, reason: 'sitemap-cycle', url: sub, origin: null });
+        break;
+      }
+      if (visitedSitemaps.has(sub)) continue;
+      visitedSitemaps.add(sub);
+      const child = await fetchBounded(sub, sitemapFetchOpts);
+      if (recordBlocked(child) || !child) {
+        incomplete = incomplete || 'required-sitemap-unavailable';
+        if (!child) recordBlocked({ blocked: true, reason: 'fetch-failed', url: sub, origin: null });
+        continue;
+      }
+      const childXml = child.body || '';
+      if (!childXml.includes('<urlset') && !childXml.includes('<sitemapindex')) {
+        incomplete = 'required-sitemap-invalid';
+        recordBlocked({ blocked: true, reason: 'invalid-sitemap', url: child.url, origin: child.origin });
+        continue;
+      }
+      const childEntries = resolvedSitemapEntries(childXml, child.url);
+      if (childXml.includes('<sitemapindex')) {
+        const childAncestors = new Set([...ancestors, sub]);
+        pending.push(...childEntries.map(url => ({ url, ancestors: childAncestors })));
+      } else discoveredUrls.push(...childEntries);
+      if (pending.length + discoveredUrls.length > maxTargets) incomplete = 'discovery-target-limit';
+    }
+    return discoveredUrls;
+  };
+
   // 1. Try sitemap via well-known paths
   if (!opts.noSitemap) {
     const sitemapUrls = [
@@ -470,7 +575,7 @@ async function discover(runtimeUrl, opts = {}) {
       `${baseOrigin}/sitemap_index.xml`,
     ];
 
-    const robotsResource = await fetchResource(`${baseOrigin}/robots.txt`, sitemapFetchOpts);
+    const robotsResource = await fetchBounded(`${baseOrigin}/robots.txt`, sitemapFetchOpts);
     if (recordBlocked(robotsResource)) {
       // Continue with default same-origin sitemap paths.
     } else if (robotsResource) {
@@ -483,34 +588,16 @@ async function discover(runtimeUrl, opts = {}) {
     }
 
     for (const sitemapUrl of [...new Set(sitemapUrls)]) {
-      const xmlResource = await fetchResource(sitemapUrl, sitemapFetchOpts);
+      if (incomplete) break;
+      const xmlResource = await fetchBounded(sitemapUrl, sitemapFetchOpts);
       if (recordBlocked(xmlResource)) continue;
       const xml = xmlResource && xmlResource.body;
       if (xml && (xml.includes('<urlset') || xml.includes('<sitemapindex'))) {
-        let discoveredUrls = parseSitemap(xml).map((entry) => {
-          try {
-            return resolvePublishedUrl(entry, xmlResource.url);
-          } catch {
-            return entry;
-          }
-        });
+        const rootEntries = resolvedSitemapEntries(xml, xmlResource.url);
+        const discoveredUrls = xml.includes('<sitemapindex')
+          ? await readSitemapIndex(xmlResource, rootEntries) : rootEntries;
 
-        if (xml.includes('<sitemapindex')) {
-          const subSitemaps = discoveredUrls;
-          discoveredUrls = [];
-          for (const sub of subSitemaps) {
-            const subXmlResource = await fetchResource(sub, sitemapFetchOpts);
-            if (recordBlocked(subXmlResource)) continue;
-            if (!subXmlResource) continue;
-            discoveredUrls.push(...parseSitemap(subXmlResource.body).map((entry) => {
-              try {
-                return resolvePublishedUrl(entry, subXmlResource.url);
-              } catch {
-                return entry;
-              }
-            }));
-          }
-        }
+        if (discoveredUrls.length > maxTargets) incomplete = 'discovery-target-limit';
 
         allUrls = [...new Set(discoveredUrls)].filter(value => {
           let target;
@@ -529,7 +616,7 @@ async function discover(runtimeUrl, opts = {}) {
   }
 
   // 2. Fallback: crawl navigation links
-  if (allUrls.length === 0) {
+  if (!incomplete && allUrls.length === 0) {
     const html = await httpFetch(runtimeUrl, fetchOpts);
     if (html) {
       allUrls = [...new Set([new URL(runtimeUrl).href, ...extractLinks(html, runtimeUrl)])];
@@ -537,11 +624,13 @@ async function discover(runtimeUrl, opts = {}) {
 
       const hubUrls = [...allUrls];
       for (const hubUrl of hubUrls.slice(0, 20)) {
+        if (incomplete) break;
         const hubHtml = await httpFetch(hubUrl, fetchOpts);
         if (hubHtml) {
           const deeper = extractLinks(hubHtml, hubUrl);
           for (const d of deeper) {
             if (!allUrls.includes(d)) allUrls.push(d);
+            if (allUrls.length > maxTargets) { incomplete = 'discovery-target-limit'; break; }
           }
         }
       }
@@ -549,6 +638,9 @@ async function discover(runtimeUrl, opts = {}) {
     }
   }
 
+  if (incomplete) {
+    return incompleteResult(allUrls);
+  }
   if (allUrls.length === 0) {
     return { error: 'No pages discovered. Check the URL and try --no-sitemap for crawl mode.' };
   }
@@ -562,6 +654,7 @@ async function discover(runtimeUrl, opts = {}) {
   // 4. Fetch API manifest for enrichment
   let apiManifest = null;
   for (const apiPath of ['/api/v1/index.json', '/api/index.json']) {
+    if (incomplete) break;
     const apiJson = await httpFetch(`${baseOrigin}${apiPath}`, fetchOpts);
     if (apiJson) {
       try { apiManifest = JSON.parse(apiJson); break; } catch { /* skip */ }
@@ -582,6 +675,7 @@ async function discover(runtimeUrl, opts = {}) {
 
   let fingerprintCount = 0;
   for (const group of sorted) {
+    if (incomplete) break;
     const isTopLevel = !group.pattern.includes('/') && !group.pattern.includes('*');
     let selected, reason, fingerprints;
 
@@ -621,6 +715,10 @@ async function discover(runtimeUrl, opts = {}) {
     }
   }).filter(Boolean))].sort();
 
+  if (incomplete) {
+    return incompleteResult(allUrls, { groups, scanList });
+  }
+
   return {
     discoverySchemaVersion: 2,
     source,
@@ -630,6 +728,7 @@ async function discover(runtimeUrl, opts = {}) {
     sitemapPolicy: allowCrossOriginSitemaps ? 'cross-origin-documents-allowed' : 'approved-origins',
     discoveredOrigins,
     blockedFetches,
+    work: { documents, totalBytes, maxDocuments, maxTotalBytes, maxTargets },
     totalPages: allUrls.length,
     discoveredUrls: allUrls,
     selectedPages: scanList.length,
@@ -675,11 +774,6 @@ async function main() {
     routeGroupMap,
   });
 
-  if (result.error) {
-    console.error(result.error);
-    process.exit(1);
-  }
-
   const outputPath = args.output ? path.resolve(args.output) : null;
   const json = JSON.stringify(result, null, 2);
 
@@ -689,6 +783,12 @@ async function main() {
     console.log(outputPath);
   } else {
     console.log(json);
+  }
+
+  if (result.error) {
+    console.error(result.error);
+    process.exitCode = 1;
+    return;
   }
 
   // Summary to stderr

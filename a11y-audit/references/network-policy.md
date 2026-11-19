@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 1
-version_date: 2026-10-26
-previous_version: null
+version: 2
+version_date: 2026-11-19
+previous_version: 1
 change_summary: >
-  Defines approved origins, sitemap budgets, sandbox configuration and local serving defaults.
+  Defines required sitemap-child completeness and whole-discovery budgets.
 ---
 
 # Network and browser policy
@@ -29,6 +29,15 @@ This is a target/navigation policy, not a hostile-page network sandbox. It does 
 ## Fetch budgets
 
 Discovery HTTP reads have a 2 MiB response cap, five redirects and a ten-second absolute deadline covering redirects and body streaming. A continuous trickle of bytes cannot reset the deadline.
+
+The discovery plan additionally bounds the complete run to 1,000 fetched documents,
+64 MiB aggregate response bytes, 100,000 distinct targets and one 120-second
+deadline across robots, sitemap traversal, HTML crawl and fingerprinting.
+Duplicate sitemap children are fetched once. A child of an accepted sitemap
+index is required: failed fetches, malformed responses, budget exhaustion and
+cycles make the plan incomplete. The CLI retains partial evidence and typed
+diagnostics, then exits with an operational failure. Optional initial sitemap
+probes may fall back to HTML crawling when no index was accepted.
 
 Direct scanner sitemap loading is bounded to 2 MiB per response, 10 MiB in total, 50 documents, 10,000 distinct targets and thirty seconds for the complete load. Each document has at most five redirects. Budgets include child sitemap documents and rewritten URLs are validated before fetching. Incomplete, oversized, timed-out and disallowed fetches are operational failures. Operators should split larger estates into deliberate bounded runs.
 

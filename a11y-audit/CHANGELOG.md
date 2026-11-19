@@ -1,14 +1,20 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 53
+version: 54
 version_date: 2026-11-19
-previous_version: 52
+previous_version: 53
 change_summary: >
-  Records scanner readiness and strict native argument handling.
+  Records complete and bounded sitemap discovery pending release.
 ---
 
 # Changelog
+
+## Unreleased discovery completeness -- 2026-11-19
+
+- Required sitemap-index children, malformed responses, cycles and whole-run budget exhaustion now produce incomplete plans with retained partial diagnostics.
+- XML text decodes once, malformed links do not discard valid siblings, and scanner and changed-surface consumers reject incomplete plans.
+- Focused discovery boundary regressions cover required children, cycles, aggregate work limits and entity handling.
 
 ## Unreleased scanner readiness -- 2026-11-19
 

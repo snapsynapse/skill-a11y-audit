@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 3
-version_date: 2026-08-09
-previous_version: 2
+version: 4
+version_date: 2026-11-18
+previous_version: 3
 change_summary: >
-  Distinguishes ambiguous canonical direct routes from unresolved routes while
-  retaining the conservative full-sample fallback for both conditions.
+  Rejects incomplete discovery plans before changed-surface selection.
 */
 
 const fs = require('fs');
@@ -65,6 +64,9 @@ function normalizeRepositoryPath(value, label = 'repository path') {
 function validateDiscoveryPlan(plan) {
   if (!plan || typeof plan !== 'object' || Array.isArray(plan)) {
     throw new Error('Discovery plan must be a JSON object');
+  }
+  if (typeof plan.error === 'string' && plan.error.length > 0) {
+    throw new Error(`Discovery plan is incomplete: ${plan.error}`);
   }
   if (!Array.isArray(plan.scanList) || plan.scanList.length === 0) {
     throw new Error('Discovery plan must contain a non-empty scanList');
