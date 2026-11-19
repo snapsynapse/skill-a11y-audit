@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-11-18
-previous_version: null
+version: 2
+version_date: 2026-11-19
+previous_version: 1
 change_summary: >
-  Checks scanner argument rejection and output/input collision preservation before browser work.
+  Checks output containment and owner-only atomic JSON publication.
 */
 'use strict';
 const assert = require('node:assert/strict');
@@ -40,7 +40,12 @@ const inputWithin = path.join(nested, 'input.json');
 fs.writeFileSync(inputWithin, '{}');
 assert.throws(() => assertSeparateOutputs([inputWithin], [nested], { directories: [nested] }), /aliases/);
 assert.doesNotThrow(() => assertSeparateOutputs([source], [path.join(temp, 'scan.json')]));
-writeJsonAtomic(path.join(temp, 'scan.json'), { results: [] });
+const scanOutput = path.join(temp, 'scan.json');
+writeJsonAtomic(scanOutput, { results: [] });
+assert.equal(fs.statSync(scanOutput).mode & 0o077, 0, 'new scan artifacts must be owner-only');
+fs.chmodSync(scanOutput, 0o600);
+writeJsonAtomic(scanOutput, { results: ['updated'] });
+assert.equal(fs.statSync(scanOutput).mode & 0o077, 0, 'replaced private artifacts must stay owner-only');
 assert.equal(digest(source), original);
 for (const bad of [
   ['--fail-on'], ['--fail-on', 'bogus'], ['--fail-onn', 'new'],

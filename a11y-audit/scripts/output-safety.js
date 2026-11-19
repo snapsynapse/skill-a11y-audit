@@ -1,11 +1,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 1
-version_date: 2026-11-18
-previous_version: null
+version: 2
+version_date: 2026-11-19
+previous_version: 1
 change_summary: >
-  Protects accepted inputs from colliding output paths and publishes JSON atomically.
+  Protects input paths and writes atomic JSON with owner-only permissions.
 */
 'use strict';
 const fs = require('fs');
@@ -80,7 +80,7 @@ function writeJsonAtomic(destination, value) {
   fs.mkdirSync(path.dirname(absolute), { recursive: true });
   const temporary = path.join(path.dirname(absolute), `.${path.basename(absolute)}.${process.pid}.${require('crypto').randomBytes(8).toString('hex')}.tmp`);
   try {
-    fs.writeFileSync(temporary, JSON.stringify(value, null, 2));
+    fs.writeFileSync(temporary, JSON.stringify(value, null, 2), { mode: 0o600, flag: 'wx' });
     fs.renameSync(temporary, absolute);
   } finally {
     try { fs.unlinkSync(temporary); } catch (error) { if (error.code !== 'ENOENT') throw error; }

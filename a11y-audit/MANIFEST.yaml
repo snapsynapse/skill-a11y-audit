@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 55
+bundle_version: 56
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 55
-    hash: sha256:ca0e38519038786015721916a5760b14a3aee365e7f21d938132c59fc7a192a9
+    version: 56
+    hash: sha256:8c48fe6fae6f0b7ce3954643cde676678bd13e24df5b3f5b7c3f05cbd7ea7936
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -426,8 +426,8 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 19
-    hash: sha256:cdd0a5fee83d84545882c13f2ee0f53e1d9500ffb26dcead39fd2cefebb9a208
+    version: 20
+    hash: sha256:434a274943610907e6ee841388d78f04724892d8d32fb34ac8b0487af6e0ba45
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 45
+    version: 46
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -720,12 +720,12 @@ files:
 
   - path: evals/test-scan-input-boundaries.js
     role: evals
-    version: 1
-    hash: sha256:c1172f1b5778d6672b41e40698ec37f296202b712c3cdd1251dfa55861a39801
+    version: 2
+    hash: sha256:3ed0e80d7359eb618f3e4daf07543a9fae535e125e0a650a6f837573a473527b
     note: Added by bundle manifest helper
 
   - path: scripts/output-safety.js
     role: script
-    version: 1
-    hash: sha256:f4644417b6417ec1700a3fe3614ea151266fa2a41cc0243e6029b6256f4dbbb0
+    version: 2
+    hash: sha256:a76f2a7678a6cf4757018641a46d08566fdccc55b548d0ebd3d08877edf797b4
     note: Added by bundle manifest helper

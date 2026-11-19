@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 19
+version: 20
 version_date: 2026-11-19
-previous_version: 18
+previous_version: 19
 change_summary: >
-  Protects accepted inputs from output aliases and publishes scan JSON atomically.
+  Pins owner-only atomic JSON publication for scan and baseline artifacts.
 */
 
 const fs = require('fs');
@@ -15,7 +15,7 @@ const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { execSync, spawnSync } = require('child_process');
 // The guide pins this entry point; bind its local executable dependencies too.
-const LOCAL_SCRIPT_HASHES = {"network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc", "auth-state.js": "87d9de544b08108ea980c90810a75f6f253943f4785fc8ca63bc8fa72b1fa9d8", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d", "output-safety.js": "f4644417b6417ec1700a3fe3614ea151266fa2a41cc0243e6029b6256f4dbbb0"};
+const LOCAL_SCRIPT_HASHES = {"network-policy.js": "7e62fae1e6c4c919bb77b3b2656c2581bebd05cd11cd5e6273d68ee1a5c65ecc", "auth-state.js": "87d9de544b08108ea980c90810a75f6f253943f4785fc8ca63bc8fa72b1fa9d8", "check-runtime.js": "d08bd5f4b70aee71e9ca3ed5cd03049bd308e69d18d4411ba38fb3145b93c48d", "output-safety.js": "a76f2a7678a6cf4757018641a46d08566fdccc55b548d0ebd3d08877edf797b4"};
 for (const [name, expected] of Object.entries(LOCAL_SCRIPT_HASHES)) {
   const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, name))).digest('hex');
   if (actual !== expected) throw new Error(`Scanner dependency integrity mismatch: ${name}`);
