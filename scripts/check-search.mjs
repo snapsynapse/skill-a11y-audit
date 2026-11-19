@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // skill_bundle: portfolio-search-indexing-audit
 // file_role: asset
-// version: 4
-// version_date: 2026-08-09
-// previous_version: 3
-// change_summary: Adds offline required-file and exact-route JSON-LD validation.
+// version: 5
+// version_date: 2026-11-18
+// previous_version: 4
+// change_summary: Ports upstream asset v7 single-pass XML entity decoding and trimmed sitemap locations while preserving local checks.
 // Upstream: portfolio-search-indexing-audit contract v4.
 // Vendored repository script. Adapt locally and retain contractVersion.
 'use strict';
@@ -58,8 +58,15 @@ const sitemapUrls = new Set();
 const entries = [];
 
 function decode(value) {
-    return String(value || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    const named = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+    return String(value ?? '').replace(/&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9a-f]+);/gi, entity => {
+        const body = entity.slice(1, -1);
+        if (body[0] !== '#') return named[body.toLowerCase()] ?? entity;
+        const codePoint = body[1]?.toLowerCase() === 'x'
+            ? Number.parseInt(body.slice(2), 16) : Number.parseInt(body.slice(1), 10);
+        return codePoint > 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+            ? String.fromCodePoint(codePoint) : entity;
+    });
 }
 
 function routeFile(pathname) {
@@ -89,8 +96,8 @@ function parseSitemapFile(relative, seen = new Set()) {
     if (/<sitemapindex\b/i.test(xml)) {
         for (const match of xml.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi)) {
             let child;
-            try { child = new URL(decode(match[1])); }
-            catch { report('defect', `${relative}: invalid child sitemap URL ${decode(match[1])}`); continue; }
+            try { child = new URL(decode(match[1]).trim()); }
+            catch { report('defect', `${relative}: invalid child sitemap URL ${decode(match[1]).trim()}`); continue; }
             if (child.origin !== origin.origin) {
                 report('defect', `${relative}: child sitemap uses noncanonical origin ${child.href}`);
                 continue;
@@ -102,8 +109,8 @@ function parseSitemapFile(relative, seen = new Set()) {
     for (const match of xml.matchAll(/<url>([\s\S]*?)<\/url>/gi)) {
         const block = match[1];
         entries.push({
-            loc: decode(block.match(/<loc>([^<]+)<\/loc>/i)?.[1]),
-            lastmod: decode(block.match(/<lastmod>([^<]+)<\/lastmod>/i)?.[1]),
+            loc: decode(block.match(/<loc>([^<]+)<\/loc>/i)?.[1]).trim(),
+            lastmod: decode(block.match(/<lastmod>([^<]+)<\/lastmod>/i)?.[1]).trim(),
             source: relative
         });
     }

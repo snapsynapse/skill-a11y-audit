@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // skill_bundle: portfolio-search-indexing-audit
 // file_role: asset
-// version: 4
-// version_date: 2026-08-09
-// previous_version: 3
-// change_summary: Adds exact-route JSON-LD support and v4 configuration compatibility.
+// version: 5
+// version_date: 2026-11-18
+// previous_version: 4
+// change_summary: Ports upstream asset v7 single-pass XML entity decoding, trimmed locations and decoded live canonicals while preserving local checks.
 // Upstream: portfolio-search-indexing-audit contract v4.
 // Release-triggered HTTP validation. Exit 2 means infrastructure is unavailable.
 'use strict';
@@ -102,6 +102,18 @@ async function fetchText(url, rule = {}) {
 
 const sitemapBodies = new Map();
 
+function decode(value) {
+    const named = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+    return String(value ?? '').replace(/&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9a-f]+);/gi, entity => {
+        const body = entity.slice(1, -1);
+        if (body[0] !== '#') return named[body.toLowerCase()] ?? entity;
+        const codePoint = body[1]?.toLowerCase() === 'x'
+            ? Number.parseInt(body.slice(2), 16) : Number.parseInt(body.slice(1), 10);
+        return codePoint > 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+            ? String.fromCodePoint(codePoint) : entity;
+    });
+}
+
 async function fetchSitemap(canonical, seen = new Set()) {
     if (seen.has(canonical)) return;
     seen.add(canonical);
@@ -112,8 +124,8 @@ async function fetchSitemap(canonical, seen = new Set()) {
     if (/<sitemapindex\b/i.test(result.body)) {
         for (const match of result.body.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi)) {
             let child;
-            try { child = new URL(match[1].replace(/&amp;/g, '&')); }
-            catch { report('defect', `${canonical}: invalid child sitemap URL ${match[1]}`); continue; }
+            try { child = new URL(decode(match[1]).trim()); }
+            catch { report('defect', `${canonical}: invalid child sitemap URL ${decode(match[1]).trim()}`); continue; }
             if (child.origin !== canonicalOrigin.origin) {
                 report('defect', `${canonical}: child sitemap uses noncanonical origin ${child.href}`);
                 continue;
@@ -148,7 +160,7 @@ const canonicals = [];
 const sitemapLastmods = new Map();
 for (const [sitemap, body] of sitemapBodies) {
     for (const match of body.matchAll(/<url>([\s\S]*?)<\/url>/gi)) {
-        const canonical = match[1].match(/<loc>([^<]+)<\/loc>/i)?.[1]?.replace(/&amp;/g, '&');
+        const canonical = decode(match[1].match(/<loc>([^<]+)<\/loc>/i)?.[1]).trim();
         const lastmod = match[1].match(/<lastmod>([^<]+)<\/lastmod>/i)?.[1]?.trim();
         if (!canonical) {
             report('defect', `${sitemap}: URL entry is missing loc`);
@@ -165,11 +177,6 @@ for (const [sitemap, body] of sitemapBodies) {
     }
 }
 if (!canonicals.length) report('infrastructure', 'live sitemaps contain no page locations');
-
-function decode(value) {
-    return String(value || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-}
 
 function repositoryCanonicals() {
     const output = path.resolve(ROOT, config.outputDir || '');
@@ -192,8 +199,8 @@ function repositoryCanonicals() {
         if (/<sitemapindex\b/i.test(xml)) {
             for (const match of xml.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi)) {
                 let child;
-                try { child = new URL(decode(match[1])); }
-                catch { report('defect', `${relative}: invalid repository child sitemap URL ${decode(match[1])}`); continue; }
+                try { child = new URL(decode(match[1]).trim()); }
+                catch { report('defect', `${relative}: invalid repository child sitemap URL ${decode(match[1]).trim()}`); continue; }
                 if (child.origin !== canonicalOrigin.origin) {
                     report('defect', `${relative}: repository child sitemap uses noncanonical origin ${child.href}`);
                     continue;
@@ -203,7 +210,7 @@ function repositoryCanonicals() {
             return;
         }
         for (const match of xml.matchAll(/<url>[\s\S]*?<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/gi)) {
-            const canonical = decode(match[1]);
+            const canonical = decode(match[1]).trim();
             let url;
             try { url = new URL(canonical); }
             catch { report('defect', `${relative}: invalid repository page location ${canonical}`); continue; }
@@ -272,8 +279,8 @@ async function checkPage(canonical) {
     if (!result) return;
     if (result.response.url !== target) report('defect', `${target}: final URL is ${result.response.url}`);
     const html = result.body;
-    const pageCanonical = html.match(/<link\b[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i)?.[1]
-        || html.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*rel=["']canonical["']/i)?.[1];
+    const pageCanonical = decode(html.match(/<link\b[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i)?.[1]
+        || html.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*rel=["']canonical["']/i)?.[1]).trim();
     if (pageCanonical !== canonical) report('defect', `${target}: canonical ${pageCanonical || '(missing)'} does not equal ${canonical}`);
     if (/<meta\b[^>]*name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
         report('defect', `${target}: sitemap page is noindex`);
