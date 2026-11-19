@@ -5,12 +5,56 @@
   "guide_version": "0.3.19",
   "guide_sha256": "2c3b2eeb6c574cc18f32e7ee0582b6b8463ee618c9d28884a97ba5962f1effeb",
   "remediation_main_commit": "554f93f399e1cd52cd56afa2dd0c2b0f614e530c",
-  "release_pr": null,
-  "release_merge_commit": null,
-  "tag": null,
-  "release": null,
-  "assets": null,
-  "pages": null,
-  "production_search": null,
-  "hosted_guidecheck": null
+  "release_pr": {
+    "number": 46,
+    "head": "24f740726edba5a1d6d7b703b128f656356aad31",
+    "exact_head_checks": 10,
+    "simplicity_review": "Gemini PASS",
+    "automated_code_review": "completed, no findings",
+    "automated_security_review": "completed"
+  },
+  "release_merge_commit": "e9fa70bf8992d639d03b71522d5b644904f97859",
+  "tag": {
+    "name": "v3.4.0",
+    "object": "6adbef427ddb35d978ca0a4fef547124d407aba3",
+    "commit": "e9fa70bf8992d639d03b71522d5b644904f97859",
+    "signed": "SSH ED25519 verified locally"
+  },
+  "release": {
+    "url": "https://github.com/snapsynapse/skill-a11y-audit/releases/tag/v3.4.0",
+    "published_at": "2026-11-19T09:11:31Z",
+    "draft": false,
+    "prerelease": false
+  },
+  "assets": {
+    "SHA256SUMS": "554bb0e219e7db319025577498d5f1a18bd31ad8e349fd99b45dbcc8607cb2f1",
+    "skill-a11y-audit-v3.4.0.tar.gz": "e49c4da16396524003c2c2ecbe6ace8dbdbf692fa09ffbbe0c4a4ca031ba5400",
+    "skill-a11y-audit-v3.4.0.zip": "e60e95a30f9e0cb8c198db5ba14367f73aab6b794db378fb8e931494a95c8b9e"
+  },
+  "pages": {
+    "run_id": 44493549993,
+    "head": "e9fa70bf8992d639d03b71522d5b644904f97859",
+    "conclusion": "success",
+    "live_guide_sha256": "2c3b2eeb6c574cc18f32e7ee0582b6b8463ee618c9d28884a97ba5962f1effeb",
+    "live_sidecar_and_discovery_bytes": "matched source"
+  },
+  "production_search": {
+    "source": "hosted Pages workflow run 44493549993",
+    "sitemap_pages": 1,
+    "defects": 0,
+    "infrastructure_failures": 0,
+    "local_node_fetch": "failed; curl and hosted run succeeded"
+  },
+  "hosted_guidecheck": {
+    "status": "not_run",
+    "local_level": 3,
+    "local_blockers": 0,
+    "local_warnings": 0,
+    "anchor": "immutable repository guide copy fetched independently; local-file mode does not establish Level 4"
+  },
+  "post_merge_validation": {
+    "run_id": 44493550035,
+    "head": "e9fa70bf8992d639d03b71522d5b644904f97859",
+    "checks_passed": 10
+  }
 }
