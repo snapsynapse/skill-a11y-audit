@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 32
+version: 33
 version_date: 2026-11-19
-previous_version: 31
+previous_version: 32
 change_summary: >
-  Registers Pages, search, audit and release identity regression checks.
+  Keeps the published guide pinned while readiness checks change candidate scanner bytes.
 */
 
 const assert = require('assert');
@@ -447,6 +447,11 @@ function eval15PluggableStandards() {
 
 function scannerBrowserValidation() {
   const scan = require(repoPath('a11y-audit/scripts/scan.js'));
+  for (const argv of [['--fail-on'], ['--unknown'], ['--urls', 'https://example.com/', '--urls', 'https://example.org/'], ['stray']]) {
+    const result = spawnSync(process.execPath, [repoPath('a11y-audit/scripts/scan.js'), ...argv], { encoding: 'utf8' });
+    assert.notStrictEqual(result.status, 0);
+    assert.match(result.stderr, /requires a value|Unknown option|Repeated option|Unexpected argument/);
+  }
   assert.strictEqual(scan.validateBrowserLib('puppeteer'), 'puppeteer');
   assert.throws(
     () => scan.validateBrowserLib('puppeteer; echo injected'),
@@ -1380,10 +1385,16 @@ function dependencyRuntimePolicy() {
 }
 
 function assistantGuideArtifactRegression() {
+  const releaseBytes = (file) => {
+    const read = spawnSync('git', ['show', `v3.3.0:${file}`], { cwd: repoRoot });
+    assert.strictEqual(read.status, 0, `published guide requires local v3.3.0 tag: ${file}`);
+    return read.stdout;
+  };
   const rootGuide = fs.readFileSync(repoPath('assistant-guide.txt'));
   const hostedGuide = fs.readFileSync(repoPath('docs/.well-known/assistant-guide.txt'));
   const text = rootGuide.toString('ascii');
   assert.deepStrictEqual(rootGuide, hostedGuide, 'root and hosted assistant guides must match');
+  assert.deepStrictEqual(rootGuide, releaseBytes('assistant-guide.txt'), 'published guide must stay at v3.3.0 bytes');
   assert.ok(rootGuide.length <= 8192, `assistant guide exceeds 8192 bytes: ${rootGuide.length}`);
   assert.ok([...rootGuide].every((byte) => byte <= 0x7f), 'assistant guide must be ASCII');
   assert.doesNotMatch(text, /\r|\t/, 'assistant guide must not contain CR or tab bytes');
@@ -1399,15 +1410,15 @@ function assistantGuideArtifactRegression() {
     .map(match => match[1]).filter(block => /^command: .*scripts\/scan\.js /m.test(block));
   assert.deepStrictEqual(scannerActions.map(block => block.match(/^id: (.+)$/m)[1]),
     ['scan-pages', 'write-reviewed-baseline', 'scan-new-findings']);
-  const scanner = fs.readFileSync(repoPath('a11y-audit/scripts/scan.js'), 'utf8');
+  const scanner = releaseBytes('a11y-audit/scripts/scan.js').toString('utf8');
   for (const name of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
-    const helper = fs.readFileSync(repoPath('a11y-audit/scripts', name));
+    const helper = releaseBytes(`a11y-audit/scripts/${name}`);
     assert.ok(scanner.includes(JSON.stringify(name) + ': ' + JSON.stringify(crypto.createHash('sha256').update(helper).digest('hex'))));
     const isolated = path.join(tmpRoot, 'tampered-' + name);
     fs.mkdirSync(isolated, { recursive: true });
     fs.writeFileSync(path.join(isolated, 'scan.js'), scanner);
     for (const dependency of ['auth-state.js', 'check-runtime.js', 'network-policy.js']) {
-      fs.copyFileSync(repoPath('a11y-audit/scripts', dependency), path.join(isolated, dependency));
+      fs.writeFileSync(path.join(isolated, dependency), releaseBytes(`a11y-audit/scripts/${dependency}`));
     }
     fs.writeFileSync(path.join(isolated, name), 'throw new Error("UNVERIFIED_CODE_EXECUTED");');
     const result = spawnSync(process.execPath, [path.join(isolated, 'scan.js')], { encoding: 'utf8' });
@@ -1422,9 +1433,9 @@ function assistantGuideArtifactRegression() {
     ['a11y-audit/scripts/scan.js', null],
     ['a11y-audit/scripts/report.js', null],
   ]);
-  // The release guide and executable bytes must be synchronized.
+  // The published guide pins the selected release, not unreleased candidate bytes.
   for (const script of scriptHashes.keys()) {
-    scriptHashes.set(script, crypto.createHash('sha256').update(fs.readFileSync(repoPath(script))).digest('hex'));
+    scriptHashes.set(script, crypto.createHash('sha256').update(releaseBytes(script)).digest('hex'));
   }
   for (const block of text.matchAll(/\[action\]\n([\s\S]*?)\n\[\/action\]/g)) {
     const command = block[1].match(/^command: (.+)$/m)?.[1] || '';
