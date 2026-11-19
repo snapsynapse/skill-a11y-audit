@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 20
+version: 23
 version_date: 2026-11-19
-previous_version: 19
+previous_version: 22
 change_summary: >
-  Pins owner-only atomic JSON publication for scan and baseline artifacts.
+  Verifies installed transitive package versions against the committed lock.
 */
 
 const fs = require('fs');
@@ -121,6 +121,7 @@ const PINNED_VERSIONS = {
 
 const DEFAULT_INSTALL_TIMEOUT_MS = 120000;
 const DEFAULT_INSTALL_ATTEMPTS = 3;
+const INSTALL_MARKER = '.a11y-audit-installed-lock.json';
 
 function validateAxeVersion(value) {
   if (value === 'latest' || /^\d+\.\d+\.\d+(-[\w.]+)?$/.test(value)) return value;
@@ -461,6 +462,46 @@ function readPkgVersion(packageRoot) {
   }
 }
 
+function managedLockDigest(depsDir) {
+  return crypto.createHash('sha256').update(fs.readFileSync(path.join(depsDir, 'package-lock.json'))).digest('hex');
+}
+
+function managedGraphStatus(depsDir) {
+  let expected, installed;
+  try {
+    expected = JSON.parse(fs.readFileSync(path.join(depsDir, 'package-lock.json'), 'utf8'));
+    installed = JSON.parse(fs.readFileSync(path.join(depsDir, 'node_modules', '.package-lock.json'), 'utf8'));
+  } catch { return 'incomplete managed install'; }
+  if (!expected.packages || !installed.packages) return 'incomplete managed install';
+  const pinned = new Map(['axe-core', 'puppeteer'].map(name =>
+    [`node_modules/${name}`, PINNED_VERSIONS[name]]));
+  for (const name of ['axe-core', 'puppeteer']) {
+    if (!expected.packages[`node_modules/${name}`]) return `managed ${name} version drift`;
+  }
+  for (const [location, entry] of Object.entries(expected.packages)) {
+    if (!location || entry.optional) continue;
+    const actual = installed.packages[location];
+    const packageVersion = readPkgVersion(path.join(depsDir, location));
+    if (pinned.has(location) && (entry.version !== pinned.get(location)
+      || packageVersion !== pinned.get(location))) {
+      return `managed ${location.slice('node_modules/'.length)} version drift`;
+    }
+    if (!actual || actual.version !== entry.version || actual.integrity !== entry.integrity
+      || packageVersion !== entry.version) {
+      return `managed dependency drift: ${location}`;
+    }
+  }
+  return null;
+}
+
+function managedSetStatus(depsDir = SKILL_DEPS_DIR) {
+  let marker;
+  try { marker = JSON.parse(fs.readFileSync(path.join(depsDir, 'node_modules', INSTALL_MARKER), 'utf8')); }
+  catch { return 'missing install marker'; }
+  if (marker.schema !== 1 || marker.lock_sha256 !== managedLockDigest(depsDir)) return 'lock digest changed';
+  return managedGraphStatus(depsDir);
+}
+
 function sleepSync(delayMs) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
 }
@@ -473,17 +514,21 @@ function installDependencySet({
   attempts = DEFAULT_INSTALL_ATTEMPTS,
   spawn = spawnSync,
   sleep = sleepSync,
+  depsDir = SKILL_DEPS_DIR,
 } = {}) {
   const useLockfile = axeVersion === PINNED_VERSIONS['axe-core'] &&
     browserLib === 'puppeteer' && browserVersion === PINNED_VERSIONS.puppeteer;
   const installArgs = useLockfile
-    ? ['ci', '--prefix', SKILL_DEPS_DIR, '--no-audit', '--no-fund']
+    ? ['ci', '--prefix', depsDir, '--no-audit', '--no-fund']
     : [
-      'install', '--prefix', SKILL_DEPS_DIR, '--no-save', '--package-lock=false',
+      'install', '--prefix', depsDir, '--no-save', '--package-lock=false',
       '--no-audit', '--no-fund',
       `axe-core@${axeVersion}`, `${browserLib}@${browserVersion}`,
     ];
   const dependencyLabel = `axe-core@${axeVersion} and ${browserLib}@${browserVersion}`;
+
+  const markerPath = path.join(depsDir, 'node_modules', INSTALL_MARKER);
+  fs.rmSync(markerPath, { force: true });
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const startedAt = Date.now();
@@ -494,7 +539,14 @@ function installDependencySet({
     });
     const elapsedMs = Date.now() - startedAt;
     const timedOut = install?.error?.code === 'ETIMEDOUT' || install?.signal === 'SIGTERM';
-    if (install?.status === 0) return;
+    if (install?.status === 0) {
+      if (useLockfile) {
+        const graphStatus = managedGraphStatus(depsDir);
+        if (graphStatus) throw new Error(`Managed install did not match npm lock evidence: ${graphStatus}`);
+        writeJsonAtomic(markerPath, { schema: 1, lock_sha256: managedLockDigest(depsDir) });
+      }
+      return;
+    }
 
     const setting = '--install-timeout-ms or A11Y_AUDIT_INSTALL_TIMEOUT_MS';
     const detail = timedOut
@@ -521,12 +573,19 @@ function ensureDependencies(projectRoot, axeVersion, browserLib, timeoutMs) {
   const managedBrowser = resolved[browserLib];
   const staleManagedBrowser = managedBrowser?.source === 'skill-deps' &&
     readPkgVersion(managedBrowser.root) !== PINNED_VERSIONS[browserLib];
-  if (Object.values(resolved).every(Boolean) && !staleManagedBrowser) return resolved;
+  const managedAxe = resolved['axe-core'];
+  const staleManagedAxe = managedAxe?.source === 'skill-deps' &&
+    (axeVersion === 'latest' || readPkgVersion(managedAxe.root) !== axeVersion);
+  const usesManaged = Object.values(resolved).some(value => value?.source === 'skill-deps');
+  const lockStatus = usesManaged && axeVersion === PINNED_VERSIONS['axe-core']
+    ? managedSetStatus() : null;
+  if (Object.values(resolved).every(Boolean) && !staleManagedBrowser && !staleManagedAxe && !lockStatus) return resolved;
 
   const missing = Object.entries(resolved).filter(([, value]) => !value).map(([name]) => name);
-  const reason = staleManagedBrowser
-    ? `Managed ${browserLib} does not match the pinned ${PINNED_VERSIONS[browserLib]}`
-    : `Missing ${missing.join(', ')}`;
+  const reason = staleManagedBrowser ? `Managed ${browserLib} does not match the pinned ${PINNED_VERSIONS[browserLib]}`
+    : staleManagedAxe ? `Managed axe-core does not match requested ${axeVersion}`
+      : lockStatus ? `Managed scanner dependencies are stale: ${lockStatus}`
+        : `Missing ${missing.join(', ')}`;
   console.error(`${reason}; installing the complete scanner dependency set to ${SKILL_DEPS_DIR}...`);
   fs.mkdirSync(SKILL_DEPS_DIR, { recursive: true });
   installDependencySet({
@@ -878,6 +937,7 @@ module.exports = {
   validateAxeVersion,
   parsePositiveInteger,
   installDependencySet,
+  managedSetStatus,
   loadUrlsFromSitemap,
   countViolations,
   isBestPracticeOnly,

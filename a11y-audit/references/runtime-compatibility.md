@@ -1,11 +1,11 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 3
-version_date: 2026-10-26
-previous_version: 2
+version: 4
+version_date: 2026-11-18
+previous_version: 3
 change_summary: >
-  Documents the v3.3.0 browser graph and sandbox policy.
+  Documents installed lock identity checks and explicit external dependency boundaries.
 ---
 
 # Runtime compatibility
@@ -57,9 +57,12 @@ using `--ignore-scripts`. The Action honors
 Puppeteer download settings and does not silently override a skipped download.
 
 An installed skill uses the same `deps/` layout under its selected skill
-directory. An existing skill-local Puppeteer that differs from the pinned
-version triggers a complete locked reinstall before
-scanning, so an earlier managed installation cannot silently retain Puppeteer 24.
+directory. Before reusing managed dependencies, the scanner checks a marker
+written after successful `npm ci` against the committed lock digest, verifies
+the installed lock graph, and checks the managed axe-core and Puppeteer versions.
+A changed transitive lock entry, stale marker, partial install or top-level
+version drift triggers a complete locked reinstall before scanning. Failed
+installation removes the marker.
 The scanner can still resolve project or global packages when
 skill-local dependencies are absent. Those externally managed graphs are
 outside this bundle's lockfile guarantee; inspect their versions and audit
