@@ -114,6 +114,45 @@ try {
         await response.arrayBuffer();
         assert.equal(response.status, expectedStatus, route);
       }
+      const outside = path.join(temp, 'outside-sentinel.txt');
+      fs.writeFileSync(outside, 'SYNTHETIC_OUTSIDE_ROOT');
+      const hiddenTarget = path.join(workspace, 'site/.private-fixture');
+      const visibleFile = path.join(workspace, 'site/visible-sentinel.txt');
+      fs.writeFileSync(visibleFile, 'VISIBLE_CONTROL');
+      const visibleDirectory = path.join(workspace, 'site/visible-directory');
+      fs.mkdirSync(visibleDirectory, { recursive: true });
+      fs.writeFileSync(path.join(visibleDirectory, 'index.html'), 'VISIBLE_DIRECTORY_CONTROL');
+      const linkedIndexDirectory = path.join(workspace, 'site/linked-index-directory');
+      fs.mkdirSync(linkedIndexDirectory, { recursive: true });
+      const links = [
+        ['outside-link.txt', outside],
+        ['hidden-link.txt', hiddenTarget],
+        ['directory-link', path.dirname(outside)],
+        ['broken-link.txt', path.join(temp, 'missing-sentinel.txt')],
+        ['linked-index-directory/index.html', outside],
+      ];
+      for (const [name, target] of links) fs.symlinkSync(target, path.join(workspace, 'site', name));
+      try {
+        for (const route of [
+          '/outside-link.txt', '/%6futside-link.txt', '/hidden-link.txt',
+          '/directory-link/outside-sentinel.txt', '/directory-link/', '/broken-link.txt',
+          '/linked-index-directory/',
+        ]) {
+          const response = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Connection: 'close' } });
+          const body = await response.text();
+          assert.equal(response.status, 404, `${route}: ${body}`);
+        }
+        for (const [route, body] of [
+          ['/visible-sentinel.txt', 'VISIBLE_CONTROL'],
+          ['/visible-directory/', 'VISIBLE_DIRECTORY_CONTROL'],
+        ]) {
+          const response = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Connection: 'close' } });
+          assert.equal(response.status, 200, route);
+          assert.equal(await response.text(), body, route);
+        }
+      } finally {
+        for (const [name] of links) fs.unlinkSync(path.join(workspace, 'site', name));
+      }
       console.log('PASS temporary server is loopback-only with dotfiles and directory listings disabled');
       const scan = read('output');
       assert.deepEqual(scan.errors, []);

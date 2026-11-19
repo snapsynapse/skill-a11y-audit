@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 56
+version: 57
 version_date: 2026-11-19
-previous_version: 55
+previous_version: 56
 change_summary: >
-  Records owner-only atomic artifacts after security review.
+  Records loopback-server path containment for Action fixtures.
 ---
 
 # Changelog
+
+## Unreleased loopback containment -- 2026-11-19
+
+- The temporary Action server refuses symlink and special-file aliases, including outward, hidden, index, fallback and encoded-path cases. Regular files and index pages remain served on loopback.
+- The isolated Action consumer exercises forbidden aliases and visible controls.
 
 ## Unreleased output and auth containment -- 2026-11-19
 
