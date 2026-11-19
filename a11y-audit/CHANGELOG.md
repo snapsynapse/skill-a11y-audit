@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 54
+version: 55
 version_date: 2026-11-19
-previous_version: 53
+previous_version: 54
 change_summary: >
-  Records complete and bounded sitemap discovery pending release.
+  Records input and artifact containment across scanner and adapters.
 ---
 
 # Changelog
+
+## Unreleased output and auth containment -- 2026-11-19
+
+- Native and adapter paths reject accepted-input aliases before writing, scanner JSON publishes atomically, and failed discovery or scan stages retain only shaped partial evidence without gate acceptance.
+- Authenticated Action uploads select generated regular files and revalidate them before collection. Local input, adapter and artifact regressions cover symlink, hardlink, ancestor and stage-outcome boundaries.
 
 ## Unreleased discovery completeness -- 2026-11-19
 

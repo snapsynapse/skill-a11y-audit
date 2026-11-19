@@ -2,12 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 1
-version_date: 2026-09-07
-previous_version: null
+version: 2
+version_date: 2026-11-18
+previous_version: 1
 change_summary: >
-  Covers the experimental POSIX JSON adapter contract with injected child
-  execution and filesystem collision fixtures.
+  Covers retained partial scan evidence after an operational child failure.
 */
 
 const assert = require('assert');
@@ -235,6 +234,47 @@ test('no-gate scan with findings completes without claiming accessibility accept
   const run = runFixture('none', { scanPayload: scanPayload(null, { violations: true }) });
   assert.strictEqual(run.result.exit_code, 0);
   assert.deepStrictEqual(run.result.gate, { mode: 'none', status: 'not_requested' });
+});
+
+test('operational scan failure keeps partial evidence without accepting a gate', () => {
+  const run = runFixture('none', {
+    scanStatus: 1,
+    scanPayload: scanPayload(null, { errors: [{ url: 'https://example.com/', error: 'HTTP 404' }] }),
+  });
+  assert.strictEqual(run.result.exit_code, 1);
+  assert.strictEqual(run.result.operational.status, 'failed');
+  assert.strictEqual(run.result.gate.status, 'not_requested');
+  const partial = JSON.parse(fs.readFileSync(path.join(run.root, 'artifacts/scan.json'), 'utf8'));
+  assert.strictEqual(partial.errors.length, 1);
+  assert.strictEqual(run.calls.includes('report'), false);
+});
+
+test('failed child cannot publish a passing gate or a protected input symlink', () => {
+  const failed = runFixture('major', {
+    scanStatus: 1,
+    scanPayload: scanPayload('pass', { errors: [{ url: 'https://example.com/', error: 'HTTP 404' }] }),
+  });
+  const evidence = JSON.parse(fs.readFileSync(path.join(failed.root, 'artifacts/scan.json'), 'utf8'));
+  assert.strictEqual(evidence.gate, null);
+  assert.strictEqual(evidence.operational_status, 'failed');
+  assert.strictEqual(failed.result.gate.status, 'not_evaluated');
+
+  const fixture = requestFixture('none');
+  const protectedFile = path.join(fixture.root, 'baseline.json');
+  fs.writeFileSync(protectedFile, JSON.stringify({ error: 'synthetic protected data', secret: 'SYNTHETIC_SECRET' }));
+  fixture.request.scan.baseline = 'baseline.json';
+  writeJson(fixture.requestPath, fixture.request);
+  const result = adapter.runContractFromArgv(['--contract', 'posix-json-v1', '--config', fixture.requestPath], {
+    executeStage(entry) {
+      if (entry.name !== 'discover') throw new Error('scan must not run');
+      fs.symlinkSync(protectedFile, flagValue(entry.args, '--output'));
+      return { status: 1 };
+    },
+    diagnostic() {},
+  });
+  assert.strictEqual(result.exit_code, 1);
+  assert.strictEqual(fs.existsSync(path.join(fixture.root, 'artifacts/discovery.json')), false);
+  assert.strictEqual(fs.readFileSync(protectedFile, 'utf8').includes('SYNTHETIC_SECRET'), true);
 });
 
 test('unverified child 2, missing, malformed, empty, and errored scan artifacts cannot become gates', () => {

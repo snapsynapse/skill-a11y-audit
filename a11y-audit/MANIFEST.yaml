@@ -1,5 +1,5 @@
 bundle: a11y-audit
-bundle_version: 54
+bundle_version: 55
 bundle_date: 2026-11-19
 description: >
   Skill for running accessibility audits on web projects. Combines automated
@@ -210,8 +210,8 @@ files:
 
   - path: CHANGELOG.md
     role: reference
-    version: 54
-    hash: sha256:6580046a6d8cce59c26e39d1fdaaacd0b8da8e2b3b0510fa514dc8a2ab43b70f
+    version: 55
+    hash: sha256:ca0e38519038786015721916a5760b14a3aee365e7f21d938132c59fc7a192a9
     note: Records the six security remediations and v3.3.0 review preparation.
 
   - path: evals/run-discover-fixture.js
@@ -222,8 +222,8 @@ files:
 
   - path: evals/run-evals.js
     role: evals
-    version: 34
-    hash: sha256:f3f0bed6800bfe7b19ff33908a2569a12deb09d1449386074f6613efa71e6340
+    version: 35
+    hash: sha256:edc854ac729199ae34af90e0f1e9db10ff62e2c31b2c46b8bb64ddecbf0c4ee2
     note: Validates candidate security behavior, helper integrity and draft guide synchronization.
 
   - path: evals/run-browser-eval.js
@@ -426,14 +426,14 @@ files:
 
   - path: scripts/scan.js
     role: script
-    version: 18
-    hash: sha256:792031128319f27b34d5a42252add2699d038101ec382f0027682b899f7f597f
+    version: 19
+    hash: sha256:cdd0a5fee83d84545882c13f2ee0f53e1d9500ffb26dcead39fd2cefebb9a208
     note: Enforces approved target origins, bounded sitemaps and sandbox-enabled browser defaults.
 
   - path: scripts/run-audit.js
     role: script
-    version: 5
-    hash: sha256:c0cee2ed8725e8573bfa0d5dc45aeb95280f5a4691f7ea6e2d033d96a8210b1f
+    version: 6
+    hash: sha256:57a32e17beb06be5b32ca19276eff2692b21da153ecbe088110041d7331fc487
     note: Propagates explicit approved origins and sandbox configuration through the adapter.
 
   - path: scripts/bootstrap-context.js
@@ -612,7 +612,7 @@ files:
 
   - path: MANIFEST.yaml
     role: reference
-    version: 44
+    version: 45
     hash: null
     note: Tracks bundle revision 51; self-hash omitted
 
@@ -630,8 +630,8 @@ files:
 
   - path: references/cli-contract.md
     role: reference
-    version: 3
-    hash: sha256:52f702619e9ea0725e6953c25e70f472d00ae19f3d51a443644497fcf5c003b7
+    version: 4
+    hash: sha256:409a5de90f2278656708bf5a9a86fbb5f44a57e37ca8202d9551568b909e844d
     note: Experimental CLI contract and compatibility boundary
 
   - path: references/cli-result-schema.json
@@ -642,14 +642,14 @@ files:
 
   - path: evals/test-cli-contract.js
     role: evals
-    version: 1
-    hash: sha256:5d9e55b5f3eac8c574a80c0e122ded99d973151c43114b70c2bb2ef93a3ea922
+    version: 2
+    hash: sha256:f99584f77cf51fb2e908ec43d6bd87cc76129230c9ec393ff8045eadb92ce64d
     note: Deterministic CLI contract and legacy compatibility cases
 
   - path: scripts/auth-state.js
     role: script
-    version: 1
-    hash: sha256:4dbbbc9a3f6fddbe51c323c0a25ac05257cd45b3936c8dc188f2b9bb207f208a
+    version: 2
+    hash: sha256:87d9de544b08108ea980c90810a75f6f253943f4785fc8ca63bc8fa72b1fa9d8
     note: Bounded authenticated scan inputs and acceptance coverage
 
   - path: evals/test-auth-state.js
@@ -660,8 +660,8 @@ files:
 
   - path: references/authenticated-scans.md
     role: reference
-    version: 4
-    hash: sha256:da638b74396ef631089d2d4105e5bb509c259c7783e148675505b877e4a7bc75
+    version: 5
+    hash: sha256:509a154f2e79352e15a446bb3f3e2aca5875ebd678d7d8e1dc1fa511a34a3835
     note: Distinguishes candidate network defaults from authenticated input guarantees.
 
   - path: evals/fixtures/eval-24/network-cases.json
@@ -704,4 +704,28 @@ files:
     role: evals
     version: 1
     hash: sha256:5466a04cb354552585fb46f84e0fe557e9df06d273e9781c63abfd018c0d7391
+    note: Added by bundle manifest helper
+
+  - path: evals/test-auth-artifact-guard.js
+    role: evals
+    version: 1
+    hash: sha256:b45f06b6532c3b7a59b9b045d7ab54ef9721cf76e29858dd7b1b52e055f71536
+    note: Added by bundle manifest helper
+
+  - path: evals/test-discovery-propagation.js
+    role: evals
+    version: 1
+    hash: sha256:3e6370046f729fcea1b130ee8545feec66ac9cbb250a0f5d4be0db894309b3d3
+    note: Added by bundle manifest helper
+
+  - path: evals/test-scan-input-boundaries.js
+    role: evals
+    version: 1
+    hash: sha256:c1172f1b5778d6672b41e40698ec37f296202b712c3cdd1251dfa55861a39801
+    note: Added by bundle manifest helper
+
+  - path: scripts/output-safety.js
+    role: script
+    version: 1
+    hash: sha256:f4644417b6417ec1700a3fe3614ea151266fa2a41cc0243e6029b6256f4dbbb0
     note: Added by bundle manifest helper
