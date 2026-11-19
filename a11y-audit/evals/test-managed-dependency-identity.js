@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 2
+version: 3
 version_date: 2026-11-19
-previous_version: 1
+previous_version: 2
 change_summary: >
-  Covers managed install lock identity, version drift, partial installation and interrupted acquisition.
+  Covers transitive package drift alongside lock and top-level version checks.
 */
 'use strict';
 const assert = require('node:assert/strict');
@@ -48,6 +48,10 @@ try {
   installDependencySet({ depsDir, spawn, attempts: 1 });
   assert.equal(managedSetStatus(depsDir), null, 'valid locked graph must be reusable');
   assert(fs.existsSync(markerPath));
+  writePackage('follow-redirects', '0.0.0');
+  assert.match(managedSetStatus(depsDir), /managed dependency drift: node_modules\/follow-redirects/,
+    'changed installed transitive metadata must not reuse an unchanged cached lock');
+  writePackage('follow-redirects', '1.16.1');
 
   writeLock('1.16.2');
   assert.match(managedSetStatus(depsDir), /lock digest changed/, 'unchanged Puppeteer cannot hide changed transitive lock');
