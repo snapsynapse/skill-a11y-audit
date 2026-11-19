@@ -119,6 +119,7 @@ try {
       const hiddenTarget = path.join(workspace, 'site/.private-fixture');
       const visibleFile = path.join(workspace, 'site/visible-sentinel.txt');
       fs.writeFileSync(visibleFile, 'VISIBLE_CONTROL');
+      fs.writeFileSync(path.join(workspace, 'site/visible-no-ext'), 'NO_EXTENSION_CONTROL');
       const visibleDirectory = path.join(workspace, 'site/visible-directory');
       fs.mkdirSync(visibleDirectory, { recursive: true });
       fs.writeFileSync(path.join(visibleDirectory, 'index.html'), 'VISIBLE_DIRECTORY_CONTROL');
@@ -130,13 +131,15 @@ try {
         ['directory-link', path.dirname(outside)],
         ['broken-link.txt', path.join(temp, 'missing-sentinel.txt')],
         ['linked-index-directory/index.html', outside],
+        ['404.html', outside],
+        ['visible-no-ext.html', outside],
       ];
       for (const [name, target] of links) fs.symlinkSync(target, path.join(workspace, 'site', name));
       try {
         for (const route of [
           '/outside-link.txt', '/%6futside-link.txt', '/hidden-link.txt',
           '/directory-link/outside-sentinel.txt', '/directory-link/', '/broken-link.txt',
-          '/linked-index-directory/',
+          '/linked-index-directory/', '/missing-route',
         ]) {
           const response = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Connection: 'close' } });
           const body = await response.text();
@@ -144,6 +147,7 @@ try {
         }
         for (const [route, body] of [
           ['/visible-sentinel.txt', 'VISIBLE_CONTROL'],
+          ['/visible-no-ext', 'NO_EXTENSION_CONTROL'],
           ['/visible-directory/', 'VISIBLE_DIRECTORY_CONTROL'],
         ]) {
           const response = await fetch(`http://127.0.0.1:${port}${route}`, { headers: { Connection: 'close' } });

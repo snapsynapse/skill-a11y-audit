@@ -1,11 +1,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 2
-version_date: 2026-11-18
-previous_version: 1
+version: 3
+version_date: 2026-11-19
+previous_version: 2
 change_summary: >
-  Rejects symlink and special-file aliases while serving Action fixtures on loopback.
+  Checks only selected static and fallback paths while rejecting unsafe aliases.
 */
 'use strict';
 
@@ -39,6 +39,14 @@ function isSafePublicPath(candidate) {
   return true;
 }
 
+function statIfPresent(candidate) {
+  try { return fs.lstatSync(candidate); }
+  catch (error) {
+    if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return null;
+    throw error;
+  }
+}
+
 const server = createServer({
   root: serveRoot, cache: -1, showDir: 'false', showDotfiles: false,
   before: [(request, response) => {
@@ -50,11 +58,20 @@ const server = createServer({
         response.writeHead(404); response.end(); return;
       }
       const target = path.resolve(serveRoot, `.${pathname}`);
-      // http-server may internally retry an index, extension, or 404 page
-      // without rerunning this middleware. Check those paths here too.
-      const candidates = [target, path.join(target, 'index.html'), path.join(serveRoot, '404.html')];
-      if (target !== serveRoot) candidates.push(`${target}.html`);
-      if (!candidates.every(isSafePublicPath)) {
+      // http-server may retry an index, extension, or 404 page without
+      // rerunning this middleware. Check only the path that retry can serve.
+      if (!isSafePublicPath(target)) {
+        response.writeHead(404); response.end(); return;
+      }
+      const targetStat = statIfPresent(target);
+      let selected = target;
+      if (targetStat?.isDirectory()) selected = path.join(target, 'index.html');
+      else if (!targetStat) {
+        const extension = `${target}.html`;
+        selected = !path.extname(pathname) && statIfPresent(extension)
+          ? extension : path.join(serveRoot, '404.html');
+      }
+      if (!isSafePublicPath(selected)) {
         response.writeHead(404); response.end(); return;
       }
     } catch {
