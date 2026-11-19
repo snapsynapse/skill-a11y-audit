@@ -1,0 +1,16 @@
+{
+  "authDirectoryAlias": {
+    "guardAccepted": true,
+    "aliasContainsSyntheticState": true
+  },
+  "reportTransitivePin": {
+    "entryUnchanged": true,
+    "sentinelExecuted": true,
+    "exit": 1
+  },
+  "siteSymlink": {
+    "exit": 0,
+    "stagedSymlink": true,
+    "readsOutsideSentinel": true
+  }
+}

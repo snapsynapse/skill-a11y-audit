@@ -1,0 +1,20 @@
+[
+  {
+    "name": "unresolved-reference",
+    "exit": 0,
+    "stdout": "AUDIT  no unreviewed high or critical advisories",
+    "stderr": ""
+  },
+  {
+    "name": "reference-cycle",
+    "exit": 0,
+    "stdout": "AUDIT  no unreviewed high or critical advisories",
+    "stderr": ""
+  },
+  {
+    "name": "real-high-control",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "AUDIT  high GHSA-test-test-test in vulnerable: Synthetic advisory"
+  }
+]

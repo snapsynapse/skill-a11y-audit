@@ -1,0 +1,6 @@
+baseline 0 1
+404 regression {"exit":0,"errors":[],"baseline":{"path":"/var/folders/fs/whz53jxd5396cbxxhk9jbgjr0000gn/T/a11y-access-review-ehod7w/baseline.json","baseline_axe_version":"4.12.1","current_axe_version":"4.12.1","axe_version_mismatch":false,"baseline_count":1,"current_count":0,"existing_count":0,"new_count":0,"resolved_count":1,"new_findings":[],"resolved_fingerprints":["7fb31ba54afc57a31ccae02500b5ef6757a705bb47e117423dd99144adce918c"]}}
+bare fail-on {"exit":0}
+baseline/output collision {"exit":0,"hasScanResults":true}
+symlink escape {"status":200,"body":"SYNTHETIC_OUTSIDE_ROOT"}
+evidence /var/folders/fs/whz53jxd5396cbxxhk9jbgjr0000gn/T/a11y-access-review-ehod7w

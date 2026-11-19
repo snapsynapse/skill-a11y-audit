@@ -1,0 +1,14 @@
+{
+  "childHits": 7,
+  "failedHits": 1,
+  "planScanList": [
+    "http://127.0.0.1:52860/page"
+  ],
+  "blockedFetches": [],
+  "error": null,
+  "encoded": [
+    "https://example.test/?a=1&amp;b=2"
+  ],
+  "multiline": [],
+  "malformedError": "Invalid URL"
+}

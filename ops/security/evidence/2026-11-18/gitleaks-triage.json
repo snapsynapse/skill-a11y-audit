@@ -1,0 +1,268 @@
+{
+  "history_matches": 15,
+  "tree_matches": 14,
+  "confirmed_credentials": 0,
+  "records": [
+    {
+      "scan": "history",
+      "file": "a11y-audit/scripts/scan.js",
+      "line": 18,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 59,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 77,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 80,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 97,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 59,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 77,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 80,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 97,
+      "rule": "generic-api-key",
+      "commit": "3e3dbe92b776da3ff7a1e4f431f472bae6e284e7",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "a11y-audit/scripts/scan.js",
+      "line": 18,
+      "rule": "generic-api-key",
+      "commit": "07f1d751a42d26371a7ab485750cf19566e5ae77",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/guide-anchor-2026-10-03/candidate-hashes.json",
+      "line": 9,
+      "rule": "generic-api-key",
+      "commit": "07f1d751a42d26371a7ab485750cf19566e5ae77",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 54,
+      "rule": "generic-api-key",
+      "commit": "736766daa2f985780b12d09ce797783db313847e",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 71,
+      "rule": "generic-api-key",
+      "commit": "736766daa2f985780b12d09ce797783db313847e",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 73,
+      "rule": "generic-api-key",
+      "commit": "736766daa2f985780b12d09ce797783db313847e",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "history",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 89,
+      "rule": "generic-api-key",
+      "commit": "736766daa2f985780b12d09ce797783db313847e",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "a11y-audit/scripts/scan.js",
+      "line": 18,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 54,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 71,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 73,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.2.0-readiness/candidate-hashes.json",
+      "line": 89,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/guide-anchor-2026-10-03/candidate-hashes.json",
+      "line": 9,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 59,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 77,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 80,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/archive-tested-files.json",
+      "line": 97,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 59,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 77,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 80,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    },
+    {
+      "scan": "tree",
+      "file": "ops/v3.3.0-readiness/candidate-files.json",
+      "line": 97,
+      "rule": "generic-api-key",
+      "commit": "",
+      "sha256_literal_on_line": true,
+      "disposition": "integrity digest false positive"
+    }
+  ]
+}
