@@ -2,15 +2,22 @@
 /*
 skill_bundle: a11y-audit
 file_role: script
-version: 7
-version_date: 2026-09-07
-previous_version: 6
+version: 8
+version_date: 2026-11-19
+previous_version: 7
 change_summary: >
-  Reports major-gate acceptance and incomplete-review evidence.
+  Verifies the bundled scanner bytes before loading report evidence helpers.
 */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+// The guide pins report.js itself. Bind the imported executable before require;
+// scan.js verifies its own local executable dependencies before loading them.
+const SCAN_SHA256 = 'ec1ff46e43d4c1a09ff2b803db368c59699d77e7616b7607918db43339a85a2f';
+const scanPath = path.join(__dirname, 'scan.js');
+const scanHash = crypto.createHash('sha256').update(fs.readFileSync(scanPath)).digest('hex');
+if (scanHash !== SCAN_SHA256) throw new Error('Report dependency integrity mismatch: scan.js');
 const { buildAuditEvidence } = require('./scan.js');
 
 // ---------------------------------------------------------------------------

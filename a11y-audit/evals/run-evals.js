@@ -2,11 +2,11 @@
 /*
 skill_bundle: a11y-audit
 file_role: evals
-version: 36
+version: 37
 version_date: 2026-11-19
-previous_version: 35
+previous_version: 36
 change_summary: >
-  Checks managed installed dependency identity and lock marker behavior.
+  Checks the report entry point's transitive executable pin.
 */
 
 const assert = require('assert');
@@ -1519,6 +1519,7 @@ test('discovery budgets, required children, cycles and XML boundaries', () => ru
 test('required sitemap failures propagate with partial evidence', () => runNode(['a11y-audit/evals/test-discovery-propagation.js']));
 test('scanner argument and input preservation boundaries', () => runNode(['a11y-audit/evals/test-scan-input-boundaries.js']));
 test('managed installed dependency identity', () => runNode(['a11y-audit/evals/test-managed-dependency-identity.js']));
+test('report transitive executable pin', () => runNode(['scripts/test-report-integrity.mjs']));
 test('authenticated upload artifact guard', () => runNode(['a11y-audit/evals/test-auth-artifact-guard.js']));
 test('npm audit advisory reference graph', () => runNode(['scripts/test-audit-deps.mjs']));
 test('site staging symlink containment', () => runNode(['scripts/test-build-site-security.mjs']));

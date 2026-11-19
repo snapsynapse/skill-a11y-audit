@@ -1,14 +1,19 @@
 ---
 skill_bundle: a11y-audit
 file_role: reference
-version: 60
+version: 61
 version_date: 2026-11-19
-previous_version: 59
+previous_version: 60
 change_summary: >
-  Shares managed install checks and derives its lock path from the package directory.
+  Records the report entry point's scanner dependency pin.
 ---
 
 # Changelog
+
+## Unreleased report executable integrity -- 2026-11-19
+
+- `report.js` verifies the scanner's exact bytes before loading report evidence helpers; the scanner binds its local executable imports before use.
+- A mutation fixture rejects changed dependencies before sentinel execution while legitimate report generation remains available.
 
 ## Unreleased managed dependency identity -- 2026-11-19
 
